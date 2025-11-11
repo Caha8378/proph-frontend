@@ -27,6 +27,12 @@ export const getCoachProfile = async (coachId?: string): Promise<CoachProfile> =
     const profile = 'profile' in response.data ? response.data.profile : response.data;
     return profile;
   } catch (error: any) {
+    // Preserve 404 status for useProfile hook to detect missing profile
+    if (error.response?.status === 404 || error.message?.includes('coach profile not found') || error.message?.includes('404')) {
+      const notFoundError: any = new Error(error.response?.data?.message || 'Coach profile not found');
+      notFoundError.response = { status: 404, data: error.response?.data };
+      throw notFoundError;
+    }
     throw new Error(error.response?.data?.message || 'Failed to fetch coach profile');
   }
 };
@@ -72,6 +78,63 @@ export const getMyTeam = async (): Promise<TeamMember[]> => {
     return response.data.coaches || [];
   } catch (error: any) {
     throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch team');
+  }
+};
+
+/**
+ * Register coach profile (after onboarding)
+ * Backend endpoint: POST /auth/register/coach
+ * 
+ * Backend expects:
+ * - userId (or user_id) - from authenticated user or request body
+ * - school_id (number) - if school selected from dropdown
+ * - position_title (string) - role or custom role
+ * - gender_coached ('male' | 'female') - mapped from 'mens'/'womens'
+ * - name (optional) - user's name if available
+ * - phone_number (optional) - not collected in onboarding yet
+ */
+export interface RegisterCoachData {
+  userId?: number; // User ID (from localStorage or token)
+  school_id?: number | null; // If school was selected from dropdown (has id)
+  position_title: string; // role or customRole
+  gender_coached: 'male' | 'female'; // 'mens' -> 'male', 'womens' -> 'female'
+  name?: string; // User's name if available
+  phone_number?: string | null; // Optional, not collected in onboarding
+}
+
+export const registerCoach = async (data: RegisterCoachData): Promise<CoachProfile> => {
+  try {
+    // Backend expects fields at top level (not nested in profile object)
+    // Backend will get userId from body or from authenticated token
+    const response = await apiClient.post<{ 
+      message: string;
+      profile: {
+        id: number;
+        userId: number;
+        profileImageUrl?: string;
+      };
+    }>(
+      '/auth/register/coach',
+      {
+        userId: data.userId,
+        school_id: data.school_id,
+        position_title: data.position_title,
+        gender_coached: data.gender_coached,
+        name: data.name,
+        phone_number: data.phone_number,
+      }
+    );
+    
+    // Backend returns { message, profile: { id, userId, profileImageUrl } }
+    // We need to fetch the full profile after registration
+    if (response.data.profile) {
+      // Fetch the full profile to get all fields
+      return await getCoachProfile();
+    }
+    
+    throw new Error('Unexpected response format from backend');
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.response?.data?.error || 'Failed to register coach profile');
   }
 };
 

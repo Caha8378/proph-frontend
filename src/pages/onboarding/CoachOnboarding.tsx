@@ -4,6 +4,9 @@ import { SchoolSearchStep } from '../../components/onboarding/SchoolSearchStep';
 import { GenderRoleStep } from '../../components/onboarding/GenderRoleStep';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import type { School } from '../../types';
+import * as coachesService from '../../api/coaches';
+import { useNotification } from '../../hooks';
+import { useAuth } from '../../context/authContext';
 
 // Local School type for onboarding (extends the main School type)
 interface OnboardingSchool extends Omit<School, 'id' | 'logo' | 'division' | 'location'> {
@@ -20,14 +23,30 @@ type Step = 1 | 2 | 'processing' | 'success';
 
 export const CoachOnboarding: React.FC = () => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [selectedSchool, setSelectedSchool] = useState<OnboardingSchool | null>(null);
+  const [name, setName] = useState<string>('');
   const [genderCoached, setGenderCoached] = useState<'mens' | 'womens' | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [customRole, setCustomRole] = useState<string>('');
   
   // Get user email from localStorage (set during signup)
   const userEmail = localStorage.getItem('userEmail') || localStorage.getItem('pendingEmail') || 'coach@example.com';
+  
+  // Get userId from auth context or localStorage
+  const userId = user?.id || (() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser).id;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  })();
 
   const handleSchoolSelect = (school: School | null) => {
     setSelectedSchool(school);
@@ -38,22 +57,59 @@ export const CoachOnboarding: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!selectedSchool || !name.trim() || !genderCoached || !role) {
+      showNotification('Please complete all required fields', 'error');
+      return;
+    }
+
     setCurrentStep('processing');
 
-    // Mock API call
     try {
-      const emailDomain = userEmail.split('@')[1];
-      const schoolDomain = selectedSchool?.email_domain;
-      
-      const verified = emailDomain === schoolDomain && emailDomain?.endsWith('.edu') && !selectedSchool?.isManual;
+      // Determine final role (use customRole if role is 'Other')
+      const finalRole = role === 'Other' ? customRole.trim() : role;
+      if (!finalRole) {
+        throw new Error('Please specify your role');
+      }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Map gender: 'mens' -> 'male', 'womens' -> 'female'
+      const genderCoachedValue: 'male' | 'female' = genderCoached === 'mens' ? 'male' : 'female';
+
+      // Get school_id - only if school was selected from dropdown (not manual)
+      const schoolId = selectedSchool.id && !selectedSchool.isManual 
+        ? parseInt(selectedSchool.id) 
+        : null;
+
+      // If manual school entry, we can't register yet (backend needs school_id)
+      // For now, we'll require selecting from dropdown
+      if (selectedSchool.isManual) {
+        throw new Error('Please select your school from the dropdown. Manual school entry is not yet supported.');
+      }
+
+      if (!schoolId) {
+        throw new Error('Please select a school from the dropdown');
+      }
+
+      // Prepare data for backend
+      const registerData: coachesService.RegisterCoachData = {
+        userId: userId ? parseInt(String(userId)) : undefined,
+        school_id: schoolId,
+        name: name.trim(),
+        position_title: finalRole,
+        gender_coached: genderCoachedValue,
+        // phone_number not collected in onboarding
+      };
+
+      // Call backend API to register coach
+      const profile = await coachesService.registerCoach(registerData);
+
+      // Check verification status (backend may set this automatically based on email domain)
+      const isVerified = profile.is_verified === true || profile.is_verified === 1;
 
       // Store coach profile data
       localStorage.setItem('coachProfileComplete', 'true');
-      localStorage.setItem('coachVerified', verified.toString());
-      
-      if (verified) {
+      localStorage.setItem('coachVerified', String(isVerified));
+
+      if (isVerified) {
         setCurrentStep('success');
         setTimeout(() => {
           navigate('/coach/home');
@@ -61,9 +117,10 @@ export const CoachOnboarding: React.FC = () => {
       } else {
         navigate('/coach/home');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to complete onboarding:', error);
-      navigate('/coach/home');
+      showNotification(error.message || 'Failed to complete onboarding. Please try again.', 'error');
+      setCurrentStep(2); // Go back to step 2
     }
   };
 
@@ -114,10 +171,12 @@ export const CoachOnboarding: React.FC = () => {
         ) : (
           <GenderRoleStep
             selectedSchool={selectedSchool}
+            name={name}
             genderCoached={genderCoached}
             role={role}
             customRole={customRole}
             userEmail={userEmail}
+            onNameChange={setName}
             onGenderChange={setGenderCoached}
             onRoleChange={setRole}
             onCustomRoleChange={setCustomRole}

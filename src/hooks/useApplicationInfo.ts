@@ -42,17 +42,25 @@ export const useApplicationInfo = (autoFetch: boolean = true): UseApplicationInf
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       localStorage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
     } catch (err: any) {
-      console.error('Error fetching application info:', err);
-      setError(err.message || 'Failed to fetch application info');
-      // On error, try to use cached value if available
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        try {
-          const cachedData = JSON.parse(cached) as ApplicationInfo;
-          setPendingCount(cachedData.pending_count || 0);
-          setSchoolId(cachedData.school_id);
-        } catch {
-          // Ignore parse errors
+      // Handle 404 gracefully - coach profile might not exist yet
+      if (err.response?.status === 404 || err.message?.includes('coach profile not found') || err.message?.includes('404')) {
+        // Set default values for missing profile
+        setPendingCount(0);
+        setSchoolId(null);
+        setError(null); // Don't show error for missing profile
+      } else {
+        console.error('Error fetching application info:', err);
+        setError(err.message || 'Failed to fetch application info');
+        // On error, try to use cached value if available
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached) {
+          try {
+            const cachedData = JSON.parse(cached) as ApplicationInfo;
+            setPendingCount(cachedData.pending_count || 0);
+            setSchoolId(cachedData.school_id);
+          } catch {
+            // Ignore parse errors
+          }
         }
       }
     } finally {

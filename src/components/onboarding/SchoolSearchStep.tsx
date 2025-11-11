@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, ChevronRight, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import * as schoolsService from '../../api/schools';
 
 interface School {
   id: string;
@@ -20,118 +21,7 @@ interface SchoolSearchStepProps {
   onContinue: () => void;
 }
 
-// Mock school data
-const MOCK_SCHOOLS: School[] = [
-  {
-    id: 'school-1',
-    name: 'Duke University',
-    division: 'D1',
-    conference: 'ACC',
-    email_domain: 'duke.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/150.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-2',
-    name: 'University of North Carolina',
-    division: 'D1',
-    conference: 'ACC',
-    email_domain: 'unc.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/153.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-3',
-    name: 'Kentucky University',
-    division: 'D1',
-    conference: 'SEC',
-    email_domain: 'uky.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/96.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-4',
-    name: 'University of Kansas',
-    division: 'D1',
-    conference: 'Big 12',
-    email_domain: 'ku.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/2305.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-5',
-    name: 'University of Michigan',
-    division: 'D1',
-    conference: 'Big Ten',
-    email_domain: 'umich.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/130.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-6',
-    name: 'UCLA',
-    division: 'D1',
-    conference: 'Pac-12',
-    email_domain: 'ucla.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/26.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-7',
-    name: 'Arizona State University',
-    division: 'D1',
-    conference: 'Pac-12',
-    email_domain: 'asu.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/9.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-8',
-    name: 'Gonzaga University',
-    division: 'D1',
-    conference: 'WCC',
-    email_domain: 'gonzaga.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/2250.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-9',
-    name: 'Villanova University',
-    division: 'D1',
-    conference: 'Big East',
-    email_domain: 'villanova.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/222.png',
-    mens_program: true,
-    womens_program: true,
-  },
-  {
-    id: 'school-10',
-    name: 'University of Connecticut',
-    division: 'D1',
-    conference: 'Big East',
-    email_domain: 'uconn.edu',
-    logo_url: 'https://a.espncdn.com/i/teamlogos/ncaa/500/41.png',
-    mens_program: true,
-    womens_program: true,
-  },
-];
-
-const searchSchools = (query: string): School[] => {
-  if (query.length < 2) return [];
-  const lowerQuery = query.toLowerCase();
-  return MOCK_SCHOOLS.filter(school =>
-    school.name.toLowerCase().includes(lowerQuery) ||
-    school.conference?.toLowerCase().includes(lowerQuery)
-  ).slice(0, 10);
-};
+// Mock data removed - now using API via schoolsService.searchSchools()
 
 export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
   selectedSchool,
@@ -151,20 +41,27 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounced search
+  // Debounced search with API call
+  // Backend requires minimum 1 character, but we'll wait for 2 for better UX
   useEffect(() => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 1) {
       setSearchResults([]);
       setShowDropdown(false);
       return;
     }
 
     setIsSearching(true);
-    const timeoutId = setTimeout(() => {
-      const results = searchSchools(searchQuery);
-      setSearchResults(results);
-      setShowDropdown(true);
-      setIsSearching(false);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const results = await schoolsService.searchSchools(searchQuery);
+        setSearchResults(results);
+        setShowDropdown(true);
+      } catch (error) {
+        console.error('Error searching schools:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -270,7 +167,7 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
             )}
 
             {/* Dropdown Results */}
-            {showDropdown && (searchResults.length > 0 || searchQuery.length >= 2) && (
+            {showDropdown && (searchResults.length > 0 || searchQuery.length >= 1) && (
               <div
                 ref={dropdownRef}
                 className="absolute top-full mt-2 w-full z-10 bg-proph-grey border border-proph-grey-light rounded-lg shadow-2xl max-h-80 overflow-y-auto"
@@ -289,7 +186,7 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
                       <img
                         src={school.logo_url || '/default-school-logo.png'}
                         alt={school.name}
-                        className="w-10 h-10 rounded-full bg-proph-black"
+                        className="w-8 h-8 object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/default-school-logo.png';
                         }}
@@ -333,7 +230,7 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
                 <img
                   src={selectedSchool.logo_url || '/default-school-logo.png'}
                   alt={selectedSchool.name}
-                  className="w-12 h-12 rounded-full bg-proph-black"
+                  className="w-8 h-8 object-contain"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/default-school-logo.png';
                   }}

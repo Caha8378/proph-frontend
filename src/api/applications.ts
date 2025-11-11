@@ -220,6 +220,14 @@ export const getApplicationInfo = async (): Promise<ApplicationInfo> => {
     const response = await apiClient.get<ApplicationInfo>('/applications/info');
     return response.data;
   } catch (error: any) {
+    // Handle 404 gracefully - coach profile might not exist yet
+    if (error.response?.status === 404 || error.message?.includes('coach profile not found') || error.message?.includes('404')) {
+      // Return default values for missing profile
+      return {
+        pending_count: 0,
+        school_id: null,
+      };
+    }
     throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch application info');
   }
 };

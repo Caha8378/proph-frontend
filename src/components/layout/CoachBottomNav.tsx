@@ -8,6 +8,7 @@ interface CoachBottomNavProps {
   pendingAppsCount?: number;
   teamCount?: number;
   unreadMessagesCount?: number; // Optional override, otherwise uses hook
+  isVerified?: boolean; // Whether the coach account is verified
 }
 
 // Helper to get school logo from localStorage (for "My Team" icon)
@@ -34,6 +35,7 @@ export const CoachBottomNav: React.FC<CoachBottomNavProps> = ({
   pendingAppsCount,
   teamCount = 0,
   unreadMessagesCount: unreadMessagesCountProp,
+  isVerified = true, // Default to true if not provided (for backward compatibility)
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,6 +69,7 @@ export const CoachBottomNav: React.FC<CoachBottomNavProps> = ({
     to,
     badge,
     useImageIcon,
+    disabled,
   }: { 
     id: string; 
     label: string; 
@@ -74,14 +77,30 @@ export const CoachBottomNav: React.FC<CoachBottomNavProps> = ({
     to: string; 
     badge?: number;
     useImageIcon?: boolean;
+    disabled?: boolean;
   }) => {
     const schoolLogo = useImageIcon ? getSchoolLogo() : null;
     
     return (
       <button
-        onClick={() => (active === id ? window.scrollTo({ top: 0, behavior: 'smooth' }) : navigate(to))}
+        onClick={() => {
+          if (disabled) {
+            alert('Your account is pending verification. You\'ll be able to access this feature once approved.');
+            return;
+          }
+          if (active === id) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            navigate(to);
+          }
+        }}
+        disabled={disabled}
         className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
-          active === id ? 'text-proph-yellow' : 'text-proph-grey-text'
+          disabled
+            ? 'opacity-50 cursor-not-allowed text-proph-grey-text'
+            : active === id 
+              ? 'text-proph-yellow' 
+              : 'text-proph-grey-text'
         }`}
         aria-label={label}
       >
@@ -128,9 +147,9 @@ export const CoachBottomNav: React.FC<CoachBottomNavProps> = ({
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-proph-black border-t border-proph-grey-text/5 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="h-14 px-2 flex items-center justify-around">
         <Tab id="home" label="Home" icon={Home} to="/coach/home" />
-        <Tab id="postings" label="Postings" icon={Pencil} to="/coach/postings" badge={postingsCount} />
-        <Tab id="applications" label="Applications" icon={ClipboardList} to="/coach/applications" badge={actualPendingCount} />
-        <Tab id="recruit" label="Recruit" icon={MessageCircle} to="/coach/messages" />
+        <Tab id="postings" label="Postings" icon={Pencil} to="/coach/postings" badge={postingsCount} disabled={!isVerified} />
+        <Tab id="applications" label="Applications" icon={ClipboardList} to="/coach/applications" badge={actualPendingCount} disabled={!isVerified} />
+        <Tab id="recruit" label="Recruit" icon={MessageCircle} to="/coach/messages" disabled={!isVerified} />
         <Tab id="team" label="My Team" icon={Users} to="/coach/team" badge={teamCount} useImageIcon={true} />
       </div>
     </nav>

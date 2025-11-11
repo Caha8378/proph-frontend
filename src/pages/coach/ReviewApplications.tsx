@@ -9,12 +9,18 @@ import { AcceptModal } from '../../components/application/AcceptModal';
 import { RejectModal } from '../../components/application/RejectModal';
 import * as applicationsService from '../../api/applications';
 import { useProfile } from '../../hooks';
+import { useAuth } from '../../context/authContext';
 import type { Application } from '../../types';
 import type { CoachProfile } from '../../api/coaches';
 
 export const ReviewApplications: React.FC = () => {
+  const { user } = useAuth();
   const { profile } = useProfile();
   const coachProfile = profile as CoachProfile | null;
+  
+  // Use user.emailVerified as the source of truth for verification status
+  // Handle both boolean and number (1/0) from backend
+  const isVerified = !!user?.emailVerified;
   
   // Get school name and coach name from coach profile
   const schoolName = (coachProfile as any)?.school || (coachProfile as any)?.school_name || null;
@@ -275,7 +281,7 @@ export const ReviewApplications: React.FC = () => {
           )}
         </div>
       </main>
-      <CoachBottomNav />
+      <CoachBottomNav isVerified={isVerified} />
 
       {/* Player Profile Modal */}
       <PlayerProfileModal

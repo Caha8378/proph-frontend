@@ -13,10 +13,12 @@ interface School {
 
 interface GenderRoleStepProps {
   selectedSchool: School | null;
+  name?: string;
   genderCoached: 'mens' | 'womens' | null;
   role: string | null;
   customRole?: string;
   userEmail: string;
+  onNameChange: (name: string) => void;
   onGenderChange: (gender: 'mens' | 'womens') => void;
   onRoleChange: (role: string) => void;
   onCustomRoleChange: (customRole: string) => void;
@@ -26,10 +28,12 @@ interface GenderRoleStepProps {
 
 export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
   selectedSchool,
+  name = '',
   genderCoached,
   role,
   customRole,
   userEmail,
+  onNameChange,
   onGenderChange,
   onRoleChange,
   onCustomRoleChange,
@@ -48,8 +52,8 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
     if (!selectedSchool) {
       return {
         verified: false,
-        message: 'Your account will be manually reviewed (24-48 hours). You\'ll be able to browse players while we verify.',
-        icon: <Clock className="w-5 h-5 text-proph-yellow flex-shrink-0" />,
+        message: 'Your account will be manually reviewed. You\'ll be able to browse players while we verify.',
+        icon: <Clock className="w-4 h-4 text-proph-yellow flex-shrink-0" />,
       };
     }
 
@@ -74,7 +78,7 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
 
   const verificationStatus = getVerificationStatus();
 
-  const canSubmit = genderCoached !== null && role !== null && (role !== 'Other' || customRole?.trim());
+  const canSubmit = (name?.trim() || '') !== '' && genderCoached !== null && role !== null && (role !== 'Other' || customRole?.trim());
 
   return (
     <>
@@ -83,12 +87,12 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
         <div className="w-2 h-2 rounded-full bg-proph-yellow" />
         <div className="w-2 h-2 rounded-full bg-proph-yellow" />
       </div>
-      <p className="text-proph-grey-text text-sm text-center mb-6">Step 2 of 2</p>
+      <p className="text-proph-grey-text text-sm text-center mb-4">Step 2 of 2</p>
 
-      <h2 className="text-2xl font-black text-proph-white mb-2">
+      <h2 className="text-2xl font-black text-proph-white mb-1">
         Your Role
       </h2>
-      <p className="text-proph-grey-text mb-6">
+      <p className="text-proph-grey-text mb-2">
         Tell us about your position
       </p>
 
@@ -98,7 +102,7 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
           <img
             src={selectedSchool.logo_url || '/default-school-logo.png'}
             alt={selectedSchool.name}
-            className="w-8 h-8 rounded-full bg-proph-black"
+            className="w-8 h-8 object-contain"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/default-school-logo.png';
             }}
@@ -115,14 +119,14 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
       )}
 
       {/* Gender Coached */}
-      <div className="mb-6">
-        <label className="block text-proph-white font-semibold text-sm mb-3">
+      <div className="mb-2">
+        <label className="block text-proph-white font-semibold text-sm mb-2">
           Gender Coached <span className="text-proph-error">*</span>
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div
             onClick={() => onGenderChange('mens')}
-            className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
               genderCoached === 'mens'
                 ? 'border-proph-yellow bg-proph-yellow/5'
                 : 'border-proph-grey-light hover:border-proph-yellow/50'
@@ -184,8 +188,22 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
         </div>
       </div>
 
-      {/* Role */}
+      {/* Name Input */}
       <div className="mb-6">
+        <label className="block text-proph-white font-semibold text-sm mb-2">
+          Full Name <span className="text-proph-error">*</span>
+        </label>
+        <input
+          type="text"
+          value={name || ''}
+          onChange={(e) => onNameChange(e.target.value)}
+          placeholder="Enter your full name"
+          className="w-full bg-proph-black border border-proph-grey-light rounded-lg px-4 py-3 text-proph-white placeholder-proph-grey-text focus:outline-none focus:border-proph-yellow focus:ring-1 focus:ring-proph-yellow"
+        />
+      </div>
+
+      {/* Role */}
+      <div className="mb-2">
         <label className="block text-proph-white font-semibold text-sm mb-2">
           Your Role <span className="text-proph-error">*</span>
         </label>
@@ -222,7 +240,7 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
       <div className="bg-proph-yellow/10 border border-proph-yellow rounded-lg p-3 mb-6">
         <div className="flex items-start gap-2">
           {verificationStatus.icon}
-          <p className="text-proph-white text-sm">{verificationStatus.message}</p>
+          <p className="text-proph-white text-xs">{verificationStatus.message}</p>
         </div>
       </div>
 

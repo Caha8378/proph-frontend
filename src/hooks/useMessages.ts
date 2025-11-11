@@ -76,7 +76,9 @@ export const useConversations = (): UseConversationsReturn => {
                 const coachProfile = await coachesService.getCoachProfile(conv.otherUser.id);
                 if (coachProfile) {
                   conv.otherUser.name = coachProfile.name || conv.otherUser.name;
-                  conv.otherUser.avatar = coachProfile.profile_image_url || conv.otherUser.avatar;
+                  // Prefer school logo_url, then profile_image_url
+                  const schoolLogo = (coachProfile as any).logo_url || (coachProfile as any).school_logo;
+                  conv.otherUser.avatar = schoolLogo || coachProfile.profile_image_url || conv.otherUser.avatar;
                   if (coachProfile.position_title) {
                     conv.otherUser.coachPosition = coachProfile.position_title;
                   }

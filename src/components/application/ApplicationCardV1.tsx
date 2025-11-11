@@ -103,10 +103,13 @@ export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage, onW
             <MessageSquare className="w-4 h-4" /> Coach wants to connect!
           </div>
           <div className="flex items-center justify-between">
-            <button disabled={loading} onClick={() => onMessage(application.id)} className="bg-proph-yellow text-proph-black font-semibold py-1 px-4 rounded-xl hover:bg-proph-yellow/90">
+            <button
+              disabled={loading}
+              onClick={() => navigate('/player/messages')}
+              className="bg-proph-yellow text-proph-black font-semibold py-1 px-4 rounded-xl hover:bg-proph-yellow/90"
+            >
               Message
             </button>
-            
             <button disabled={loading} onClick={handleWithdrawClick} className="text-proph-error text-sm hover:underline">Withdraw</button>
           </div>
         </div>

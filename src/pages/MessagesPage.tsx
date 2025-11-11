@@ -113,7 +113,7 @@ export const MessagesPage: React.FC = () => {
         />
         
         {user.role === 'coach' ? (
-          <CoachBottomNav unreadMessagesCount={unreadCount} />
+          <CoachBottomNav unreadMessagesCount={unreadCount} isVerified={!!user.emailVerified} />
         ) : (
           <BottomNav />
         )}

@@ -41,7 +41,9 @@ const convertBackendUser = (backendUser: authService.User): User => {
     role: mapAccountTypeToRole(backendUser.account_type),
     verified: false, // Will be determined from profile data
     profileComplete: false, // Will be determined from profile data
-    emailVerified: backendUser.email_verified || false,
+    // Backend may return email_verified as 1/0 (number) or true/false (boolean)
+    // Convert to boolean: !! converts any truthy value (1, true) to true, falsy (0, false) to false
+    emailVerified: !!(backendUser.email_verified as any),
   };
 };
 

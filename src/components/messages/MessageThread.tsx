@@ -174,14 +174,16 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
           className={`flex items-center gap-3 flex-1 min-w-0 ${canClickPlayer ? 'cursor-pointer' : ''}`}
           onClick={canClickPlayer ? handlePlayerClick : undefined}
         >
-          <img
-            src={conversation.otherUser.avatar}
-            alt={conversation.otherUser.name}
-            className="w-10 h-10 rounded-full bg-proph-grey-light object-cover flex-shrink-0"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/IMG_1918.jpeg';
-            }}
-          />
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+            <img
+              src={conversation.otherUser.avatar}
+              alt={conversation.otherUser.name}
+              className="w-8 h-8 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/IMG_1918.jpeg';
+              }}
+            />
+          </div>
           <div className="flex-1 min-w-0">
             <p className={`font-bold text-proph-white truncate ${canClickPlayer ? 'hover:text-proph-yellow transition-colors' : ''}`}>
               {conversation.otherUser.name}

@@ -226,12 +226,17 @@ export function convertBackendConversationToFrontend(
     read: true,
   };
   
+  // For coaches, prefer school_logo over other_user_image
+  const coachAvatar = isOtherUserCoach && backendConv.school_logo 
+    ? backendConv.school_logo 
+    : otherUserAvatar;
+  
   return {
     id: String(backendConv.conversation_id),
     otherUser: {
       id: String(otherUserId),
       name: otherUserName,
-      avatar: otherUserAvatar,
+      avatar: coachAvatar,
       role: backendConv.other_user_role,
       // Coach fields
       school: isOtherUserCoach ? backendConv.school_name : undefined,

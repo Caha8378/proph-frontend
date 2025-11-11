@@ -60,6 +60,10 @@ export const MyTeam: React.FC = () => {
   }));
 
   const currentUserId = user?.id ? String(user.id) : undefined;
+  
+  // Use user.emailVerified as the source of truth for verification status
+  // Handle both boolean and number (1/0) from backend
+  const isVerified = !!user?.emailVerified;
 
   return (
     <div className="min-h-screen bg-proph-black pb-20">
@@ -85,7 +89,7 @@ export const MyTeam: React.FC = () => {
           <CoachBanner coaches={teamCoaches} currentUserId={currentUserId} />
         )}
       </main>
-      <CoachBottomNav />
+      <CoachBottomNav isVerified={isVerified} />
     </div>
   );
 };

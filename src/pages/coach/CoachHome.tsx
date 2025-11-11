@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { CoachBottomNav } from '../../components/layout/CoachBottomNav';
 import { SearchBar } from '../../components/common/SearchBar';
@@ -8,17 +9,28 @@ import { PendingVerificationBanner } from '../../components/coach/PendingVerific
 import { ClipboardList, Plus, Lock } from 'lucide-react';
 import { PlayerProfileModal } from '../../components/player/PlayerProfileModal';
 import { useRandomPlayers, useProfile, useApplicationInfo } from '../../hooks';
+import { useAuth } from '../../context/authContext';
 import type { PlayerProfile } from '../../types';
 import { useSearchParams } from 'react-router-dom';
-import type { CoachProfile } from '../../api/coaches';
 
 export const CoachHome: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [createOpen, setCreateOpen] = useState(false);
   
-  // Fetch coach profile to get is_verified status
-  const { profile } = useProfile();
-  const coachProfile = profile as CoachProfile | null;
-  const isVerified = coachProfile?.is_verified === true || coachProfile?.is_verified === 1 || localStorage.getItem('coachVerified') === 'true';
+  // Fetch coach profile
+  const { profileNotFound } = useProfile();
+  
+  // Use user.emailVerified as the source of truth for verification status
+  // Handle both boolean and number (1/0) from backend
+  const isVerified = !!user?.emailVerified;
+
+  // Redirect to onboarding if profile doesn't exist
+  useEffect(() => {
+    if (profileNotFound) {
+      navigate('/onboarding/coach', { replace: true });
+    }
+  }, [profileNotFound, navigate]);
 
   // Fetch application info (pending count)
   const { pendingCount } = useApplicationInfo();
@@ -115,15 +127,31 @@ export const CoachHome: React.FC = () => {
             {/* Review Applications */}
             <button
               aria-label="Review applications"
-              onClick={() => (window.location.href = '/coach/applications')}
-              className="bg-proph-grey rounded-xl mx-6 sm:mx-0 p-6 sm:p-8 min-h-[140px] sm:min-h-[160px] shadow-lg hover:bg-proph-grey-light transition-all text-left"
+              onClick={() => {
+                if (!isVerified) {
+                  alert('Your account is pending verification. You\'ll be able to review applications once approved.');
+                  return;
+                }
+                window.location.href = '/coach/applications';
+              }}
+              disabled={!isVerified}
+              className={`bg-proph-grey rounded-xl mx-6 sm:mx-0 p-6 sm:p-8 min-h-[140px] sm:min-h-[160px] shadow-lg transition-all text-left ${
+                isVerified
+                  ? 'hover:bg-proph-grey-light'
+                  : 'opacity-50 cursor-not-allowed'
+              }`}
             >
-              <ClipboardList className="w-10 h-10 text-proph-yellow mb-4" />
+              <div className="flex items-center gap-2 mb-4">
+                {!isVerified && <Lock className="w-10 h-10 text-proph-yellow" />}
+                <ClipboardList className="w-10 h-10 text-proph-yellow" />
+              </div>
               <h3 className="text-xl font-bold text-proph-yellow">Review Applications</h3>
               <p className="text-base text-proph-white/80 mt-1">
-                {pendingCount > 0 
-                  ? `${pendingCount} pending ${pendingCount === 1 ? 'application' : 'applications'}`
-                  : 'Manage player applications'
+                {isVerified
+                  ? pendingCount > 0 
+                    ? `${pendingCount} pending ${pendingCount === 1 ? 'application' : 'applications'}`
+                    : 'Manage player applications'
+                  : 'Verify your account to review applications'
                 }
               </p>
             </button>
@@ -147,7 +175,7 @@ export const CoachHome: React.FC = () => {
 
       <CreatePostingModal open={createOpen} onClose={() => setCreateOpen(false)} onPublish={() => setCreateOpen(false)} />
 
-      <CoachBottomNav pendingAppsCount={pendingCount} />
+      <CoachBottomNav pendingAppsCount={pendingCount} isVerified={isVerified} />
 
       <PlayerProfileModal
         player={selectedPlayer}

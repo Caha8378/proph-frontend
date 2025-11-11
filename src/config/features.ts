@@ -6,11 +6,14 @@ export const FEATURES = {
 };
 
 export const shouldRequireEmailVerification = (): boolean => {
+  // DISABLED FOR INITIAL TESTING - coaches go directly to onboarding
+  return false;
+  
   // Check localStorage override first (for dev/testing)
-  const skipOverride = localStorage.getItem('skipEmailVerification') === 'true';
-  if (skipOverride) return false;
+  // const skipOverride = localStorage.getItem('skipEmailVerification') === 'true';
+  // if (skipOverride) return false;
 
   // Then check feature flag
-  return FEATURES.REQUIRE_EMAIL_VERIFICATION;
+  // return FEATURES.REQUIRE_EMAIL_VERIFICATION;
 };
 

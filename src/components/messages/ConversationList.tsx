@@ -27,14 +27,16 @@ const ConversationCard: React.FC<ConversationCardProps> = ({ conversation, selec
     >
       {/* User Avatar + Name */}
       <div className="flex items-center gap-3 mb-2">
-        <img
-          src={conversation.otherUser.avatar}
-          alt={conversation.otherUser.name}
-          className="w-12 h-12 rounded-full bg-proph-grey-light object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/IMG_1918.jpeg';
-          }}
-        />
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+          <img
+            src={conversation.otherUser.avatar}
+            alt={conversation.otherUser.name}
+            className="w-8 h-8 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/IMG_1918.jpeg';
+            }}
+          />
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <p className="font-bold text-proph-white truncate">

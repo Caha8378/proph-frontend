@@ -10,9 +10,11 @@ import type { Posting } from '../../types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as postingsService from '../../api/postings';
 import { useProfile } from '../../hooks';
+import { useAuth } from '../../context/authContext';
 import type { CoachProfile } from '../../api/coaches';
 
 export const CoachPostings: React.FC = () => {
+  const { user } = useAuth();
   const [postings, setPostings] = useState<Posting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +26,10 @@ export const CoachPostings: React.FC = () => {
   // Fetch coach profile for school info
   const { profile } = useProfile();
   const coachProfile = profile as CoachProfile | null;
+  
+  // Use user.emailVerified as the source of truth for verification status
+  // Handle both boolean and number (1/0) from backend
+  const isVerified = !!user?.emailVerified;
 
   // Fetch postings on mount
   useEffect(() => {
@@ -212,7 +218,7 @@ export const CoachPostings: React.FC = () => {
         />
       )}
 
-      <CoachBottomNav postingsCount={postings.length} />
+      <CoachBottomNav postingsCount={postings.length} isVerified={isVerified} />
     </div>
   );
 };
