@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-proph-yellow: #FFEC3C;
+  --color-proph-black: #0A0A0A;
+  --color-proph-grey: #1C1C1E;
+  --color-proph-white: #FFFFFF;
+  --color-proph-purple: #8B5CF6;
+  --color-proph-purple-dark: #6D28D9;
+  --color-proph-success: #10B981;
+  --color-proph-error: #EF4444;
+  --color-proph-grey-light: #2C2C2E;
+  --color-proph-grey-text: #A1A1A6;
+  
+  --font-family-sans: Inter, sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+  font-family: Inter, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.btn-primary {
+  width: 100%;
+  background-color: #FFEC3C;
+  color: #0A0A0A;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 150ms;
+}
+
+.btn-primary:hover {
+  background-color: #E6D436;
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+.btn-secondary {
+  width: 100%;
+  border: 2px solid #8B5CF6;
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 150ms;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
+.card {
+  background-color: #1C1C1E;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(161, 161, 166, 0.2);
+}
+
+/* Proph utility classes */
+.bg-proph-black { background-color: #0A0A0A; }
+.bg-proph-grey { background-color: #1C1C1E; }
+.bg-proph-grey-light { background-color: #2C2C2E; }
+.text-proph-white { color: #FFFFFF; }
+.text-proph-yellow { color: #FFEC3C; }
+.text-proph-purple { color: #8B5CF6; }
+.text-proph-grey-text { color: #A1A1A6; }
+.text-proph-success { color: #10B981; }
+.text-proph-error { color: #EF4444; }
+.border-proph-purple { border-color: #8B5CF6; }
+.border-proph-yellow { border-color: #FFEC3C; }
+.border-proph-grey-text { border-color: #A1A1A6; }
+.border-proph-success { border-color: #10B981; }
+.border-proph-error { border-color: #EF4444; }
+
+/* Subtle bounce animation for hero basketball icon */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2.2s ease-in-out infinite;
+}
+
+/* Slide up animation for modals */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 300ms ease-out;
+}

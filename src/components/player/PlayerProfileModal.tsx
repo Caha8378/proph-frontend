@@ -1,0 +1,175 @@
+import React, { useEffect, useRef } from 'react';
+import { X, ChevronLeft, Share2, Users } from 'lucide-react';
+import { PlayerCardFinal1 } from './PlayerCardFinal1';
+import { usePlayer } from '../../hooks';
+import type { PlayerProfile } from '../../types';
+
+interface PlayerProfileModalProps {
+  player?: PlayerProfile | null; // Optional - can pass player directly
+  playerId?: string | null; // Or pass playerId to fetch
+  isOpen: boolean;
+  onClose: () => void;
+  onShare?: () => void;
+  showViewTeam?: boolean;
+}
+
+export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
+  player: playerProp,
+  playerId,
+  isOpen,
+  onClose,
+  onShare,
+  showViewTeam = false,
+}) => {
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [entered, setEntered] = React.useState(false);
+  
+  // Fetch player data if playerId is provided (instead of player prop)
+  // Only fetch if playerId is valid (not undefined/null/empty)
+  const validPlayerId = playerId && playerId !== 'undefined' && playerId !== 'null' ? playerId : null;
+  const { player: fetchedPlayer, loading, error } = usePlayer(validPlayerId);
+  
+  // Use fetched player if available, otherwise use prop
+  const player = validPlayerId ? fetchedPlayer : playerProp;
+
+  // ESC to close
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
+  // Lock body scroll
+  useEffect(() => {
+    if (isOpen) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      setEntered(true);
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
+  }, [isOpen]);
+
+  const handleShare = () => {
+    if (!player) return;
+    if (onShare) {
+      onShare();
+      return;
+    }
+    const url = `${window.location.origin}/?player=${player.id}`;
+    navigator.clipboard.writeText(url);
+    alert('Profile link copied to clipboard!');
+  };
+
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  if (!isOpen) return null;
+
+  // Loading state
+  if (playerId && loading) {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        onClick={handleBackdrop}
+      >
+        <div className="bg-proph-black rounded-2xl p-8">
+          <p className="text-proph-grey-text">Loading player profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (playerId && error) {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        onClick={handleBackdrop}
+      >
+        <div className="bg-proph-black rounded-2xl p-8">
+          <p className="text-proph-error">{error}</p>
+          <button
+            onClick={onClose}
+            className="mt-4 text-proph-yellow hover:text-proph-yellow/80"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!player) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={handleBackdrop}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="player-profile-title"
+    >
+      <div
+        ref={contentRef}
+        className={`bg-proph-black rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 ease-out ${entered ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'} border border-proph-grey-light`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-proph-grey-text/20">
+          <button
+            onClick={onClose}
+            className="text-proph-white hover:text-proph-yellow transition-colors"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+
+          <h2 id="player-profile-title" className="text-lg font-bold text-proph-white">
+            {player.name}
+          </h2>
+
+          <button
+            onClick={onClose}
+            className="text-proph-white hover:text-proph-yellow transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Player Card */}
+        <div className="flex items-center justify-center p-6 min-h-[580px]">
+          <PlayerCardFinal1 player={player} />
+        </div>
+
+        {/* Actions */}
+        <div className="p-4 space-y-3 border-t border-proph-grey-text/20 pb-safe">
+          <button
+            onClick={handleShare}
+            className="w-full bg-proph-grey-light hover:bg-proph-grey-text/20 text-proph-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Share2 className="w-5 h-5" />
+            Share Profile
+          </button>
+
+          {showViewTeam && (
+            <button
+              onClick={() => console.log('View Team Page')}
+              className="w-full bg-proph-yellow hover:bg-proph-yellow/90 text-proph-black font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <Users className="w-5 h-5" />
+              View Team Page
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+

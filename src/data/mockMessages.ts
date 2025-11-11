@@ -1,0 +1,122 @@
+import type { Conversation } from '../types';
+
+export const MOCK_CONVERSATIONS: Conversation[] = [
+  {
+    id: 'conv-1',
+    otherUser: {
+      id: 'coach-1',
+      name: 'Coach Mike Johnson',
+      avatar: '/IMG_1918.jpeg',
+      role: 'coach',
+      school: 'Duke University',
+      coachPosition: 'Assistant Coach',
+    },
+    messages: [
+      {
+        id: 'msg-1',
+        conversationId: 'conv-1',
+        senderId: 'coach-1',
+        text: 'Hey Marcus! We reviewed your application and we\'re interested. Can we set up a call this week?',
+        timestamp: '2024-03-15T14:30:00Z',
+        read: true,
+      },
+      {
+        id: 'msg-2',
+        conversationId: 'conv-1',
+        senderId: 'player-123',
+        text: 'Absolutely! I\'m free Tuesday or Thursday afternoon.',
+        timestamp: '2024-03-15T15:45:00Z',
+        read: true,
+      },
+      {
+        id: 'msg-3',
+        conversationId: 'conv-1',
+        senderId: 'coach-1',
+        text: 'Perfect! Let\'s do Thursday at 3pm. I\'ll send you a Zoom link.',
+        timestamp: '2024-03-15T16:00:00Z',
+        read: false,
+      },
+    ],
+    lastMessage: {
+      id: 'msg-3',
+      conversationId: 'conv-1',
+      senderId: 'coach-1',
+      text: 'Perfect! Let\'s do Thursday at 3pm. I\'ll send you a Zoom link.',
+      timestamp: '2024-03-15T16:00:00Z',
+      read: false,
+    },
+    unreadCount: 1,
+    createdAt: '2024-03-15T14:30:00Z',
+  },
+  {
+    id: 'conv-2',
+    otherUser: {
+      id: 'coach-2',
+      name: 'Sarah Williams',
+      avatar: '/IMG_1918.jpeg',
+      role: 'coach',
+      school: 'University of North Carolina',
+      coachPosition: 'Head Coach',
+    },
+    messages: [
+      {
+        id: 'msg-4',
+        conversationId: 'conv-2',
+        senderId: 'coach-2',
+        text: 'Hi! We\'d love to have you visit campus. When works for you?',
+        timestamp: '2024-03-14T10:15:00Z',
+        read: true,
+      },
+      {
+        id: 'msg-5',
+        conversationId: 'conv-2',
+        senderId: 'player-123',
+        text: 'Thanks! I can do next month. What dates are available?',
+        timestamp: '2024-03-14T11:30:00Z',
+        read: true,
+      },
+    ],
+    lastMessage: {
+      id: 'msg-5',
+      conversationId: 'conv-2',
+      senderId: 'player-123',
+      text: 'Thanks! I can do next month. What dates are available?',
+      timestamp: '2024-03-14T11:30:00Z',
+      read: true,
+    },
+    unreadCount: 0,
+    createdAt: '2024-03-14T10:15:00Z',
+  },
+  {
+    id: 'conv-3',
+    otherUser: {
+      id: 'player-456',
+      name: 'Alex Thompson',
+      avatar: '/IMG_1918.jpeg',
+      role: 'player',
+      gradYear: 2025,
+      playerPosition: 'Point Guard',
+    },
+    messages: [
+      {
+        id: 'msg-6',
+        conversationId: 'conv-3',
+        senderId: 'coach-1',
+        text: 'Hi Alex! Thanks for applying. We\'re reviewing your application and will get back to you soon.',
+        timestamp: '2024-03-13T09:00:00Z',
+        read: true,
+      },
+    ],
+    lastMessage: {
+      id: 'msg-6',
+      conversationId: 'conv-3',
+      senderId: 'coach-1',
+      text: 'Hi Alex! Thanks for applying. We\'re reviewing your application and will get back to you soon.',
+      timestamp: '2024-03-13T09:00:00Z',
+      read: true,
+    },
+    unreadCount: 0,
+    createdAt: '2024-03-13T09:00:00Z',
+  },
+];
+

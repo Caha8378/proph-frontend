@@ -1,0 +1,904 @@
+# PROPH - Basketball Recruiting Platform
+## Cursor IDE Context File
+
+---
+
+## PROJECT OVERVIEW
+
+Proph is a mobile-first basketball recruiting platform that connects high school players with college coaches through algorithmic matching. Think "Tinder for recruiting" meets "Indeed job alerts" with data-driven player evaluation.
+
+### Core Value Proposition
+- **For Players:** Browse personalized recruitment postings, apply with one tap, track application status
+- **For Coaches:** Post openings, review applications with algorithmic match scores, connect with qualified players
+- **Key Differentiator:** Algorithm predicts player's college level (D1/D2/D3/NAIA) to ensure quality matches
+
+### Target Users
+- **Primary:** High school basketball players (ages 15-18) and their parents
+- **Secondary:** College coaching staffs (D1/D2/D3/NAIA)
+- **Focus:** Underserved D2/D3/NAIA players (the "other 95%")
+
+---
+
+## TECH STACK
+
+### Frontend
+- **Framework:** React 18+ with TypeScript
+- **Styling:** Tailwind CSS (mobile-first)
+- **Routing:** React Router v6
+- **State Management:** React Context API or Zustand (keep it simple)
+- **Icons:** Lucide React or Heroicons
+- **Build Tool:** Vite
+
+### Backend (Already Built - Do NOT Modify)
+- Assume all APIs exist and work
+- Focus ONLY on frontend/UI development
+
+### Development Environment
+- **IDE:** Cursor
+- **Package Manager:** npm or pnpm
+- **Node Version:** 18+
+
+---
+
+## PROJECT SETUP INSTRUCTIONS
+
+### Step 1: Initialize React + Vite + Tailwind Project
+
+Run these commands in terminal:
+
+```bash
+# Create new Vite + React + TypeScript project
+npm create vite@latest proph-frontend -- --template react-ts
+
+# Navigate into project
+cd proph-frontend
+
+# Install dependencies
+npm install
+
+# Install Tailwind CSS
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Install additional dependencies
+npm install react-router-dom lucide-react clsx tailwind-merge
+```
+
+### Step 2: Configure Tailwind
+
+Update `tailwind.config.js`:
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'proph-bg': '#1E2019',
+        'proph-surface': '#2A2D23',
+        'proph-text': '#CDD1DE',
+        'proph-yellow': '#FFEC3C',
+        'proph-blue': '#BBD5ED',
+        'proph-violet': '#5B5F97',
+        'proph-success': '#10B981',
+        'proph-error': '#EF4444',
+      },
+      fontFamily: {
+        'sans': ['Inter', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
+```
+
+### Step 3: Update Global CSS
+
+Replace `src/index.css` with:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply bg-proph-bg text-proph-text font-sans;
+  }
+}
+
+@layer utilities {
+  .btn-primary {
+    @apply w-full bg-proph-yellow text-black font-semibold py-3 px-6 rounded-lg hover:bg-[#E6D436] active:scale-95 transition-all duration-150;
+  }
+  
+  .btn-secondary {
+    @apply w-full border-2 border-proph-violet text-proph-text font-semibold py-3 px-6 rounded-lg hover:bg-proph-violet/10 active:scale-95 transition-all duration-150;
+  }
+  
+  .card {
+    @apply bg-proph-surface rounded-xl p-4 border border-proph-violet/20;
+  }
+}
+```
+
+### Step 4: Project Structure
+
+Create this folder structure in `src/`:
+
+```
+src/
+├── components/
+│   ├── common/          # Reusable UI components
+│   │   ├── Button.tsx
+│   │   ├── Badge.tsx
+│   │   ├── Card.tsx
+│   │   └── Input.tsx
+│   ├── layout/          # Layout components
+│   │   ├── Header.tsx
+│   │   ├── BottomNav.tsx
+│   │   └── Modal.tsx
+│   ├── posting/         # Posting-related components
+│   │   ├── PostingCard.tsx
+│   │   ├── PostingFeed.tsx
+│   │   └── ApplyModal.tsx
+│   ├── player/          # Player-related components
+│   │   ├── PlayerCard.tsx
+│   │   └── PlayerProfile.tsx
+│   └── application/     # Application tracking
+│       └── ApplicationCard.tsx
+├── pages/               # Full page components
+│   ├── PostingFeedPage.tsx
+│   ├── ApplicationsPage.tsx
+│   ├── ProfilePage.tsx
+│   └── ConnectionsPage.tsx
+├── hooks/               # Custom React hooks
+├── utils/               # Helper functions
+├── types/               # TypeScript types
+├── App.tsx
+└── main.tsx
+```
+
+---
+
+## DESIGN SYSTEM
+
+### Color Palette
+
+**Dark Mode (Default)**
+
+```
+Primary Colors:
+- Background:    #1E2019  (Eerie Black)     - App background
+- Surface:       #2A2D23  (Lighter)         - Card backgrounds
+- Text Primary:  #CDD1DE  (French Gray)     - Headlines, body text
+
+Accent Colors:
+- Yellow:        #FFEC3C  (Aureolin)        - CTAs, urgency, highlights
+- Blue:          #BBD5ED  (Columbia Blue)   - Links, secondary accents
+- Violet:        #5B5F97  (Ultra Violet)    - Secondary text, borders
+
+Status Colors:
+- Success:       #10B981  (Emerald Green)   - Accepted, positive states
+- Error:         #EF4444  (Bright Red)      - Rejected, warnings
+- Warning:       #FFEC3C  (Yellow)          - Pending states
+
+Neutrals:
+- White:         #FFFFFF  (Pure White)      - Contrast elements
+- Black:         #000000  (True Black)      - Text on yellow buttons
+```
+
+### Typography Scale
+
+```typescript
+// Font sizes (Tailwind classes)
+text-xs      // 12px - Captions, timestamps
+text-sm      // 14px - Secondary text, meta info
+text-base    // 16px - Body text
+text-lg      // 18px - Card titles (H3)
+text-xl      // 20px - Section titles (H2)
+text-2xl     // 24px - Unused
+text-3xl     // 30px - Page titles (H1)
+
+// Font weights
+font-normal  // 400 - Body text
+font-medium  // 500 - Labels
+font-semibold // 600 - Buttons, card titles
+font-bold    // 700 - Headlines, emphasis
+font-extrabold // 800 - Brand elements
+```
+
+### Spacing System
+
+Use Tailwind's default spacing scale (4px base):
+- p-2 (8px), p-3 (12px), p-4 (16px), p-6 (24px), p-8 (32px)
+- gap-2, gap-3, gap-4, gap-6 for flex/grid gaps
+
+### Border Radius
+
+```
+rounded-lg   // 8px  - Buttons, inputs
+rounded-xl   // 12px - Cards
+rounded-2xl  // 16px - Player cards, modals
+rounded-full // 9999px - Badges, pills
+```
+
+---
+
+## COMPONENT SPECIFICATIONS
+
+### Button Component
+
+**File:** `src/components/common/Button.tsx`
+
+```typescript
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'success' | 'error';
+  children: React.ReactNode;
+  fullWidth?: boolean;
+}
+
+// Usage:
+<Button variant="primary">Apply Now</Button>
+<Button variant="secondary">Visit Profile</Button>
+<Button variant="success">Accept & Connect</Button>
+<Button variant="error">Reject</Button>
+```
+
+**Styles:**
+```typescript
+const variants = {
+  primary: 'bg-proph-yellow text-black hover:bg-[#E6D436]',
+  secondary: 'border-2 border-proph-violet text-proph-text hover:bg-proph-violet/10',
+  success: 'bg-proph-success text-white hover:bg-[#059669]',
+  error: 'bg-proph-error text-white hover:bg-[#DC2626]',
+}
+```
+
+### Badge Component
+
+**File:** `src/components/common/Badge.tsx`
+
+```typescript
+interface BadgeProps {
+  variant: 'great-fit' | 'good-fit' | 'possible-fit' | 'pending' | 'accepted' | 'rejected';
+  children: React.ReactNode;
+}
+
+// Usage:
+<Badge variant="great-fit">Great Fit</Badge>
+<Badge variant="pending">Pending</Badge>
+```
+
+**Styles:**
+```typescript
+const variants = {
+  'great-fit': 'bg-proph-yellow text-black',
+  'good-fit': 'bg-proph-blue text-black',
+  'possible-fit': 'bg-proph-violet text-white',
+  'pending': 'bg-proph-yellow/20 text-proph-yellow border border-proph-yellow',
+  'accepted': 'bg-proph-success/20 text-proph-success border border-proph-success',
+  'rejected': 'bg-proph-error/20 text-proph-error border border-proph-error',
+}
+```
+
+### Card Component
+
+**File:** `src/components/common/Card.tsx`
+
+```typescript
+interface CardProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  hover?: boolean;
+}
+
+// Base styles:
+bg-proph-surface rounded-xl p-4 border border-proph-violet/20
+
+// With hover:
+hover:border-proph-blue/40 transition-all duration-200
+```
+
+### PostingCard Component
+
+**File:** `src/components/posting/PostingCard.tsx`
+
+**Structure:**
+```
+┌─────────────────────────────────────┐
+│ [Logo] School Name • Division       │  <- text-lg font-bold
+│        Position Title                │  <- text-xl font-bold text-proph-yellow
+│                                      │
+│ Requirements:                        │
+│ • Height: Any height                 │  <- text-sm text-proph-violet
+│ • Class: 2025                        │
+│ • Academics: 3.6 GPA                 │
+│                                      │
+│ Apply by Dec 14                      │  <- text-sm text-proph-error (if urgent)
+│ 12 players applied   [87% Match]    │  <- text-xs text-proph-violet / Badge
+│                                      │
+│ [Apply Now Button - Full Width]     │
+└─────────────────────────────────────┘
+```
+
+**Data Structure:**
+```typescript
+interface Posting {
+  id: string;
+  school: {
+    name: string;
+    logo: string;
+    division: 'D1' | 'D2' | 'D3' | 'NAIA';
+  };
+  position: string;
+  requirements: {
+    height?: string;
+    classYear?: number;
+    gpa?: number;
+  };
+  deadline: string; // ISO date
+  applicantCount: number;
+  matchScore?: number; // 0-100
+  description?: string;
+  coachName?: string;
+}
+```
+
+### PlayerCard Component
+
+**File:** `src/components/player/PlayerCard.tsx`
+
+**Structure (Trading Card Style):**
+```
+┌─────────────────────────────────────┐
+│          [Player Photo]              │  <- Circular, large
+│                                      │
+│         Player Name                  │  <- text-2xl font-bold
+│         Position                     │  <- text-lg text-proph-yellow
+│                                      │
+│ School Name          Height • Age    │  <- text-sm
+│ Class of 2025        Location        │
+│                                      │
+│ ┌─────────────────────────────────┐ │
+│ │   YOUR PROPH: D1 - Power 5      │ │  <- Highlighted box
+│ └─────────────────────────────────┘ │
+│                                      │
+│ Shades Of:                           │  <- text-xs text-proph-violet
+│ • Nikola Jokić                       │  <- text-sm
+│ • Kevin Durant                       │
+│                                      │
+│ [Proph Logo]     Click to flip      │
+└─────────────────────────────────────┘
+```
+
+**Data Structure:**
+```typescript
+interface PlayerProfile {
+  id: string;
+  name: string;
+  position: string;
+  photo: string;
+  school: string;
+  height: string;
+  age: number;
+  location: string;
+  classYear: number;
+  evaluation: {
+    level: string; // "D1 - Power 5", "D2", etc.
+    comparisons: string[]; // NBA player names
+  };
+  stats: {
+    ppg: number;
+    rpg: number;
+    apg: number;
+    fgPercentage: number;
+    // ... other stats
+  };
+}
+```
+
+### ApplyModal Component
+
+**File:** `src/components/posting/ApplyModal.tsx`
+
+**Structure (Slide-up overlay):**
+```
+┌─────────────────────────────────────┐
+│ Apply to University of Colorado  [X]│  <- Header with close button
+│ Utility Player • D1                  │  <- Subtext
+│                                      │
+│ [Player Card Preview - 60% scale]   │  <- Scaled down PlayerCard
+│ "This is what Coach will see"       │  <- text-xs text-proph-violet
+│                                      │
+│ ┌─ Add a note (optional) ──────────┐│
+│ │ [Expandable textarea]             ││  <- Collapsed by default
+│ └───────────────────────────────────┘│
+│                                      │
+│ Your application includes:           │  <- text-sm text-proph-violet
+│ ✓ Player profile                     │
+│ ✓ Stats & highlights                 │
+│ ✓ Proph evaluation                   │
+│                                      │
+│ [Submit Application - Full Width]    │
+│ Track this in your Applications tab  │  <- text-xs text-proph-violet
+└─────────────────────────────────────┘
+```
+
+### ApplicationCard Component
+
+**File:** `src/components/application/ApplicationCard.tsx`
+
+**Structure:**
+```
+┌─────────────────────────────────────┐
+│ [Logo] University of Colorado       │
+│        Utility Player                │
+│                                      │
+│ [PENDING Badge]    Applied 2 days ago│
+│ 12 other applicants                  │
+│                                      │
+│ [View Posting]                       │  <- Secondary button
+└─────────────────────────────────────┘
+```
+
+For Accepted state:
+```
+│ [ACCEPTED Badge]   Accepted 1 day ago│
+│                                       │
+│ [Message Coach]    [View Profile]    │  <- Success + Secondary buttons
+```
+
+---
+
+## PAGE LAYOUTS
+
+### PostingFeedPage (Default Landing)
+
+**File:** `src/pages/PostingFeedPage.tsx`
+
+**Structure:**
+```
+[Sticky Header: Logo | Filter Icon | Notification Badge]
+
+[Page Title: "Postings For You"]
+[Subtext: "Based on your D1 - Power 5 projection"]
+
+[PostingCard]
+[PostingCard]
+[PostingCard]
+...
+
+[Bottom Navigation: Feed | Applications | Profile | Connections]
+```
+
+**Key Features:**
+- Infinite scroll (load more postings)
+- Filter modal (Division, Position, Location)
+- Empty state: "No postings right now. We'll notify you when new ones arrive."
+
+### ApplicationsPage
+
+**File:** `src/pages/ApplicationsPage.tsx`
+
+**Structure:**
+```
+[Sticky Header]
+
+[Tab Navigation: Pending (3) | Accepted | Rejected]
+
+[ApplicationCard]
+[ApplicationCard]
+...
+
+[Bottom Navigation]
+```
+
+### ProfilePage
+
+**File:** `src/pages/ProfilePage.tsx`
+
+**Structure:**
+```
+[Sticky Header]
+
+[PlayerCard - Full Size]
+
+[Share My Proph Button - Primary, Prominent]
+
+[Profile Settings Section]
+- Update Photo
+- Edit Profile
+
+[Bottom Navigation]
+```
+
+### ConnectionsPage
+
+**File:** `src/pages/ConnectionsPage.tsx`
+
+**Structure:**
+```
+[Sticky Header]
+
+Active Connections
+[Connection Card: Coach info + Message Button]
+...
+
+Connection Requests
+[Empty State: "No pending requests"]
+
+Recruitment Applications
+[Application Card]
+...
+
+[Bottom Navigation]
+```
+
+---
+
+## LAYOUT COMPONENTS
+
+### Header Component
+
+**File:** `src/components/layout/Header.tsx`
+
+```typescript
+interface HeaderProps {
+  showFilter?: boolean;
+  showNotifications?: boolean;
+}
+
+// Structure:
+<header className="sticky top-0 bg-proph-bg border-b border-proph-violet/20 px-4 py-3 flex justify-between items-center z-50">
+  <img src="/logo.svg" alt="Proph" className="h-8" />
+  <div className="flex items-center gap-4">
+    {showFilter && <FilterButton />}
+    {showNotifications && <NotificationBadge count={3} />}
+  </div>
+</header>
+```
+
+### BottomNav Component
+
+**File:** `src/components/layout/BottomNav.tsx`
+
+```typescript
+const navItems = [
+  { id: 'feed', label: 'Feed', icon: HomeIcon, path: '/' },
+  { id: 'applications', label: 'Applications', icon: FileTextIcon, path: '/applications' },
+  { id: 'profile', label: 'Profile', icon: UserIcon, path: '/profile' },
+  { id: 'connections', label: 'Connections', icon: UsersIcon, path: '/connections' },
+];
+
+// Active state: text-proph-yellow
+// Inactive state: text-proph-violet
+```
+
+### Modal Component
+
+**File:** `src/components/layout/Modal.tsx`
+
+**Slide-up style:**
+```typescript
+<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end">
+  <div className="w-full bg-proph-bg rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto">
+    {children}
+  </div>
+</div>
+```
+
+---
+
+## USER FLOWS TO BUILD
+
+### Priority 1: Journey 1 - Player Browses & Applies
+
+**Screens to build:**
+1. PostingFeedPage (default landing)
+2. ApplyModal (overlay)
+3. ApplicationsPage (tracking dashboard)
+
+**Key interactions:**
+- Tap "Apply Now" → Open ApplyModal
+- Submit application → Toast notification + update card state
+- Navigate to Applications tab → See pending/accepted/rejected
+
+### Priority 2: Journey 2 - Player Shares Card
+
+**Screens to build:**
+1. ProfilePage with share button
+2. Shareable landing page (public view)
+
+**Key interactions:**
+- Tap "Share My Proph" → Generate link + share options
+- Public link shows PlayerCard without login required
+
+### Priority 3: Journey 3 - Coach Reviews Applications
+
+**Screens to build:**
+1. Coach PostingsPage (dashboard)
+2. ApplicationReviewPage (list of applicants)
+
+**Key interactions:**
+- View applications for a posting
+- Accept/Reject applicants
+- Connect with accepted players
+
+---
+
+## MOBILE-FIRST BEST PRACTICES
+
+1. **Touch Targets:** Minimum 44x44px for all buttons/links
+2. **Thumb Zone:** Place primary actions in bottom 2/3 of screen
+3. **Swipe Gestures:** Consider swipe-to-dismiss on cards
+4. **Fixed Elements:** Use sticky headers, fixed bottom nav
+5. **Input Focus:** Auto-scroll to keep focused input visible
+6. **Loading States:** Show skeletons/spinners for async operations
+7. **Offline Support:** Consider showing cached data when offline
+
+---
+
+## TYPESCRIPT TYPES
+
+**File:** `src/types/index.ts`
+
+```typescript
+export type Division = 'D1' | 'D2' | 'D3' | 'NAIA';
+
+export interface School {
+  id: string;
+  name: string;
+  logo: string;
+  division: Division;
+  location: string;
+  conference?: string;
+}
+
+export interface Posting {
+  id: string;
+  school: School;
+  position: string;
+  requirements: {
+    height?: string;
+    classYear?: number;
+    gpa?: number;
+  };
+  deadline: string;
+  applicantCount: number;
+  matchScore?: number;
+  description: string;
+  coachName: string;
+  createdAt: string;
+}
+
+export interface PlayerProfile {
+  id: string;
+  name: string;
+  position: string;
+  photo: string;
+  school: string;
+  height: string;
+  weight?: number;
+  age: number;
+  location: string;
+  classYear: number;
+  evaluation: {
+    level: string;
+    comparisons: string[];
+  };
+  stats: {
+    ppg: number;
+    rpg: number;
+    apg: number;
+    fgPercentage: number;
+    threePtPercentage: number;
+    steals: number;
+    blocks: number;
+  };
+}
+
+export interface Application {
+  id: string;
+  posting: Posting;
+  player: PlayerProfile;
+  status: 'pending' | 'accepted' | 'rejected';
+  appliedAt: string;
+  note?: string;
+}
+
+export interface Connection {
+  id: string;
+  coach: {
+    id: string;
+    name: string;
+    school: School;
+    position: string;
+    photo?: string;
+  };
+  player: PlayerProfile;
+  connectedAt: string;
+}
+```
+
+---
+
+## UTILITY FUNCTIONS
+
+**File:** `src/utils/helpers.ts`
+
+```typescript
+// Format date relative to now
+export function formatRelativeDate(date: string): string {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return `${Math.floor(diffDays / 30)} months ago`;
+}
+
+// Calculate urgency for deadlines
+export function isDeadlineUrgent(deadline: string): boolean {
+  const now = new Date();
+  const deadlineDate = new Date(deadline);
+  const diffMs = deadlineDate.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return diffDays <= 7;
+}
+
+// Format match score as tier
+export function getMatchTier(score: number): 'great-fit' | 'good-fit' | 'possible-fit' {
+  if (score >= 80) return 'great-fit';
+  if (score >= 60) return 'good-fit';
+  return 'possible-fit';
+}
+
+// Truncate text with ellipsis
+export function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '...';
+}
+```
+
+---
+
+## ACCESSIBILITY REQUIREMENTS
+
+1. **Color Contrast:** All text must meet WCAG AA standards (4.5:1 for body, 3:1 for large text)
+2. **Keyboard Navigation:** All interactive elements must be keyboard accessible
+3. **Screen Readers:** Use semantic HTML (nav, main, article, etc.)
+4. **Focus States:** Visible focus indicators on all interactive elements
+5. **Alt Text:** All images must have descriptive alt text
+6. **ARIA Labels:** Use aria-label for icon-only buttons
+
+---
+
+## DEVELOPMENT WORKFLOW
+
+### For Building Components:
+
+1. Create TypeScript interface for component props
+2. Build component with Tailwind classes (no custom CSS unless necessary)
+3. Export component from index file
+4. Test in isolation before integrating into pages
+
+### For Building Pages:
+
+1. Define page layout structure
+2. Import and compose components
+3. Add routing in App.tsx
+4. Test navigation flow
+
+### For Styling:
+
+1. Use Tailwind utility classes first
+2. Create custom classes in index.css only if reused 3+ times
+3. Use Tailwind's @apply for common patterns
+4. Maintain mobile-first approach (default styles = mobile, use md: lg: for larger screens)
+
+---
+
+## COMMON PATTERNS
+
+### Loading State
+```typescript
+{isLoading ? (
+  <div className="flex justify-center items-center h-64">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-proph-yellow"></div>
+  </div>
+) : (
+  <PostingFeed postings={postings} />
+)}
+```
+
+### Empty State
+```typescript
+{postings.length === 0 ? (
+  <div className="text-center py-12">
+    <p className="text-proph-violet">No postings right now</p>
+    <p className="text-sm text-proph-violet mt-2">We'll notify you when new ones arrive</p>
+  </div>
+) : (
+  <PostingFeed postings={postings} />
+)}
+```
+
+### Error State
+```typescript
+{error ? (
+  <div className="bg-proph-error/20 border border-proph-error rounded-lg p-4">
+    <p className="text-proph-error font-semibold">Something went wrong</p>
+    <button onClick={retry} className="text-sm text-proph-blue mt-2">Try again</button>
+  </div>
+) : (
+  // ... content
+)}
+```
+
+---
+
+## IMPORTANT CONSTRAINTS
+
+1. **Backend is off-limits:** Do NOT modify APIs, assume they exist and work
+2. **Mobile-first:** Design for 375px width first, scale up
+3. **Dark mode only:** No light mode toggle for MVP
+4. **Single role per user:** Players and coaches have separate account types (different nav, different pages)
+5. **No authentication UI:** Assume user is already logged in, focus on core flows
+6. **Real data:** Use realistic placeholder data (actual school names, player names, stats)
+
+---
+
+## NEXT STEPS
+
+1. Run project setup commands
+2. Configure Tailwind with Proph colors
+3. Create folder structure
+4. Build common components (Button, Badge, Card, Input)
+5. Build layout components (Header, BottomNav, Modal)
+6. Build PostingCard component
+7. Build PostingFeedPage
+8. Build ApplyModal
+9. Build ApplicationsPage
+10. Test full Journey 1 flow
+
+---
+
+## QUESTIONS TO ASK IF STUCK
+
+- "What is the primary user action on this screen?"
+- "What happens if there's no data?"
+- "What happens if the API call fails?"
+- "How does this look on a 375px screen?"
+- "Can I tap this with my thumb easily?"
+- "Is the text readable on this background?"
+- "What's the next step after this action?"
+
+---
+
+## DESIGN PHILOSOPHY
+
+- **Clarity over cleverness:** Make it obvious, not cute
+- **Speed over perfection:** Ship working features, iterate based on feedback
+- **Data over opinions:** Let user behavior guide decisions
+- **Constraints breed creativity:** Work within the palette and components
+- **Mobile is not desktop:** Don't shrink desktop layouts, redesign for mobile
+
+---
+
+END OF CONTEXT FILE
