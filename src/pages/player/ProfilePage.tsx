@@ -118,39 +118,41 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* Share Button */}
-        <button 
-          className="w-full bg-proph-yellow text-proph-black font-black py-4 rounded-xl hover:bg-[#E6D436] transition-colors" 
-          onClick={handleShare}
-        >
-          <span className="flex items-center justify-center gap-2">
-            <Share2 className="w-5 h-5" />
-            Share My Proph
-          </span>
-        </button>
+        <div className="w-full max-w-[600px] mx-auto">
+          <button 
+            className="w-full bg-proph-yellow text-proph-black font-black py-4 md:py-5 rounded-xl hover:bg-[#E6D436] transition-colors text-base md:text-lg" 
+            onClick={handleShare}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <Share2 className="w-5 h-5 md:w-6 md:h-6" />
+              Share My Proph
+            </span>
+          </button>
+        </div>
 
         {/* Profile Settings */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-proph-white">
+        <div className="space-y-4 max-w-[600px] mx-auto">
+          <h2 className="text-xl md:text-2xl font-bold text-proph-white">
             Profile Settings
           </h2>
 
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => setUploadImageModalOpen(true)}
-              className="bg-proph-grey border border-proph-purple/20 rounded-lg p-4 flex flex-col items-center gap-2 hover:border-proph-purple/40 transition-colors"
+              className="bg-proph-grey border border-proph-purple/20 rounded-lg p-4 md:p-6 flex flex-col items-center gap-2 md:gap-3 hover:border-proph-purple/40 transition-colors"
             >
-              <Camera className="w-6 h-6 text-proph-yellow" />
-              <span className="text-sm font-semibold text-proph-white">
+              <Camera className="w-6 h-6 md:w-8 md:h-8 text-proph-yellow" />
+              <span className="text-sm md:text-base font-semibold text-proph-white">
                 Update Photo
               </span>
             </button>
 
             <button 
               onClick={() => setEditProfileModalOpen(true)}
-              className="bg-proph-grey border border-proph-purple/20 rounded-lg p-4 flex flex-col items-center gap-2 hover:border-proph-purple/40 transition-colors"
+              className="bg-proph-grey border border-proph-purple/20 rounded-lg p-4 md:p-6 flex flex-col items-center gap-2 md:gap-3 hover:border-proph-purple/40 transition-colors"
             >
-              <Edit className="w-6 h-6 text-proph-yellow" />
-              <span className="text-sm font-semibold text-proph-white">
+              <Edit className="w-6 h-6 md:w-8 md:h-8 text-proph-yellow" />
+              <span className="text-sm md:text-base font-semibold text-proph-white">
                 Edit Profile
               </span>
             </button>

@@ -54,14 +54,14 @@ export const CoachBanner: React.FC<CoachBannerProps> = ({ coaches, currentUserId
   const sortedCoaches = useMemo(() => sortCoaches(coaches), [coaches]);
   
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-w-[600px] mx-auto">
       {sortedCoaches.map((coach) => {
         const isCurrentUser = currentUserId === coach.id;
         
         return (
           <div
             key={coach.id}
-            className={`bg-proph-grey rounded-xl border p-4 flex items-center gap-4 relative ${
+            className={`bg-proph-grey rounded-xl border p-4 md:p-6 flex items-center gap-4 md:gap-5 relative ${
               isCurrentUser 
                 ? 'border-proph-yellow border-2' 
                 : 'border-proph-grey-text/20'
@@ -69,7 +69,7 @@ export const CoachBanner: React.FC<CoachBannerProps> = ({ coaches, currentUserId
           >
             {/* Me Badge - Top Right */}
             {isCurrentUser && (
-              <span className="absolute top-2 right-2 px-2 py-0.5 bg-proph-yellow text-proph-black text-xs font-bold rounded">
+              <span className="absolute top-2 right-2 px-2 py-0.5 bg-proph-yellow text-proph-black text-xs md:text-sm font-bold rounded">
                 Me
               </span>
             )}
@@ -78,15 +78,15 @@ export const CoachBanner: React.FC<CoachBannerProps> = ({ coaches, currentUserId
             <img
               src={coach.school.logo}
               alt={coach.school.name}
-              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+              className="w-12 h-12 md:w-16 md:h-16 rounded-lg object-cover flex-shrink-0"
             />
             
             {/* Coach Info */}
             <div className="flex-1 min-w-0">
-              <p className={`font-bold truncate ${isCurrentUser ? 'text-proph-yellow' : 'text-proph-white'}`}>
+              <p className={`font-bold truncate text-base md:text-lg ${isCurrentUser ? 'text-proph-yellow' : 'text-proph-white'}`}>
                 {coach.name}
               </p>
-              <p className="text-sm text-proph-grey-text truncate">
+              <p className="text-sm md:text-base text-proph-grey-text truncate">
                 {coach.position}
               </p>
             </div>

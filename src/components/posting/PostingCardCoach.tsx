@@ -16,53 +16,53 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
   const navigate = useNavigate();
 
   return (
-    <div className="bg-proph-grey rounded-2xl p-4 border border-proph-grey-text/20 relative">
+    <div className="bg-proph-grey rounded-2xl p-4 md:p-6 border border-proph-grey-text/20 relative max-w-[600px] mx-auto">
       {/* Top row: status + actions */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-3 md:mb-4">
         <div className="flex items-center gap-2">
           {posting.status && <PostingStatusBadge status={posting.status} />}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => onEdit(posting.id)} className="p-2 rounded-lg hover:bg-proph-grey-light" aria-label="Edit posting">
-            <Pencil className="w-4 h-4 text-proph-white" />
+          <button onClick={() => onEdit(posting.id)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Edit posting">
+            <Pencil className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
           </button>
-          <button onClick={() => onDelete(posting.id)} className="p-2 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
-            <Trash2 className="w-4 h-4 text-proph-white" />
+          <button onClick={() => onDelete(posting.id)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
+            <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
           </button>
         </div>
       </div>
 
       {/* Header */}
-      <div className="flex items-start gap-3 mb-2 cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>
-        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-proph-black/40 flex items-center justify-center">
+      <div className="flex items-start gap-3 md:gap-4 mb-2 md:mb-3 cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>
+        <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden bg-proph-black/40 flex items-center justify-center">
           {posting.school.logo ? (
             <img 
               src={posting.school.logo} 
               alt={posting.school.name} 
-              className="w-full h-full object-contain p-1.5" 
+              className="w-full h-full object-contain p-1.5 md:p-2" 
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/defualt.webp';
               }}
             />
           ) : (
             <div className="w-full h-full bg-proph-grey flex items-center justify-center">
-              <span className="text-proph-grey-text text-xs">No Logo</span>
+              <span className="text-proph-grey-text text-xs md:text-sm">No Logo</span>
             </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold text-proph-white truncate">{posting.school.name}</h3>
-          <p className="text-xs text-proph-grey-text truncate">
+          <h3 className="text-lg md:text-xl font-bold text-proph-white truncate">{posting.school.name}</h3>
+          <p className="text-xs md:text-sm text-proph-grey-text truncate">
             {[posting.school.division, posting.school.conference].filter(Boolean).join(' • ')}
           </p>
         </div>
       </div>
 
       {/* Position */}
-      <h4 className="text-xl font-extrabold text-proph-white mb-2 cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>{posting.position}</h4>
+      <h4 className="text-xl md:text-2xl font-extrabold text-proph-white mb-2 md:mb-3 cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>{posting.position}</h4>
 
       {/* Requirements inline */}
-      <p className="text-xs text-proph-grey-text mb-3">
+      <p className="text-xs md:text-sm text-proph-grey-text mb-3 md:mb-4">
         {[posting.requirements.height, posting.requirements.classYear ? `Class of ${posting.requirements.classYear}` : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
           .filter(Boolean)
           .join(' • ')}
@@ -70,17 +70,17 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
 
       {/* Meta + button */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 text-xs text-proph-purple">
+        <div className="flex items-center gap-3 text-xs md:text-sm text-proph-purple">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+            <Clock className="w-3 h-3 md:w-4 md:h-4" />
             {due}
           </span>
           <span className="flex items-center gap-1">
-            <Users className="w-3 h-3" />
+            <Users className="w-3 h-3 md:w-4 md:h-4" />
             {posting.applicantCount} applications
           </span>
         </div>
-        <button onClick={() => onViewApplications(posting.id)} className="bg-proph-yellow text-proph-black text-xs font-black px-4 py-2 rounded-lg hover:bg-[#E6D436] transition-colors">
+        <button onClick={() => onViewApplications(posting.id)} className="bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-4 md:px-6 py-2 md:py-2.5 rounded-lg hover:bg-[#E6D436] transition-colors">
           Review Applications
         </button>
       </div>

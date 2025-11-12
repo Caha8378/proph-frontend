@@ -77,25 +77,41 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="bg-proph-yellow text-proph-black text-center py-10">
+      <section className="bg-proph-yellow text-proph-black text-center h-[80vh] flex flex-col justify-start pt-8 md:pt-12">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="flex justify-center mb-6 animate-bounce-subtle" aria-hidden="true">
+          {/* Ball Logo with Bounce */}
+          <div className="flex justify-center mb-1 animate-bounce-subtle" aria-hidden="true">
             <img
-              src="/prophLogo.png"
-              alt="Proph logo"
-              className="w-24 h-24 md:w-48 md:h-48 lg:w-72 lg:h-72 object-contain drop-shadow"
+              src="/logoBall.png"
+              alt="Proph ball logo"
+              className="w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 object-contain"
             />
           </div>
+          
+          {/* Search Bar */}
+          <div className="mb-6">
+            <SearchBar className="mb-4" />
+          </div>
+          
+          {/* Word Logo (no bounce) */}
+          <div className="flex justify-center mb-4" aria-hidden="true">
+            <img
+              src="/logoWord.png"
+              alt="Proph word logo"
+              className="w-64 h-auto md:w-80 md:h-auto lg:w-96 lg:h-auto object-contain"
+            />
+          </div>
+          
+          {/* Tagline */}
           <p className="text-2xl font-bold mt-2">The First Ever Digital Basketball Resume</p>
-          <p className="mt-3 text-base font-semibold">
-            {selectedRole === 'player' 
-              ? 'Get your AI evaluation and connect directly with college coaches'
-              : 'Find Qualified players easier than ever, backed by analytics.'
-            }
-          </p>
+          
+          {/* Role Selection Buttons */}
           <div className="mt-8 flex items-center justify-center gap-3">
             <button 
-              onClick={() => setSelectedRole('player')}
+              onClick={() => {
+                setSelectedRole('player');
+                navigate('/signup');
+              }}
               className={`rounded-xl font-black px-6 py-3 active:scale-95 transition-transform ${
                 selectedRole === 'player'
                   ? 'bg-proph-black text-proph-yellow'
@@ -105,7 +121,10 @@ export const LandingPage: React.FC = () => {
               I'm a Player
             </button>
             <button 
-              onClick={() => setSelectedRole('coach')}
+              onClick={() => {
+                setSelectedRole('coach');
+                navigate('/signup');
+              }}
               className={`rounded-xl font-black px-6 py-3 active:scale-95 transition-transform ${
                 selectedRole === 'coach'
                   ? 'bg-proph-black text-proph-yellow'
@@ -118,16 +137,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. SEARCH SECTION */}
-      <section className="bg-proph-black py-16">
-        <div className="max-w-3xl mx-auto px-4">
-          <h3 className="text-xl font-black mb-6">Discover Players and Programs</h3>
-          <SearchBar className="mb-4" />
-          <p className="text-proph-grey-text text-sm">500+ programs • 600+ Recruitment Posts</p>
-        </div>
-      </section>
-
-      {/* 4. CAROUSEL SECTION */}
+      {/* 3. CAROUSEL SECTION */}
       <section className="bg-proph-grey py-16">
         <div className="max-w-2xl mx-auto px-4">
           <h3 className="text-3xl font-black text-center mb-8">See Proph in Action</h3>
@@ -146,7 +156,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. AI DIFFERENTIATOR */}
+      {/* 4. AI DIFFERENTIATOR */}
       <section className="bg-proph-black py-20 border-y-4 border-proph-yellow">
         <div className="max-w-2xl mx-auto px-4">
           <h3 className="text-4xl font-black text-proph-yellow text-center">Your AI Recruiting Advantage</h3>
@@ -182,7 +192,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. MARKET RESEARCH PROOF */}
+      {/* 5. MARKET RESEARCH PROOF */}
       <section className="bg-proph-grey py-16">
         <div className="max-w-2xl mx-auto px-4">
           <h3 className="text-3xl font-black text-center mb-8">Built for the 95%</h3>
@@ -209,7 +219,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. FINAL CTA */}
+      {/* 6. FINAL CTA */}
       <section className="bg-proph-yellow py-20 text-center text-proph-black">
         <div className="max-w-2xl mx-auto px-4">
           <h3 className="text-4xl font-black">Ready to Create Your Proph?</h3>

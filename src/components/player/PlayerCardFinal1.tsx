@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { PlayerProfile } from '../../types';
 import { ExternalLink } from 'lucide-react';
 import { UnderReviewBadge } from '../onboarding/UnderReviewBadge';
+import { useAuth } from '../../context/authContext';
 
 interface PlayerCardProps {
   player: PlayerProfile;
@@ -13,7 +14,27 @@ interface PlayerCardProps {
 
 export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable = true, visitOnClick = false, onVisit, showReviewBadge = true }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { user } = useAuth();
   const percent = (v: number) => `${Math.round(v * 100)}%`;
+  
+  // Check if current user is a coach
+  // First try auth context, then fallback to localStorage
+  const isCoach = (() => {
+    // Check auth context first
+    if (user?.role === 'coach') return true;
+    
+    // Fallback to localStorage
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        return parsed.account_type === 'coach' || parsed.accountType === 'coach';
+      }
+    } catch {
+      // Ignore parsing errors
+    }
+    return false;
+  })();
   
   // Calculate percentages from makes/attempts if raw data is available
   const calculatePercentage = (makes: number | undefined, attempts: number | undefined): number => {
@@ -197,43 +218,47 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           <div>
             <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Shades Of</h4>
             {player.evaluation.comparisons.length > 0 ? (
-              <ul className="text-xs text-proph-white list-disc list-inside space-y-0.5">
+              <div className="text-xs text-proph-white space-y-0.5 flex flex-col items-center">
                 {player.evaluation.comparisons.map((comparison, index) => (
-                  <li key={index}>{comparison}</li>
+                  <div key={index}>{comparison}</div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p className="text-xs text-proph-grey-text">N/A</p>
+              <p className="text-xs text-proph-grey-text text-center">N/A</p>
             )}
           </div>
 
-          <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Academic Info (Coaches only)</h4>
-            {(player.gpa || player.sat || player.act) ? (
-              <p className="text-xs text-proph-white">
-                {[
-                  player.gpa ? `GPA: ${player.gpa}` : null,
-                  player.sat ? `SAT: ${player.sat}` : null,
-                  player.act ? `ACT: ${player.act}` : null,
-                ].filter(Boolean).join(' • ')}
-              </p>
-            ) : (
-              <p className="text-xs text-proph-grey-text">N/A</p>
-            )}
-          </div>
+          {isCoach && (
+            <div>
+              <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Academic Info (Coaches only)</h4>
+              {(player.gpa || player.sat || player.act) ? (
+                <p className="text-xs text-proph-white">
+                  {[
+                    player.gpa ? `GPA: ${player.gpa}` : null,
+                    player.sat ? `SAT: ${player.sat}` : null,
+                    player.act ? `ACT: ${player.act}` : null,
+                  ].filter(Boolean).join(' • ')}
+                </p>
+              ) : (
+                <p className="text-xs text-proph-grey-text">N/A</p>
+              )}
+            </div>
+          )}
 
-          <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Contact (Coaches only)</h4>
-            {player.email && (
-              <p className="text-xs text-proph-white">{player.email}</p>
-            )}
-            {player.phoneNumber && (
-              <p className="text-xs text-proph-white">{player.phoneNumber}</p>
-            )}
-            {!player.email && !player.phoneNumber && (
-              <p className="text-xs text-proph-grey-text">No contact info provided</p>
-            )}
-          </div>
+          {isCoach && (
+            <div>
+              <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Contact (Coaches only)</h4>
+              {player.email && (
+                <p className="text-xs text-proph-white">{player.email}</p>
+              )}
+              {player.phoneNumber && (
+                <p className="text-xs text-proph-white">{player.phoneNumber}</p>
+              )}
+              {!player.email && !player.phoneNumber && (
+                <p className="text-xs text-proph-grey-text">No contact info provided</p>
+              )}
+            </div>
+          )}
 
           {flippable && (
             <p className="text-[10px] text-proph-grey-text text-center pt-1">Tap to flip back</p>

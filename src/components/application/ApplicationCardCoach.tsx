@@ -28,22 +28,22 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
 
   return (
     <div 
-      className="bg-proph-grey rounded-xl border border-proph-yellow p-4 flex flex-col gap-3 cursor-pointer hover:bg-proph-grey-light transition-colors"
+      className="bg-proph-grey rounded-xl border border-proph-yellow p-4 md:p-6 flex flex-col gap-3 cursor-pointer hover:bg-proph-grey-light transition-colors max-w-[600px] mx-auto"
       onClick={handleCardClick}
     >
       {/* Header */}
-      <div className="flex items-start gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-start gap-3 md:gap-4">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           {player.photo ? (
-            <img src={player.photo} alt={player.name} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+            <img src={player.photo} alt={player.name} className="w-14 h-14 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0" />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-proph-grey-light flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 text-proph-white" />
+            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-proph-grey-light flex items-center justify-center flex-shrink-0">
+              <User className="w-6 h-6 md:w-8 md:h-8 text-proph-white" />
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-lg font-bold text-proph-white truncate">{player.name}</p>
-            <p className="text-sm text-proph-grey-text truncate">
+            <p className="text-lg md:text-xl font-bold text-proph-white truncate">{player.name}</p>
+            <p className="text-sm md:text-base text-proph-grey-text truncate">
               {(() => {
                 const parts: string[] = [];
                 if (player.height) parts.push(player.height);
@@ -57,8 +57,8 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
       </div>
 
       {/* Timeline */}
-      <div className="flex items-center gap-2 text-xs text-proph-grey-text">
-        <Clock className="w-4 h-4" />
+      <div className="flex items-center gap-2 text-xs md:text-sm text-proph-grey-text">
+        <Clock className="w-4 h-4 md:w-5 md:h-5" />
         <span>Applied {formatRelativeDate(appliedAt)}</span>
       </div>
 
@@ -72,31 +72,31 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
                   e.stopPropagation();
                   setIsMessageExpanded(!isMessageExpanded);
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-proph-grey-text hover:text-proph-white hover:bg-proph-grey-light/30 rounded-lg transition-colors"
+                className="w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base text-proph-grey-text hover:text-proph-white hover:bg-proph-grey-light/30 rounded-lg transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
                   <span>View Message</span>
                 </div>
                 {isMessageExpanded ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-4 h-4 md:w-5 md:h-5" />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4 md:w-5 md:h-5" />
                 )}
               </button>
             )}
             <div className="flex gap-2">
               <button 
                 onClick={(e) => handleButtonClick(e, () => onAccept(id))} 
-                className="flex-1 bg-proph-black text-proph-yellow font-semibold text-sm py-2.5 px-4 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-proph-black text-proph-yellow font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
               >
-                <Check className="w-3 h-3" />Accept
+                <Check className="w-3 h-3 md:w-4 md:h-4" />Accept
               </button>
               <button 
                 onClick={(e) => handleButtonClick(e, () => onReject(id))} 
-                className="flex-1 bg-proph-black text-proph-white font-semibold text-sm py-2.5 px-4 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-proph-black text-proph-white font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
               >
-                <XIcon className="w-3 h-3" />Dismiss
+                <XIcon className="w-3 h-3 md:w-4 md:h-4" />Dismiss
               </button>
             </div>
           </div>
@@ -108,12 +108,12 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start gap-2 mb-2">
-                <div className="w-5 h-5 rounded-full border border-proph-grey-text/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <MessageSquare className="w-3 h-3 text-proph-grey-text" />
+                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full border border-proph-grey-text/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MessageSquare className="w-3 h-3 md:w-4 md:h-4 text-proph-grey-text" />
                 </div>
-                <span className="text-xs font-semibold text-proph-grey-text">Application Message</span>
+                <span className="text-xs md:text-sm font-semibold text-proph-grey-text">Application Message</span>
               </div>
-              <p className="text-sm text-proph-white leading-relaxed pl-7">
+              <p className="text-sm md:text-base text-proph-white leading-relaxed pl-7 md:pl-8">
                 {applicationMessage}
               </p>
             </div>
@@ -123,18 +123,18 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <button 
             disabled 
-            className="flex-1 bg-proph-black/40 text-proph-grey-text font-semibold text-sm py-2.5 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 bg-proph-black/40 text-proph-grey-text font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
           >
-            <Check className="w-4 h-4" />Accepted
+            <Check className="w-4 h-4 md:w-5 md:h-5" />Accepted
           </button>
         </div>
       ) : (
         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <button 
             disabled 
-            className="flex-1 bg-proph-black/40 text-proph-grey-text font-semibold text-sm py-2.5 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 bg-proph-black/40 text-proph-grey-text font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
           >
-            <XIcon className="w-4 h-4" />Rejected
+            <XIcon className="w-4 h-4 md:w-5 md:h-5" />Rejected
           </button>
         </div>
       )}

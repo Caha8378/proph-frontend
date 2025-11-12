@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-50 bg-proph-black border-b border-proph-grey-text/20">
-      <div className="h-14 px-4 flex items-center justify-between">
+      <div className="h-14 md:h-16 px-4 flex items-center justify-between">
         {/* Left: Logo + Edit (if profile) */}
         <div className="flex items-center gap-3">
           {/* Logo */}
@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="Go to home"
           >
             <h1 
-              className="text-xl font-extrabold text-proph-yellow"
+              className="text-xl md:text-3xl font-extrabold text-proph-yellow"
               style={{ 
                 textShadow: '0 0 10px rgba(255, 236, 60, 0.5)',
                 letterSpacing: '-2px'

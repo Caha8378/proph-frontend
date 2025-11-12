@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PostingCardHorizontalMini } from '../components/posting/PostingCardHorizontalMini';
 import { ApplyModalMinC } from '../components/application/ApplyModalMinC';
 import { EmptyState } from '../components/common/EmptyState';
-import { FileText, Share2, ChevronLeft } from 'lucide-react';
+import { FileText, Share2, ChevronLeft, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import * as postingsService from '../api/postings';
 import type { Posting, School } from '../types';
@@ -118,32 +118,56 @@ export const SchoolPage: React.FC = () => {
             <ChevronLeft className="w-5 h-5" /> Back
           </button>
           <h1 className="text-proph-yellow font-bold text-xl">Proph</h1>
-          <button 
-            onClick={handleShare} 
-            className="text-proph-white hover:text-proph-yellow transition-colors"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
+          {!user ? (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => navigate('/login')}
+                className="px-3 py-2 rounded-lg hover:bg-proph-grey-light active:scale-95 transition-all flex items-center gap-1 text-sm font-semibold text-proph-white"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+              <button 
+                onClick={() => navigate('/signup')}
+                className="px-3 py-2 rounded-lg bg-proph-yellow text-proph-black active:scale-95 transition-all text-sm font-bold"
+              >
+                <UserPlus className="w-4 h-4 inline mr-1" />
+                Sign Up
+              </button>
+            </div>
+          ) : (
+            <div className="w-10" />
+          )}
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-6">
         {/* School Header */}
-        <div className="flex items-center gap-4 pb-6 border-b border-proph-grey-text/20">
-          <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center">
-            <img 
-              src={school.logo || '/defualt.webp'} 
-              alt={school.name} 
-              className="w-full h-full object-contain p-1.5" 
-            />
+        <div className="flex items-center justify-between pb-6 border-b border-proph-grey-text/20">
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center">
+              <img 
+                src={school.logo || '/defualt.webp'} 
+                alt={school.name} 
+                className="w-full h-full object-contain p-1.5" 
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-proph-white">{school.name}</h2>
+              <p className="text-sm text-proph-grey-text">{school.division}</p>
+              {school.location && (
+                <p className="text-xs text-proph-grey-text mt-1">{school.location}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-proph-white">{school.name}</h2>
-            <p className="text-sm text-proph-grey-text">{school.division}</p>
-            {school.location && (
-              <p className="text-xs text-proph-grey-text mt-1">{school.location}</p>
-            )}
-          </div>
+          {/* Share Button */}
+          <button 
+            onClick={handleShare} 
+            className="text-proph-white hover:text-proph-yellow transition-colors p-2 hover:bg-proph-grey-light rounded-lg"
+            aria-label="Share school page"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Postings List */}

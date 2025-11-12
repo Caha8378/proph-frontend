@@ -188,22 +188,24 @@ export const PostingFeedPage: React.FC = () => {
 
         {/* Filter Button - Only show on All Postings tab */}
         {activeTab === 'all' && (
-          <button
-            onClick={handleFilterClick}
-            className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-colors ${
-              hasActiveFilters
-                ? 'bg-proph-yellow/20 border-proph-yellow text-proph-yellow'
-                : 'bg-proph-grey border-proph-grey-text/20 text-proph-white hover:bg-proph-grey-light'
-            }`}
-          >
-            <Filter className="w-5 h-5" />
-            <span className="font-semibold">Filters</span>
-            {hasActiveFilters && (
-              <span className="ml-1 px-2 py-0.5 bg-proph-yellow text-proph-black text-xs font-bold rounded-full">
-                {Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v === true).length}
-              </span>
-            )}
-          </button>
+          <div className="w-full max-w-[600px] mx-auto">
+            <button
+              onClick={handleFilterClick}
+              className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-colors ${
+                hasActiveFilters
+                  ? 'bg-proph-yellow/20 border-proph-yellow text-proph-yellow'
+                  : 'bg-proph-grey border-proph-grey-text/20 text-proph-white hover:bg-proph-grey-light'
+              }`}
+            >
+              <Filter className="w-5 h-5" />
+              <span className="font-semibold">Filters</span>
+              {hasActiveFilters && (
+                <span className="ml-1 px-2 py-0.5 bg-proph-yellow text-proph-black text-xs font-bold rounded-full">
+                  {Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v === true).length}
+                </span>
+              )}
+            </button>
+          </div>
         )}
 
         {/* Posting Feed */}

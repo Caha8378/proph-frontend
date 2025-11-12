@@ -53,7 +53,7 @@ export const ApplicationsPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-proph-white">My Applications</h1>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-proph-purple/20">
+        <div className="flex border-b border-proph-white/20">
           {(['pending', 'accepted', 'rejected'] as TabType[]).map((tab) => {
             const count = getTabCount(tab);
             const isActive = activeTab === tab;
@@ -67,7 +67,7 @@ export const ApplicationsPage: React.FC = () => {
                   'border-b-2',
                   isActive
                     ? 'text-proph-yellow border-proph-yellow'
-                    : 'text-proph-purple border-transparent hover:text-proph-white'
+                    : 'text-proph-white border-transparent hover:text-proph-white'
                 )}
               >
                 {tab} {count > 0 && `(${count})`}
