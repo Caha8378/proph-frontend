@@ -3,6 +3,11 @@ import type { Posting } from '../../types';
 import { X, ArrowLeft } from 'lucide-react';
 import { useNotification } from '../../hooks';
 
+// Helper function for height conversion
+const feetAndInchesToInches = (feet: number, inches: number): number => {
+  return (feet * 12) + inches;
+};
+
 interface CreatePostingModalProps {
   open: boolean;
   onClose: () => void;
@@ -13,16 +18,27 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
   const { showNotification } = useNotification();
   const [form, setForm] = useState<Partial<Posting>>({
     position: '',
-    requirements: { gpa: undefined, height: '', class: [] },
+    requirements: { gpa: undefined, height: '', classYear: undefined },
     deadline: '2026-06-01',
     description: '',
   } as Partial<Posting>);
+  const [heightFeet, setHeightFeet] = useState<number>(0);
+  const [heightInches, setHeightInches] = useState<number>(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    // Reset form when opening
+    setForm({
+      position: '',
+      requirements: { gpa: undefined, height: '', classYear: undefined },
+      deadline: '2026-06-01',
+      description: '',
+    } as Partial<Posting>);
+    setHeightFeet(0);
+    setHeightInches(0);
     return () => { document.body.style.overflow = original; };
   }, [open]);
 
@@ -38,9 +54,37 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
 
   const handlePublish = async () => {
     if (saving) return;
+    
+    // Validate required fields
+    if (!form.position) {
+      showNotification('Position is required', 'error');
+      return;
+    }
+    if (!form.requirements?.classYear) {
+      showNotification('Graduation year is required', 'error');
+      return;
+    }
+    if (!form.deadline) {
+      showNotification('Application deadline is required', 'error');
+      return;
+    }
+    
     try {
       setSaving(true);
-      await onPublish(form);
+      // Convert height to inches before publishing
+      const heightInInches = (heightFeet > 0 || heightInches > 0) 
+        ? feetAndInchesToInches(heightFeet, heightInches) 
+        : undefined;
+      
+      const formToPublish = {
+        ...form,
+        requirements: {
+          ...form.requirements,
+          heightInches: heightInInches, // Store as heightInches for API
+        }
+      };
+      
+      await onPublish(formToPublish);
       showNotification('Posting created successfully!', 'success');
     } catch (err: any) {
       console.error('Error creating posting:', err);
@@ -85,39 +129,20 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
               />
             </div>
 
-            {/* Class - Checkbox Grid */}
+            {/* Class - Single Selection */}
             <div>
-              <label className="block text-sm font-semibold text-proph-white mb-2">Class *</label>
-              <div className="grid grid-cols-2 gap-3">
-                {[2025, 2026, 2027, 2028].map((year) => {
-                  const selected = (form.requirements?.class as number[] | undefined) || [];
-                  const isSelected = selected.includes(year);
-                  return (
-                    <button
-                      key={year}
-                      type="button"
-                      className={`flex items-center justify-center gap-2 p-3 border-2 rounded-lg transition-colors ${
-                        isSelected 
-                          ? 'border-proph-yellow bg-proph-yellow/20 text-proph-white' 
-                          : 'border-proph-grey-text/20 bg-proph-black text-proph-white'
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const current = new Set(selected);
-                        if (current.has(year)) {
-                          current.delete(year);
-                        } else {
-                          current.add(year);
-                        }
-                        handleReqChange('class', Array.from(current));
-                      }}
-                    >
-                      {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-proph-yellow" />}
-                      <span className="text-sm font-medium">{year}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
+              <select
+                value={form.requirements?.classYear || ''}
+                onChange={(e) => handleReqChange('classYear', e.target.value === '' ? undefined : Number(e.target.value))}
+                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+              >
+                <option value="">Select graduation year</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+              </select>
             </div>
 
             {/* GPA */}
@@ -140,16 +165,35 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
               />
             </div>
 
-            {/* Height */}
+            {/* Height - Feet and Inches */}
             <div>
-              <label className="block text-sm font-semibold text-proph-white mb-2">Height Requirement</label>
-              <input
-                type="text"
-                value={form.requirements?.height || ''}
-                onChange={(e) => handleReqChange('height', e.target.value)}
-                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
-                placeholder={`e.g., 6'2" or taller`}
-              />
+              <label className="block text-sm font-semibold text-proph-white mb-2">Minimum Height (Optional)</label>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-proph-grey-text mb-1">Feet</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="8"
+                    value={heightFeet || ''}
+                    onChange={(e) => setHeightFeet(Number(e.target.value) || 0)}
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    placeholder="6"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-proph-grey-text mb-1">Inches</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="11"
+                    value={heightInches || ''}
+                    onChange={(e) => setHeightInches(Number(e.target.value) || 0)}
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    placeholder="2"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Deadline */}

@@ -6,6 +6,14 @@ import { ApplyModalMinC } from '../components/application/ApplyModalMinC';
 import * as postingsService from '../api/postings';
 import type { Posting } from '../types';
 
+// Helper function to convert inches to feet'inches" format
+const formatHeight = (heightInches: number | undefined | null): string | null => {
+  if (!heightInches || heightInches <= 0) return null;
+  const feet = Math.floor(heightInches / 12);
+  const inches = heightInches % 12;
+  return `${feet}'${inches}"+`;
+};
+
 export const PostingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -133,7 +141,13 @@ export const PostingDetailPage: React.FC = () => {
             <div>
               <h3 className="text-sm font-bold uppercase text-proph-yellow tracking-wide mb-3">Requirements</h3>
               <div className="space-y-2 text-base text-proph-white">
-                {posting.requirements.height && <p>• Height: {posting.requirements.height}</p>}
+                {(() => {
+                  // Get height in display format (check heightInches first, then fall back to height string)
+                  const heightDisplay = (posting.requirements as any)?.heightInches 
+                    ? formatHeight((posting.requirements as any).heightInches)
+                    : posting.requirements.height || null;
+                  return heightDisplay && <p>• Height: {heightDisplay}</p>;
+                })()}
                 {posting.requirements.classYear && (
                   <p>• Class: {String(posting.requirements.classYear)}</p>
                 )}

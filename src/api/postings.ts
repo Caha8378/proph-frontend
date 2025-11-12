@@ -9,8 +9,8 @@ export interface Posting {
   state?: string;
   position_title: string;
   division?: string;
-  graduation_year_min?: number;
-  graduation_year_max?: number;
+  graduation_year?: number; // Single graduation year (replaces graduation_year_min/max)
+  min_height?: number; // Height in inches
   gpa?: number;
   is_active: boolean;
   created_at?: string;
@@ -32,10 +32,13 @@ export interface CreatePostingData {
   state?: string;
   position_title: string;
   division?: string;
-  graduation_year_min?: number;
-  graduation_year_max?: number;
+  graduation_year?: number; // Single graduation year (replaces graduation_year_min/max)
+  min_height?: number; // Height in inches
   gpa?: number;
-  description?: string;
+  position_description?: string; // Backend field name
+  description?: string; // Alternative field name
+  application_deadline?: string; // Backend field name
+  deadline?: string; // Alternative field name
   [key: string]: any;
 }
 
@@ -301,6 +304,30 @@ export const createPosting = async (data: CreatePostingData): Promise<Posting> =
 };
 
 /**
+ * Update existing posting (coach only)
+ * Backend endpoint: PUT /postings/:id
+ */
+export interface UpdatePostingData {
+  position_title?: string;
+  position_description?: string;
+  min_height?: number; // Height in inches
+  height?: number; // Alternative field name (also in inches)
+  graduation_year?: number;
+  gpa?: number;
+  application_deadline?: string;
+  deadline?: string; // Alternative field name
+}
+
+export const updatePosting = async (postingId: string | number, data: UpdatePostingData): Promise<{ id: string | number; message: string }> => {
+  try {
+    const response = await apiClient.put<{ id: string | number; message: string }>(`/postings/${postingId}`, data);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update posting');
+  }
+};
+
+/**
  * Get coach's own postings for their school
  * Backend endpoint: GET /api/recruitment/my-postings
  * Returns: { postings: [...] }
@@ -334,6 +361,20 @@ export const deactivatePosting = async (postingId: string | number): Promise<voi
     await apiClient.delete(`/postings/${postingId}`);
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to deactivate posting');
+  }
+};
+
+/**
+ * Delete a posting (coach only)
+ * Deletes the posting and all associated applications
+ * Backend endpoint: DELETE /postings/:id
+ */
+export const deletePosting = async (postingId: string | number): Promise<{ message: string; deleted_applications: number }> => {
+  try {
+    const response = await apiClient.delete<{ message: string; deleted_applications: number }>(`/postings/${postingId}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete posting');
   }
 };
 
@@ -388,13 +429,13 @@ function convertBackendPostingToFrontend(backendPosting: Posting): FrontendPosti
   };
 
   // Build requirements object
-  const requirements: FrontendPosting['requirements'] = {
+  // Handle both new schema (graduation_year) and old schema (graduation_year_min/max) for backwards compatibility
+  const graduationYear = backendPosting.graduation_year || backendPosting.graduation_year_min;
+  const requirements: FrontendPosting['requirements'] & { heightInches?: number } = {
     gpa: backendPosting.gpa || undefined,
-    classYear: backendPosting.graduation_year_min || undefined,
-    class: backendPosting.graduation_year_min && backendPosting.graduation_year_max
-      ? Array.from({ length: backendPosting.graduation_year_max - backendPosting.graduation_year_min + 1 }, 
-          (_, i) => backendPosting.graduation_year_min! + i)
-      : undefined,
+    classYear: graduationYear || undefined,
+    // Store height in inches for frontend use (internal field for modals)
+    heightInches: backendPosting.min_height || undefined,
   };
 
   // Use application_deadline from database, or default to 30 days from creation if not provided

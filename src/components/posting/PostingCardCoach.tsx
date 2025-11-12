@@ -4,16 +4,29 @@ import type { Posting } from '../../types';
 import { Pencil, Trash2, Users, Clock } from 'lucide-react';
 import { PostingStatusBadge } from './PostingStatusBadge';
 
+// Helper function to convert inches to feet'inches" format
+const formatHeight = (heightInches: number | undefined | null): string | null => {
+  if (!heightInches || heightInches <= 0) return null;
+  const feet = Math.floor(heightInches / 12);
+  const inches = heightInches % 12;
+  return `${feet}'${inches}"+`;
+};
+
 interface PostingCardCoachProps {
   posting: Posting;
   onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (posting: Posting) => void;
   onViewApplications: (id: string) => void;
 }
 
 export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onEdit, onDelete, onViewApplications }) => {
   const due = new Date(posting.deadline).toLocaleString('en-US', { month: 'short', day: 'numeric' });
   const navigate = useNavigate();
+  
+  // Get height in display format (check heightInches first, then fall back to height string)
+  const heightDisplay = (posting.requirements as any)?.heightInches 
+    ? formatHeight((posting.requirements as any).heightInches)
+    : posting.requirements.height || null;
 
   return (
     <div className="bg-proph-grey rounded-2xl p-4 md:p-6 border border-proph-grey-text/20 relative max-w-[600px] mx-auto">
@@ -26,7 +39,7 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
           <button onClick={() => onEdit(posting.id)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Edit posting">
             <Pencil className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
           </button>
-          <button onClick={() => onDelete(posting.id)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
+          <button onClick={() => onDelete(posting)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
             <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
           </button>
         </div>
@@ -63,7 +76,7 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
 
       {/* Requirements inline */}
       <p className="text-xs md:text-sm text-proph-grey-text mb-3 md:mb-4">
-        {[posting.requirements.height, posting.requirements.classYear ? `Class of ${posting.requirements.classYear}` : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
+        {[heightDisplay, posting.requirements.classYear ? `Class of ${posting.requirements.classYear}` : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
           .filter(Boolean)
           .join(' • ')}
       </p>

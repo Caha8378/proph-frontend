@@ -4,6 +4,7 @@ import { CoachBottomNav } from '../../components/layout/CoachBottomNav';
 import { PostingCardCoach } from '../../components/posting/PostingCardCoach';
 import { CreatePostingModal } from '../../components/posting/CreatePostingModal';
 import { EditPostingModal } from '../../components/posting/EditPostingModal';
+import { DeletePostingModal } from '../../components/posting/DeletePostingModal';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Plus, FileText } from 'lucide-react';
 import type { Posting } from '../../types';
@@ -20,6 +21,7 @@ export const CoachPostings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Posting | null>(null);
+  const [deleting, setDeleting] = useState<Posting | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -68,9 +70,22 @@ export const CoachPostings: React.FC = () => {
     setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 0);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this posting?')) {
-      setPostings(prev => prev.filter(p => p.id !== id));
+  const handleDeleteClick = (posting: Posting) => {
+    setDeleting(posting);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleting) return;
+    
+    try {
+      await postingsService.deletePosting(deleting.id);
+      // Remove from local state
+      setPostings(prev => prev.filter(p => p.id !== deleting.id));
+      setDeleting(null);
+    } catch (err: any) {
+      console.error('Error deleting posting:', err);
+      // Error is handled by the modal's notification system
+      throw err;
     }
   };
 
@@ -82,14 +97,10 @@ export const CoachPostings: React.FC = () => {
     // Convert frontend posting format to backend format
     const createData = {
       position_title: posting.position || '',
-      graduation_year_min: posting.requirements?.class && Array.isArray(posting.requirements.class) && posting.requirements.class.length > 0 
-        ? Math.min(...(posting.requirements.class as number[]))
-        : undefined,
-      graduation_year_max: posting.requirements?.class && Array.isArray(posting.requirements.class) && posting.requirements.class.length > 0
-        ? Math.max(...(posting.requirements.class as number[]))
-        : undefined,
+      graduation_year: posting.requirements?.classYear || undefined,
+      min_height: (posting.requirements as any)?.heightInches || undefined, // Height in inches
       gpa: posting.requirements?.gpa,
-      description: posting.description,
+      position_description: posting.description,
       application_deadline: posting.deadline,
     };
 
@@ -108,15 +119,36 @@ export const CoachPostings: React.FC = () => {
     }
   };
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = async (updatedPosting: Partial<Posting>) => {
     if (!editing) return;
-    setEditing(null);
-    // Refresh postings after editing
+    
     try {
-      const data = await postingsService.getMyPostings();
-      setPostings(data);
+      // Convert frontend posting format to backend format
+      const updateData = {
+        position_title: updatedPosting.position || editing.position,
+        graduation_year: updatedPosting.requirements?.classYear || editing.requirements?.classYear || undefined,
+        min_height: (updatedPosting.requirements as any)?.heightInches || undefined, // Height in inches
+        gpa: updatedPosting.requirements?.gpa !== undefined ? updatedPosting.requirements.gpa : editing.requirements?.gpa,
+        position_description: updatedPosting.description !== undefined ? updatedPosting.description : editing.description,
+        application_deadline: updatedPosting.deadline || editing.deadline,
+      };
+
+      // Call API to update posting
+      await postingsService.updatePosting(editing.id, updateData);
+      
+      // Close modal
+      setEditing(null);
+      
+      // Refresh postings after editing
+      try {
+        const data = await postingsService.getMyPostings();
+        setPostings(data);
+      } catch (err: any) {
+        console.error('Error refreshing postings:', err);
+      }
     } catch (err: any) {
-      console.error('Error refreshing postings:', err);
+      console.error('Error updating posting:', err);
+      throw err; // Let the modal handle the error notification
     }
   };
 
@@ -153,12 +185,14 @@ export const CoachPostings: React.FC = () => {
         )}
 
         {/* Big Create Button */}
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="w-full bg-proph-yellow text-proph-black text-xl font-bold py-6 px-8 rounded-xl shadow-xl flex items-center justify-center gap-3 hover:bg-proph-yellow/90"
-        >
-          <Plus className="w-8 h-8" /> Create New Posting
-        </button>
+        <div className="w-full max-w-[600px] mx-auto">
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="w-full bg-proph-yellow text-proph-black text-xl md:text-2xl font-bold py-6 md:py-7 px-8 md:px-10 rounded-xl shadow-xl flex items-center justify-center gap-3 hover:bg-proph-yellow/90"
+          >
+            <Plus className="w-8 h-8 md:w-10 md:h-10" /> Create New Posting
+          </button>
+        </div>
 
         {/* Postings List */}
         <div className="space-y-4">
@@ -182,7 +216,7 @@ export const CoachPostings: React.FC = () => {
                   key={posting.id}
                   posting={posting}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteClick}
                   onViewApplications={handleViewApplications}
                 />
               ))}
@@ -193,7 +227,7 @@ export const CoachPostings: React.FC = () => {
                   key={posting.id}
                   posting={posting}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteClick}
                   onViewApplications={handleViewApplications}
                 />
               ))}
@@ -215,6 +249,15 @@ export const CoachPostings: React.FC = () => {
           onClose={() => setEditing(null)}
           onSave={handleSaveEdit}
           onClosePosting={handleClosePosting}
+        />
+      )}
+
+      {deleting && (
+        <DeletePostingModal
+          open={!!deleting}
+          posting={deleting}
+          onSubmit={handleDeleteConfirm}
+          onClose={() => setDeleting(null)}
         />
       )}
 

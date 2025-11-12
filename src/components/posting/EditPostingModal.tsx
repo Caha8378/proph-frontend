@@ -1,6 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import type { Posting } from '../../types';
 import { X, ArrowLeft } from 'lucide-react';
+import { useNotification } from '../../hooks';
+
+// Helper functions for height conversion
+const inchesToFeetAndInches = (totalInches: number | undefined | null): { feet: number; inches: number } => {
+  if (!totalInches || totalInches <= 0) return { feet: 0, inches: 0 };
+  return {
+    feet: Math.floor(totalInches / 12),
+    inches: totalInches % 12
+  };
+};
+
+const feetAndInchesToInches = (feet: number, inches: number): number => {
+  return (feet * 12) + inches;
+};
+
+// Parse height from various formats (inches number, string like "6'2"", etc.)
+const parseHeightToInches = (height: any): number | undefined => {
+  if (!height) return undefined;
+  if (typeof height === 'number') return height;
+  if (typeof height === 'string') {
+    // Try to parse "6'2"" format
+    const match = height.match(/(\d+)'(\d+)"/);
+    if (match) {
+      const feet = parseInt(match[1], 10);
+      const inches = parseInt(match[2], 10);
+      return feetAndInchesToInches(feet, inches);
+    }
+    // Try to parse just a number
+    const num = parseInt(height, 10);
+    if (!isNaN(num)) return num;
+  }
+  return undefined;
+};
 
 interface EditPostingModalProps {
   posting: Posting;
@@ -11,17 +44,34 @@ interface EditPostingModalProps {
 }
 
 export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isOpen, onClose, onSave, onClosePosting }) => {
+  const { showNotification } = useNotification();
   const [form, setForm] = useState<Partial<Posting>>({});
+  const [heightFeet, setHeightFeet] = useState<number>(0);
+  const [heightInches, setHeightInches] = useState<number>(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    // Extract single graduation year from class array or use classYear directly
+    const classYear = posting.requirements?.classYear || 
+      (Array.isArray(posting.requirements?.class) && posting.requirements.class.length > 0 
+        ? posting.requirements.class[0] 
+        : undefined);
+    
+    // Parse height from posting (could be in inches, or string format)
+    // Check if there's a heightInches field first (from backend), then fall back to height
+    const heightInInches = (posting.requirements as any)?.heightInches || 
+                          parseHeightToInches(posting.requirements?.height);
+    const { feet, inches } = inchesToFeetAndInches(heightInInches);
+    
     setForm({
       position: posting.position,
-      requirements: { ...posting.requirements, class: (posting as any).requirements?.class || [] },
+      requirements: { ...posting.requirements, classYear },
       deadline: posting.deadline,
       description: posting.description,
     });
+    setHeightFeet(feet);
+    setHeightInches(inches);
   }, [isOpen, posting]);
 
   useEffect(() => {
@@ -37,9 +87,31 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
   const handleReqChange = (key: string, value: any) => setForm(prev => ({ ...prev, requirements: { ...(prev.requirements || {}), [key]: value } }));
 
   const handleSave = async () => {
-    setSaving(true);
-    await onSave(form);
-    setSaving(false);
+    if (saving) return;
+    
+    try {
+      setSaving(true);
+      // Convert height to inches before saving
+      const heightInInches = (heightFeet > 0 || heightInches > 0) 
+        ? feetAndInchesToInches(heightFeet, heightInches) 
+        : undefined;
+      
+      const formToSave = {
+        ...form,
+        requirements: {
+          ...form.requirements,
+          heightInches: heightInInches, // Store as heightInches for API
+        }
+      };
+      
+      await onSave(formToSave);
+      showNotification('Posting updated successfully!', 'success');
+    } catch (err: any) {
+      console.error('Error updating posting:', err);
+      showNotification(err.message || 'Failed to update posting', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const confirmClosePosting = () => {
@@ -47,8 +119,6 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
       onClosePosting(posting.id);
     }
   };
-
-  const selectedClasses: number[] = ((form.requirements as any)?.class || []) as number[];
 
   return (
     <div className="fixed inset-0 z-50" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -76,25 +146,20 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
               </select>
             </div>
 
-            {/* Class - Checkbox Grid */}
+            {/* Class - Single Selection */}
             <div>
-              <label className="block text-sm font-semibold text-proph-white mb-2">Class *</label>
-              <div className="grid grid-cols-2 gap-3">
-                {[2025, 2026, 2027, 2028].map((year) => {
-                  const isSelected = selectedClasses.includes(year);
-                  return (
-                    <label key={year} className={`flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${isSelected ? 'border-proph-yellow bg-proph-yellow/10' : 'border-proph-grey-text/20 bg-proph-black'}`} onClick={() => {
-                      const current = new Set(selectedClasses);
-                      if (current.has(year)) current.delete(year); else current.add(year);
-                      handleReqChange('class', Array.from(current));
-                    }}>
-                      <input type="checkbox" className="sr-only" checked={isSelected} readOnly />
-                      {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-proph-yellow" />}
-                      <span className="text-sm font-medium text-proph-white">{year}</span>
-                    </label>
-                  );
-                })}
-              </div>
+              <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
+              <select
+                value={form.requirements?.classYear || ''}
+                onChange={(e) => handleReqChange('classYear', e.target.value === '' ? undefined : Number(e.target.value))}
+                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+              >
+                <option value="">Select graduation year</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+              </select>
             </div>
 
             {/* GPA */}
@@ -103,16 +168,57 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
               <input type="number" step="0.1" min="0" max="4" value={(form.requirements?.gpa ?? posting.requirements.gpa) as any} onChange={(e) => handleReqChange('gpa', e.target.value === '' ? undefined : Number(e.target.value))} className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" placeholder="e.g., 3.0" />
             </div>
 
-            {/* Height */}
+            {/* Height - Feet and Inches */}
             <div>
-              <label className="block text-sm font-semibold text-proph-white mb-2">Height Requirement</label>
-              <input type="text" value={(form.requirements?.height ?? posting.requirements.height) as any} onChange={(e) => handleReqChange('height', e.target.value)} className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" placeholder={`e.g., 6'2" +`} />
+              <label className="block text-sm font-semibold text-proph-white mb-2">Minimum Height (Optional)</label>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-proph-grey-text mb-1">Feet</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="8"
+                    value={heightFeet || ''}
+                    onChange={(e) => setHeightFeet(Number(e.target.value) || 0)}
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    placeholder="6"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-proph-grey-text mb-1">Inches</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="11"
+                    value={heightInches || ''}
+                    onChange={(e) => setHeightInches(Number(e.target.value) || 0)}
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    placeholder="2"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Deadline */}
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Application Deadline *</label>
-              <input type="date" value={(form.deadline as string) || posting.deadline.split('T')[0] || ''} onChange={(e) => handleChange('deadline', e.target.value)} className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" />
+              <input 
+                type="date" 
+                value={(() => {
+                  // Convert deadline to yyyy-MM-dd format for date input
+                  const deadline = (form.deadline as string) || posting.deadline;
+                  if (!deadline) return '';
+                  try {
+                    const date = new Date(deadline);
+                    if (isNaN(date.getTime())) return '';
+                    return date.toISOString().split('T')[0];
+                  } catch {
+                    return '';
+                  }
+                })()}
+                onChange={(e) => handleChange('deadline', e.target.value)} 
+                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" 
+              />
             </div>
 
             {/* Description */}
