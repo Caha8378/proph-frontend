@@ -162,7 +162,7 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-2">Season Stats</h4>
+            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-2 text-center">Season Stats</h4>
             <div className="grid grid-cols-4 gap-1.5">
               {Object.entries({
                 'PPG': player.stats.ppg,
@@ -195,12 +195,20 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           )}
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5">Shades Of</h4>
-            <p className="text-xs text-proph-white">{player.evaluation.comparisons.length > 0 ? player.evaluation.comparisons.join(', ') : 'N/A'}</p>
+            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Shades Of</h4>
+            {player.evaluation.comparisons.length > 0 ? (
+              <ul className="text-xs text-proph-white list-disc list-inside space-y-0.5">
+                {player.evaluation.comparisons.map((comparison, index) => (
+                  <li key={index}>{comparison}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-proph-grey-text">N/A</p>
+            )}
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5">Academic Info (Coaches only)</h4>
+            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Academic Info (Coaches only)</h4>
             {(player.gpa || player.sat || player.act) ? (
               <p className="text-xs text-proph-white">
                 {[
@@ -215,7 +223,7 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5">Contact (Coaches only)</h4>
+            <h4 className="text-[10px] font-bold uppercase text-proph-yellow tracking-wide mb-1.5 text-center">Contact (Coaches only)</h4>
             {player.email && (
               <p className="text-xs text-proph-white">{player.email}</p>
             )}

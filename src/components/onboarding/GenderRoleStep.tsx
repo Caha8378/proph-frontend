@@ -100,11 +100,11 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
       {selectedSchool && (
         <div className="bg-proph-grey-light rounded-lg p-3 mb-6 flex items-center gap-3">
           <img
-            src={selectedSchool.logo_url || '/default-school-logo.png'}
+            src={selectedSchool.logo_url || '/defualt.webp'}
             alt={selectedSchool.name}
             className="w-8 h-8 object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/default-school-logo.png';
+              (e.target as HTMLImageElement).src = '/defualt.webp';
             }}
           />
           <div>

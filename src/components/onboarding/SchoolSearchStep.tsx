@@ -184,11 +184,11 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
                       className="flex items-center gap-3 p-3 hover:bg-proph-grey-light cursor-pointer transition-colors border-b border-proph-grey-light last:border-b-0"
                     >
                       <img
-                        src={school.logo_url || '/default-school-logo.png'}
+                        src={school.logo_url || '/defualt.webp'}
                         alt={school.name}
                         className="w-8 h-8 object-contain"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/default-school-logo.png';
+                          (e.target as HTMLImageElement).src = '/defualt.webp';
                         }}
                       />
                       <div className="flex-1">
@@ -228,11 +228,11 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <img
-                  src={selectedSchool.logo_url || '/default-school-logo.png'}
+                  src={selectedSchool.logo_url || '/defualt.webp'}
                   alt={selectedSchool.name}
                   className="w-8 h-8 object-contain"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/default-school-logo.png';
+                    (e.target as HTMLImageElement).src = '/defualt.webp';
                   }}
                 />
                 <div>
