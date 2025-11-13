@@ -244,7 +244,7 @@ const mockPosting3: Posting = {
   school: {
     id: '3',
     name: 'Eastern Washington',
-    logo: '/eastern_washington.png',
+    logo: '/Eastern_Washington.png',
     division: 'D1',
     location: 'Cheney, WA',
     conference: 'Big Sky'

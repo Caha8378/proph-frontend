@@ -13,7 +13,7 @@ interface Props {
   onRemove: (id: string) => Promise<void> | void;
 }
 
-export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage, onWithdraw, onRemove }) => {
+export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage: _onMessage, onWithdraw, onRemove }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
