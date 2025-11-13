@@ -328,6 +328,39 @@ export const updatePosting = async (postingId: string | number, data: UpdatePost
 };
 
 /**
+ * Check if player is eligible to apply to a posting
+ * Backend endpoint: GET /api/postings/:postingId/can-apply
+ * Authentication: Required (player must be authenticated)
+ */
+export interface EligibilityResponse {
+  eligible: boolean;
+  reasons: string[];
+  posting: {
+    id: number;
+    school: string;
+    division: string;
+    gender: string;
+  };
+}
+
+export const checkEligibility = async (postingId: string | number): Promise<EligibilityResponse> => {
+  try {
+    const response = await apiClient.get<EligibilityResponse>(`/api/postings/${postingId}/can-apply`);
+    return response.data;
+  } catch (error: any) {
+    // Handle 404 for player profile not found or posting not found
+    if (error.response?.status === 404) {
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Posting or profile not found');
+    }
+    // Handle 400 for invalid posting ID
+    if (error.response?.status === 400) {
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Invalid posting ID');
+    }
+    throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to check eligibility');
+  }
+};
+
+/**
  * Get coach's own postings for their school
  * Backend endpoint: GET /api/recruitment/my-postings
  * Returns: { postings: [...] }

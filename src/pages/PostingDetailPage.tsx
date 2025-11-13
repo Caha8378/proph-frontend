@@ -32,6 +32,9 @@ export const PostingDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [canApply, setCanApply] = useState<boolean | null>(null);
+  const [eligibilityReasons, setEligibilityReasons] = useState<string[]>([]);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
 
   useEffect(() => {
     const fetchPosting = async () => {
@@ -48,7 +51,12 @@ export const PostingDetailPage: React.FC = () => {
         setPosting(data);
       } catch (err: any) {
         console.error('Error fetching posting:', err);
-        setError(err.message || 'Failed to load posting');
+        // Handle 404 - might indicate gender mismatch
+        if (err.message?.includes('404') || err.message?.includes('not found')) {
+          setError('This posting is not available or you do not have permission to view it.');
+        } else {
+          setError(err.message || 'Failed to load posting');
+        }
       } finally {
         setLoading(false);
       }
@@ -56,6 +64,33 @@ export const PostingDetailPage: React.FC = () => {
     
     fetchPosting();
   }, [id]);
+
+  // Check eligibility for players
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!id || !user || user.role !== 'player' || !posting) {
+        return;
+      }
+
+      try {
+        setIsCheckingEligibility(true);
+        const eligibility = await postingsService.checkEligibility(id);
+        setCanApply(eligibility.eligible);
+        setEligibilityReasons(eligibility.reasons || []);
+      } catch (err: any) {
+        console.error('Error checking eligibility:', err);
+        // On error, default to allowing apply (backend will catch it on submission)
+        setCanApply(true);
+        setEligibilityReasons([]);
+      } finally {
+        setIsCheckingEligibility(false);
+      }
+    };
+
+    if (posting && user?.role === 'player' && !posting.hasApplied) {
+      checkEligibility();
+    }
+  }, [id, user, posting]);
 
   const handleShare = () => {
     const url = `${window.location.origin}/posting/${posting?.id}`;
@@ -217,9 +252,31 @@ export const PostingDetailPage: React.FC = () => {
                 <button onClick={handleShare} className="w-full bg-proph-grey-light hover:bg-proph-grey-text/20 text-proph-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                   <Share2 className="w-5 h-5" /> Share Posting
                 </button>
-                <button onClick={() => setIsApplyModalOpen(true)} className="w-full bg-proph-yellow hover:bg-proph-yellow/90 text-proph-black font-black py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-lg">
-                  <CheckCircle className="w-6 h-6" /> Apply to This Position
-                </button>
+                {isCheckingEligibility ? (
+                  <button disabled className="w-full bg-proph-grey-light text-proph-white font-semibold py-4 px-4 rounded-lg flex items-center justify-center gap-2 text-lg">
+                    Checking Eligibility...
+                  </button>
+                ) : canApply === false ? (
+                  <>
+                    <button disabled className="w-full bg-proph-grey-light text-proph-white font-semibold py-4 px-4 rounded-lg flex items-center justify-center gap-2 text-lg opacity-50 cursor-not-allowed">
+                      <CheckCircle className="w-6 h-6" /> Not Eligible to Apply
+                    </button>
+                    {eligibilityReasons.length > 0 && (
+                      <div className="bg-proph-error/20 border border-proph-error/50 rounded-lg p-4 space-y-2">
+                        <p className="text-sm font-semibold text-proph-error">You are not eligible to apply:</p>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-proph-white">
+                          {eligibilityReasons.map((reason, index) => (
+                            <li key={index}>{reason}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button onClick={() => setIsApplyModalOpen(true)} className="w-full bg-proph-yellow hover:bg-proph-yellow/90 text-proph-black font-black py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-lg">
+                    <CheckCircle className="w-6 h-6" /> Apply to This Position
+                  </button>
+                )}
               </>
             )}
 

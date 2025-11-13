@@ -113,6 +113,7 @@ export const PlayerOnboarding: React.FC = () => {
 
   const [createdProfile, setCreatedProfile] = useState<PlayerProfile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stat threshold checks
@@ -1064,13 +1065,80 @@ export const PlayerOnboarding: React.FC = () => {
     </div>
   );
 
-  const handleFileUpload = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
+  // Helper function to compress and resize image
+  const compressImage = (file: File, maxWidth: number = 800, maxHeight: number = 800, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // Check file size first (max 5MB before compression)
+      if (file.size > 5 * 1024 * 1024) {
+        reject(new Error('Image is too large. Please use an image smaller than 5MB.'));
+        return;
+      }
+
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileData(prev => ({ ...prev, photo: reader.result as string }));
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Calculate new dimensions
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = width * ratio;
+            height = height * ratio;
+          }
+
+          // Create canvas and resize
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            reject(new Error('Failed to create canvas context'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to base64 with compression
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          
+          // Check final size (max 500KB after compression)
+          const base64Size = (compressedDataUrl.length * 3) / 4;
+          if (base64Size > 500 * 1024) {
+            // Try again with lower quality
+            const lowerQuality = quality * 0.7;
+            const retryDataUrl = canvas.toDataURL('image/jpeg', lowerQuality);
+            resolve(retryDataUrl);
+          } else {
+            resolve(compressedDataUrl);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
       };
+      reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Please select a valid image file');
+      return;
+    }
+
+    try {
+      setIsCompressingImage(true);
+      // Compress and resize the image before converting to base64
+      const compressedDataUrl = await compressImage(file);
+      setProfileData(prev => ({ ...prev, photo: compressedDataUrl }));
+    } catch (error: any) {
+      console.error('Error processing image:', error);
+      alert(error.message || 'Failed to process image. Please try a different image.');
+    } finally {
+      setIsCompressingImage(false);
     }
   };
 
@@ -1130,7 +1198,14 @@ export const PlayerOnboarding: React.FC = () => {
                 onChange={handleFileInputChange}
                 className="hidden"
               />
-              {profileData.photo ? (
+              {isCompressingImage ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-proph-yellow"></div>
+                  </div>
+                  <p className="text-proph-white text-sm">Compressing image...</p>
+                </div>
+              ) : profileData.photo ? (
                 <div className="space-y-2">
                   <img
                     src={profileData.photo}

@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Posting } from '../../types';
 import { Clock } from 'lucide-react';
+import { useAuth } from '../../context/authContext';
+import * as postingsService from '../../api/postings';
+
+// Helper function to convert inches to feet'inches" format
+const formatHeight = (heightInches: number | undefined | null): string | null => {
+  if (!heightInches || heightInches <= 0) return null;
+  const feet = Math.floor(heightInches / 12);
+  const inches = heightInches % 12;
+  return `${feet}'${inches}"+`;
+};
 
 interface PostingCardMiniProps {
   posting: Posting & { hasApplied?: boolean };
@@ -12,16 +22,49 @@ interface PostingCardMiniProps {
 export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ posting, onApply, hasApplied: hasAppliedProp }) => {
   const due = new Date(posting.deadline).toLocaleString('en-US', { month: 'short', day: 'numeric' });
   const navigate = useNavigate();
+  const { user } = useAuth();
   const req = posting.requirements;
   
   // Use posting.hasApplied from backend if available, otherwise fall back to prop
   const hasApplied = posting.hasApplied ?? hasAppliedProp ?? false;
+  
+  // Eligibility state for players
+  const [canApply, setCanApply] = useState<boolean | null>(null);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
+
+  // Get height in display format (check heightInches first, then fall back to height string)
+  const heightDisplay = (req as any)?.heightInches 
+    ? formatHeight((req as any).heightInches)
+    : req.height || null;
 
   const reqString = [
-    req.height ? `${req.height}+` : null,
+    heightDisplay,
     req.classYear ? `Class ${req.classYear}` : null,
     req.gpa ? `${req.gpa} GPA` : null
   ].filter(Boolean).join(' • ');
+
+  // Check eligibility for players
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!user || user.role !== 'player' || hasApplied) {
+        return;
+      }
+
+      try {
+        setIsCheckingEligibility(true);
+        const eligibility = await postingsService.checkEligibility(posting.id);
+        setCanApply(eligibility.eligible);
+      } catch (err: any) {
+        console.error('Error checking eligibility:', err);
+        // On error, default to allowing apply (backend will catch it on submission)
+        setCanApply(true);
+      } finally {
+        setIsCheckingEligibility(false);
+      }
+    };
+
+    checkEligibility();
+  }, [posting.id, user, hasApplied]);
 
   return (
     <div className="bg-proph-grey rounded-2xl p-2 md:p-4 border border-proph-grey-text/20 w-full max-w-[600px] mx-auto cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>
@@ -72,6 +115,14 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
             {hasApplied ? (
               <button disabled className="flex-shrink-0 bg-white/10 text-proph-yellow text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg" onClick={(e) => e.stopPropagation()}>
                 Applied
+              </button>
+            ) : isCheckingEligibility ? (
+              <button disabled className="flex-shrink-0 bg-proph-grey-light text-proph-grey-text text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg" onClick={(e) => e.stopPropagation()}>
+                Checking...
+              </button>
+            ) : canApply === false ? (
+              <button disabled className="flex-shrink-0 bg-proph-grey-light text-proph-error text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg opacity-50 cursor-not-allowed" onClick={(e) => e.stopPropagation()}>
+                Not Eligible
               </button>
             ) : (
               <button

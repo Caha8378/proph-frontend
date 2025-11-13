@@ -60,6 +60,14 @@ export const applyToPosting = async (
     });
     return response.data;
   } catch (error: any) {
+    // Handle 403 for gender mismatch
+    if (error.response?.status === 403) {
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'You can only apply to postings that match your gender');
+    }
+    // Handle 400 for posting closed
+    if (error.response?.status === 400) {
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'This posting is no longer accepting applications');
+    }
     throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to apply to posting');
   }
 };
