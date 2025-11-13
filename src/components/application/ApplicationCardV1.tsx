@@ -61,7 +61,7 @@ export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage, onW
   };
 
   return (
-    <div className="bg-proph-grey rounded-xl border border-proph-grey-text/20 p-4 md:p-6 space-y-3 max-w-[600px] mx-auto">
+    <div className="bg-proph-grey rounded-xl border border-proph-grey-text/20 p-4 md:p-6 space-y-3 w-full max-w-[600px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 md:gap-4">
         <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden flex items-center justify-center">

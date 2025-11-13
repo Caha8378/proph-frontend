@@ -1,136 +1,306 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, Megaphone, Check, LogIn, UserPlus, ArrowRight, Target, Eye, MessageCircle } from 'lucide-react';
+import { User, Megaphone, Check, LogIn, UserPlus, Eye, MessageCircle, Target, ArrowRight, X as XIcon } from 'lucide-react';
 import { PlayerProfileModal } from '../components/player/PlayerProfileModal';
 import { useAuth } from '../context/authContext';
+import { getTotalPlayerCards } from '../api/players';
+import { PlayerCardFinal1 } from '../components/player/PlayerCardFinal1';
+import { PostingCardHorizontalMini } from '../components/posting/PostingCardHorizontalMini';
+import { ApplicationCardV1 } from '../components/application/ApplicationCardV1';
+import type { PlayerProfile, Posting, Coach, Application } from '../types';
 
 // Quick Evaluation Quiz Component
 const QuickEvalQuiz: React.FC = () => {
   const navigate = useNavigate();
   const [quizExpanded, setQuizExpanded] = useState(false);
   const [quizData, setQuizData] = useState({
-    position: '',
-    height: '',
-    classYear: '',
-    gpa: ''
+    email: '',
+    gender: '',
+    heightFeet: '',
+    heightInches: '',
+    weight: '',
+    graduationYear: ''
   });
 
   const handleSubmit = () => {
-    const params = new URLSearchParams({
-      position: quizData.position,
-      height: quizData.height,
-      classYear: quizData.classYear,
-      gpa: quizData.gpa || '',
-      role: 'player'
-    });
-    navigate(`/signup?${params.toString()}`);
+    // Store quiz data in localStorage
+    localStorage.setItem('quizData', JSON.stringify(quizData));
+    
+    // Redirect to signup
+    navigate('/signup');
   };
 
-  return (
-    <div className="mt-8 max-w-2xl mx-auto">
-      {/* Collapsed State: Search-style input */}
-      {!quizExpanded && (
+  // Collapsed state
+  if (!quizExpanded) {
+    return (
+      <div className="mt-8 max-w-2xl mx-auto">
         <button
           onClick={() => setQuizExpanded(true)}
-          className="w-full bg-proph-black/90 backdrop-blur rounded-2xl px-6 py-5 text-left text-proph-grey-text hover:bg-proph-black transition-colors group"
+          className="w-full bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-grey-text hover:bg-proph-black transition-colors group"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-proph-yellow" />
-            <span className="text-lg">I'm a 6'2" point guard from California...</span>
+            <span className="text-lg">I'm a 6'2", 180lb player from...</span>
             <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform" />
           </div>
         </button>
-      )}
+      </div>
+    );
+  }
 
-      {/* Expanded State: Quick form */}
-      {quizExpanded && (
-        <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
-          <h3 className="text-xl font-bold text-proph-white mb-4">Get Your Free AI Evaluation</h3>
-          
-          {/* Position */}
-          <div>
-            <label className="block text-sm font-semibold text-proph-grey-text mb-2">Position</label>
-            <select 
-              value={quizData.position}
-              onChange={(e) => setQuizData({...quizData, position: e.target.value})}
-              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-4 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
-            >
-              <option value="">Select position</option>
-              <option value="PG">Point Guard</option>
-              <option value="SG">Shooting Guard</option>
-              <option value="SF">Small Forward</option>
-              <option value="PF">Power Forward</option>
-              <option value="C">Center</option>
-            </select>
-          </div>
-
-          {/* Height */}
-          <div>
-            <label className="block text-sm font-semibold text-proph-grey-text mb-2">Height</label>
-            <input 
-              type="text"
-              placeholder="6'2&quot;"
-              value={quizData.height}
-              onChange={(e) => setQuizData({...quizData, height: e.target.value})}
-              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-4 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
-            />
-          </div>
-
-          {/* Class Year */}
-          <div>
-            <label className="block text-sm font-semibold text-proph-grey-text mb-2">Graduation Year</label>
-            <select 
-              value={quizData.classYear}
-              onChange={(e) => setQuizData({...quizData, classYear: e.target.value})}
-              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-4 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
-            >
-              <option value="">Select year</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-              <option value="2029">2029</option>
-            </select>
-          </div>
-
-          {/* GPA */}
-          <div>
-            <label className="block text-sm font-semibold text-proph-grey-text mb-2">GPA (optional)</label>
-            <input 
-              type="text"
-              placeholder="3.5"
-              value={quizData.gpa}
-              onChange={(e) => setQuizData({...quizData, gpa: e.target.value})}
-              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-4 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={!quizData.position || !quizData.height || !quizData.classYear}
-            className="w-full bg-proph-yellow text-proph-black font-bold py-4 rounded-lg hover:bg-proph-yellow/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
-          >
-            See My Projected Level — Free
-          </button>
-
-          <button
-            onClick={() => setQuizExpanded(false)}
-            className="w-full text-sm text-proph-grey-text hover:text-proph-white transition-colors py-2"
-          >
-            Cancel
-          </button>
+  // Expanded quiz form
+  return (
+    <div className="mt-8 max-w-2xl mx-auto">
+      <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
+        <h3 className="text-xl font-bold text-proph-white mb-3">Get Your Free AI Evaluation</h3>
+        
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Email</label>
+          <input 
+            type="email"
+            placeholder="your.email@example.com"
+            value={quizData.email}
+            onChange={(e) => setQuizData({...quizData, email: e.target.value})}
+            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+          />
         </div>
-      )}
+
+        {/* Gender */}
+        <div>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Gender</label>
+          <select 
+            value={quizData.gender}
+            onChange={(e) => setQuizData({...quizData, gender: e.target.value})}
+            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+          >
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        {/* Height */}
+        <div>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Height</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <input 
+                type="number"
+                placeholder="6"
+                min="4"
+                max="8"
+                value={quizData.heightFeet}
+                onChange={(e) => setQuizData({...quizData, heightFeet: e.target.value})}
+                className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+              />
+              <p className="text-xs text-proph-grey-text mt-1">Feet</p>
+            </div>
+            <div>
+              <input 
+                type="number"
+                placeholder="2"
+                min="0"
+                max="11"
+                value={quizData.heightInches}
+                onChange={(e) => setQuizData({...quizData, heightInches: e.target.value})}
+                className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+              />
+              <p className="text-xs text-proph-grey-text mt-1">Inches</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Weight */}
+        <div>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Weight (lbs)</label>
+          <input 
+            type="number"
+            placeholder="180"
+            value={quizData.weight}
+            onChange={(e) => setQuizData({...quizData, weight: e.target.value})}
+            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+          />
+        </div>
+
+        {/* Graduation Year */}
+        <div>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-2">Graduation Year</label>
+          <select 
+            value={quizData.graduationYear}
+            onChange={(e) => setQuizData({...quizData, graduationYear: e.target.value})}
+            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+          >
+            <option value="">Select year</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={!quizData.email || !quizData.gender || !quizData.heightFeet || !quizData.heightInches || !quizData.weight || !quizData.graduationYear}
+          className="w-full bg-proph-yellow text-proph-black font-bold py-3 rounded-lg hover:bg-proph-yellow/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+        >
+          Complete Your Proph to Find Your Fit
+        </button>
+
+        <button
+          onClick={() => setQuizExpanded(false)}
+          className="w-full text-sm text-proph-grey-text hover:text-proph-white transition-colors py-2"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 };
+
+// Mock data for demo components
+const mockPlayerProfile: PlayerProfile = {
+  id: 'demo-1',
+  userId: 1,
+  name: 'Coby Gold',
+  position: 'Knockdown 3-Level Scorer',
+  photo: '/demoCoby.jpeg',
+  school: 'Kent Denver',
+  height: "6'2\"",
+  weight: 180,
+  age: 19,
+  location: 'Denver, CO',
+  classYear: 2019,
+  evaluation: {
+    level: 'D2',
+    comparisons: ['James Harden', 'Goran Dragic', 'Darius Garland']
+  },
+  stats: {
+    ppg: 21,
+    rpg: 2.5,
+    apg: 4.5,
+    fgPercentage: 0.45,
+    threePtPercentage: 0.38,
+    ftPercentage: 0.82,
+    steals: 2.1,
+    blocks: 0.5
+  },
+  gpa: 3.5,
+  verified: true
+};
+
+const mockPosting: Posting = {
+  id: 'demo-posting-1',
+  school: {
+    id: '1',
+    name: 'Macalester',
+    logo: '/logo_macalester.png',
+    division: 'D3',
+    location: 'St. Paul, MN',
+    conference: 'MIAC'
+  },
+  position: 'Guard',
+  requirements: {
+    height: "6'0\"+",
+    classYear: 2019,
+    gpa: 3.5
+  },
+  deadline: '2026-05-15',
+  applicantCount: 12,
+  description: 'Looking for a guard who can contribute to our program.',
+  coachName: 'Abe Woldeslassie',
+  createdAt: '2025-01-15',
+  status: 'active'
+};
+
+const mockPosting2: Posting = {
+  id: 'demo-posting-2',
+  school: {
+    id: '2',
+    name: 'Colorado School of Mines',
+    logo: '/colorado_school_of_mines.png',
+    division: 'D2',
+    location: 'Golden, CO',
+    conference: 'RMAC'
+  },
+  position: 'Guard',
+  requirements: {
+    height: "6'2\"+",
+    classYear: 2019,
+    gpa: undefined
+  },
+  deadline: '2026-05-20',
+  applicantCount: 8,
+  description: 'Seeking a guard for our program.',
+  coachName: 'Coach Smith',
+  createdAt: '2025-01-20',
+  status: 'active'
+};
+
+const mockPosting3: Posting = {
+  id: 'demo-posting-3',
+  school: {
+    id: '3',
+    name: 'Eastern Washington',
+    logo: '/eastern_washington.png',
+    division: 'D1',
+    location: 'Cheney, WA',
+    conference: 'Big Sky'
+  },
+  position: 'Guard',
+  requirements: {
+    height: "6'1\"+",
+    classYear: 2019,
+    gpa: 3.2
+  },
+  deadline: '2026-05-25',
+  applicantCount: 15,
+  description: 'Looking for a skilled guard to join our program.',
+  coachName: 'Coach Riley',
+  createdAt: '2025-01-22',
+  status: 'active'
+};
+
+const mockApplication: Application = {
+  id: 'demo-app-1',
+  posting: mockPosting,
+  player: mockPlayerProfile,
+  status: 'accepted',
+  appliedAt: '2025-01-18T10:00:00Z'
+};
+
+const mockApplication2: Application = {
+  id: 'demo-app-2',
+  posting: mockPosting2,
+  player: mockPlayerProfile,
+  status: 'pending',
+  appliedAt: '2025-01-20T14:30:00Z',
+  applicationMessage: 'I am very interested in your program and would love the opportunity to contribute to your team.'
+};
+
+const mockCoach: Coach = {
+  id: 'demo-coach-1',
+  name: 'Abe Woldeslassie',
+  school: {
+    id: '1',
+    name: 'Macalester',
+    logo: '/logo_macalester.png',
+    division: 'D3',
+    location: 'St. Paul, MN'
+  },
+  position: 'Head Coach',
+  verified: true
+};
+
 
 export const LandingPage2: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'players' | 'coaches'>('players');
-  const [playerCount, setPlayerCount] = useState(1247);
+  const [playerCount, setPlayerCount] = useState(0);
   const playerParam = searchParams.get('player');
   
   // Redirect coaches to their home page
@@ -140,12 +310,18 @@ export const LandingPage2: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // Live player counter animation
+  // Fetch total player cards count from API
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayerCount(prev => prev + 1);
-    }, 8000); // Increment every 8 seconds
-    return () => clearInterval(interval);
+    const fetchPlayerCount = async () => {
+      try {
+        const count = await getTotalPlayerCards();
+        setPlayerCount(count);
+      } catch (error) {
+        console.error('Error fetching player count:', error);
+        // Keep default 0 if API fails
+      }
+    };
+    fetchPlayerCount();
   }, []);
 
   const closeModal = () => {
@@ -189,32 +365,41 @@ export const LandingPage2: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. HERO SECTION - Interactive Qualification Quiz */}
+      {/* 2. HERO SECTION */}
       <section className="bg-proph-yellow text-proph-black min-h-[85vh] flex flex-col justify-center py-12">
         <div className="max-w-4xl mx-auto px-4 text-center">
+          {/* Proph Logo with Bounce */}
+          <div className="flex justify-center mb-4 animate-bounce-subtle" aria-hidden="true">
+            <img
+              src="/prophLogo.png"
+              alt="Proph logo"
+              className="w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 object-contain"
+            />
+          </div>
+
           {/* Hero Headline */}
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight mb-4">
-            Stop Guessing.<br />Start Getting Recruited.
+          <h2 className="text-[clamp(1.25rem,3.5vw,3.5rem)] font-black leading-[1.1] mb-6 px-4 text-center">
+            Every hooper needs the right fit.<br />Find yours here.
           </h2>
-          <p className="text-xl md:text-2xl font-semibold text-proph-black/80 max-w-2xl mx-auto mb-8">
-            The only platform that tells you exactly which programs you're qualified for.
-          </p>
 
           {/* Interactive Quiz */}
           <QuickEvalQuiz />
 
-          {/* Live Player Counter */}
-          <p className="mt-6 text-sm font-semibold text-proph-black/70">
-            Join <span className="inline-block min-w-[60px] text-center font-black text-proph-black transition-all duration-500">
+          {/* Cards Created Counter */}
+          <div className="mt-8">
+            <p className="text-base md:text-lg font-light text-proph-black mb-2">
+              Cards created
+            </p>
+            <p className="text-3xl md:text-4xl font-light text-proph-black transition-all duration-500">
               {playerCount.toLocaleString()}
-            </span> players already committed
-          </p>
+            </p>
+          </div>
         </div>
       </section>
 
       {/* 3. HOW IT WORKS - Tabbed Section */}
-      <section className="bg-proph-grey py-20">
-        <div className="max-w-6xl mx-auto px-4">
+      <section className="bg-proph-black py-20">
+        <div className="max-w-10xl mx-auto px-4">
           <h3 className="text-4xl md:text-5xl font-black text-center mb-4">How It Works</h3>
           <p className="text-center text-proph-grey-text text-lg mb-12 max-w-2xl mx-auto">
             Built for players and coaches who want results, not promises
@@ -246,76 +431,237 @@ export const LandingPage2: React.FC = () => {
 
           {/* Players Tab Content */}
           {activeTab === 'players' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-6">
               {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <User className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Create Your Profile</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Add your stats, highlights, and academic info. Our AI evaluates your level (D1, D2, D3, NAIA) in seconds.
+                <h4 className="text-xl font-bold mb-2 text-center">Create Your Profile</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Create your profile and get your digital basketball resume, evaluated by our AI to find the perfect fit for you.
                 </p>
+                <div className="w-full flex justify-center -mx-8 md:-mx-12 lg:-mx-16">
+                  <PlayerCardFinal1 
+                    player={mockPlayerProfile} 
+                    flippable={false}
+                    showReviewBadge={false}
+                  />
+                </div>
               </div>
 
               {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <Target className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Apply to Programs</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Browse postings from 1,900+ college programs. See which schools match your skill level and playing style.
+                <h4 className="text-xl font-bold mb-2 text-center">Apply to Postings</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Apply to postings from real, verified coaching staffs.
                 </p>
+                <div className="w-full flex flex-col gap-3 items-center">
+                  <PostingCardHorizontalMini 
+                    posting={mockPosting}
+                    onApply={() => {}}
+                    hasApplied={false}
+                  />
+                  <PostingCardHorizontalMini 
+                    posting={mockPosting2}
+                    onApply={() => {}}
+                    hasApplied={false}
+                  />
+                  <PostingCardHorizontalMini 
+                    posting={mockPosting3}
+                    onApply={() => {}}
+                    hasApplied={false}
+                  />
+                </div>
               </div>
 
               {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <MessageCircle className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Connect Directly</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Accepted coaches message you directly. No middlemen, no guessing games.
+                <h4 className="text-xl font-bold mb-2 text-center">Connect & Message</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Connect and message with coaches you know are already interested in you.
                 </p>
+                <div className="w-full flex flex-col gap-3 items-center">
+                  <ApplicationCardV1 
+                    application={mockApplication}
+                    onMessage={async () => {}}
+                    onWithdraw={async () => {}}
+                    onRemove={async () => {}}
+                  />
+                  <ApplicationCardV1 
+                    application={mockApplication2}
+                    onMessage={async () => {}}
+                    onWithdraw={async () => {}}
+                    onRemove={async () => {}}
+                  />
+                </div>
               </div>
             </div>
           )}
 
           {/* Coaches Tab Content */}
           {activeTab === 'coaches' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-6">
               {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <Megaphone className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Post Your Opening</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Create a posting in 2 minutes. Specify position, class year, and skill requirements.
+                <h4 className="text-xl font-bold mb-2 text-center">Create a Posting</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Create a posting to find the exact fit you need for your program.
                 </p>
+                <div className="w-full max-w-md mx-auto">
+                  <div className="bg-proph-grey rounded-2xl overflow-hidden border border-proph-grey-text/20">
+                    {/* Preview of CreatePostingModal content */}
+                    <div className="flex flex-col" style={{ height: '500px' }}>
+                      {/* Header */}
+                      <div className="flex items-center justify-between p-4 border-b border-proph-grey-text/10 bg-proph-grey flex-shrink-0">
+                        <div className="w-9"></div>
+                        <div className="text-proph-white font-bold">Create Posting</div>
+                        <div className="w-9"></div>
+                      </div>
+                      {/* Body Preview */}
+                      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-proph-white mb-2">Position *</label>
+                          <div className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-grey-text">
+                            Point Guard
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
+                          <div className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-grey-text">
+                            2026
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-proph-white mb-2">Minimum GPA</label>
+                          <div className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-grey-text">
+                            3.0
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-proph-white mb-2">Minimum Height (Optional)</label>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <label className="block text-xs text-proph-grey-text mb-1">Feet</label>
+                              <div className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-grey-text">6</div>
+                            </div>
+                            <div className="flex-1">
+                              <label className="block text-xs text-proph-grey-text mb-1">Inches</label>
+                              <div className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-grey-text">2</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Footer */}
+                      <div className="p-4 border-t border-proph-grey-text/10 bg-proph-grey flex-shrink-0">
+                        <button disabled className="w-full bg-proph-yellow text-proph-black font-bold py-3 rounded-xl opacity-75">
+                          Publish Posting
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <Eye className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Review Qualified Athletes</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Our AI pre-screens applicants. Only see players who fit your system and level.
+                <h4 className="text-xl font-bold mb-2 text-center">Review Applications</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Review applications from qualified athletes.
                 </p>
+                <div className="w-full flex flex-col items-center gap-4 -mx-8 md:-mx-12 lg:-mx-16">
+                  <PlayerCardFinal1 
+                    player={mockPlayerProfile} 
+                    flippable={false}
+                    showReviewBadge={false}
+                  />
+                  <div className="w-full max-w-[315px] flex gap-2">
+                    <button 
+                      disabled
+                      className="flex-1 bg-proph-black text-proph-yellow font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg opacity-75 cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <Check className="w-3 h-3 md:w-4 md:h-4" />Accept
+                    </button>
+                    <button 
+                      disabled
+                      className="flex-1 bg-proph-black text-proph-white font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg opacity-75 cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <XIcon className="w-3 h-3 md:w-4 md:h-4" />Dismiss
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <MessageCircle className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2">Recruit Top Talent</h4>
-                <p className="text-sm text-proph-grey-text">
-                  Message players directly. Track conversations. Build your roster faster.
+                <h4 className="text-xl font-bold mb-2 text-center">Connect & Message</h4>
+                <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
+                  Connect and message with players you know are qualified for your program.
                 </p>
+                <div className="w-full max-w-md mx-auto">
+                  <div className="bg-proph-grey rounded-2xl overflow-hidden border border-proph-grey-text/20">
+                    {/* Preview of AcceptModal content */}
+                    <div className="flex flex-col" style={{ height: '500px' }}>
+                      {/* Header */}
+                      <div className="p-4 bg-proph-grey border-b border-proph-grey-text/10 relative">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={mockPlayerProfile.photo} 
+                            alt={mockPlayerProfile.name} 
+                            className="w-12 h-12 rounded-full object-cover" 
+                          />
+                          <div className="min-w-0 pr-8">
+                            <p className="text-proph-white font-bold truncate">
+                              Accept {mockPlayerProfile.name}?
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Body Preview */}
+                      <div className="p-2 space-y-2 flex-1 overflow-y-auto">
+                        <p className="text-proph-white text-sm leading-relaxed">
+                          This will notify {mockPlayerProfile.name} that you're interested and open direct communication. You can continue the conversation through the Recruit tab in Proph.
+                        </p>
+                        <div>
+                          <label className="block text-sm font-semibold text-proph-white mb-2">
+                            Message *
+                          </label>
+                          <div className="w-full min-h-40 bg-proph-black border border-proph-yellow rounded-lg p-3 text-sm text-proph-grey-text">
+                            Hey {mockPlayerProfile.name},<br/><br/>
+                            We're interested in having you play {mockPosting.position} at {mockPosting.school.name}. Let's talk about fit.<br/><br/>
+                            You can message me directly through Proph - check your Recruit tab for our conversation.<br/><br/>
+                            - Coach {mockCoach.name}
+                          </div>
+                          <div className="text-right text-xs text-proph-grey-text mt-1">245/500</div>
+                        </div>
+                      </div>
+                      {/* Footer */}
+                      <div className="bg-proph-grey p-4 space-y-2">
+                        <button disabled className="w-full bg-proph-success text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 opacity-75">
+                          Accept & Send Message
+                        </button>
+                        <button disabled className="w-full border-2 border-proph-grey-text text-proph-white font-semibold py-3 rounded-xl opacity-50">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -385,58 +731,6 @@ export const LandingPage2: React.FC = () => {
             >
               See Your Projected Level — Free
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. BUILT FOR THE 95% - Social Proof */}
-      <section className="bg-proph-grey py-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-4xl md:text-5xl font-black text-center mb-12">Built for the 95%</h3>
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-proph-black rounded-2xl p-8 text-center border border-proph-grey-text/20">
-              <div className="text-6xl font-black text-proph-yellow">970K</div>
-              <div className="mt-2 text-base text-proph-grey-text">High school players</div>
-            </div>
-            <div className="bg-proph-black rounded-2xl p-8 text-center border border-proph-grey-text/20">
-              <div className="text-6xl font-black text-proph-yellow">38K</div>
-              <div className="mt-2 text-base text-proph-grey-text">College spots</div>
-            </div>
-            <div className="bg-proph-black rounded-2xl p-8 text-center border border-proph-grey-text/20">
-              <div className="text-6xl font-black text-proph-yellow">95%</div>
-              <div className="mt-2 text-base text-proph-grey-text">Underserved by current platforms</div>
-            </div>
-          </div>
-
-          {/* Proof Points */}
-          <div className="max-w-2xl mx-auto space-y-3">
-            <div className="flex items-start gap-3 text-base">
-              <Check className="w-5 h-5 text-proph-yellow flex-shrink-0 mt-0.5" />
-              <span className="font-semibold">Free to create your profile. Premium features start at $8/month.</span>
-            </div>
-            <div className="flex items-start gap-3 text-base">
-              <Check className="w-5 h-5 text-proph-yellow flex-shrink-0 mt-0.5" />
-              <span className="font-semibold">See exactly which coaches viewed your profile (no black box).</span>
-            </div>
-            <div className="flex items-start gap-3 text-base">
-              <Check className="w-5 h-5 text-proph-yellow flex-shrink-0 mt-0.5" />
-              <span className="font-semibold">AI evaluation based on 10,000+ real player profiles—not guesswork.</span>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="mt-12 text-center">
-            <button
-              onClick={() => navigate('/signup')}
-              className="px-12 py-4 rounded-xl bg-proph-yellow text-proph-black font-black text-lg hover:bg-proph-yellow/90 active:scale-95 transition-all shadow-lg shadow-proph-yellow/20"
-            >
-              Get Your Free Evaluation
-            </button>
-            <p className="mt-4 text-sm text-proph-grey-text">
-              No credit card required. See your projected level in 60 seconds.
-            </p>
           </div>
         </div>
       </section>

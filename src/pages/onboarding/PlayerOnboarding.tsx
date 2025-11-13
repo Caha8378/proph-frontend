@@ -116,6 +116,34 @@ export const PlayerOnboarding: React.FC = () => {
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Pre-fill from quiz data if available
+  useEffect(() => {
+    const quizDataStr = localStorage.getItem('quizData');
+    if (quizDataStr) {
+      try {
+        const quizData = JSON.parse(quizDataStr);
+        
+        // Pre-fill Step 1 fields
+        setProfileData(prev => ({
+          ...prev,
+          heightFeet: quizData.heightFeet || '',
+          heightInches: quizData.heightInches || '',
+          weight: quizData.weight || '',
+          classYear: quizData.graduationYear ? parseInt(quizData.graduationYear) : new Date().getFullYear() + 1,
+          gender: quizData.gender === 'male' ? 'Male' : quizData.gender === 'female' ? 'Female' : ''
+        }));
+
+        // Store gender separately for the backend registration call (use 'male'/'female' format)
+        if (quizData.gender) {
+          localStorage.setItem('pendingGender', quizData.gender);
+        }
+        
+      } catch (error) {
+        console.error('Error parsing quiz data:', error);
+      }
+    }
+  }, []);
+
   // Stat threshold checks
   const statWarnings = useMemo(() => {
     const thresholds = getStatThresholds();
@@ -231,6 +259,7 @@ export const PlayerOnboarding: React.FC = () => {
       // Get pending signup data
       const pendingEmail = localStorage.getItem('pendingEmail');
       const pendingPassword = localStorage.getItem('pendingPassword');
+      const pendingGender = localStorage.getItem('pendingGender');
       
       if (!pendingEmail || !pendingPassword) {
         alert('Session expired. Please sign up again.');
@@ -277,7 +306,7 @@ export const PlayerOnboarding: React.FC = () => {
         height: height, // Total inches
         weight: profileData.weight ? parseInt(profileData.weight) : null,
         age: age, // Calculated from date of birth
-        gender: profileData.gender || null, // Male or Female
+        gender: pendingGender || profileData.gender || null, // From quiz data or form, Male or Female
         clop: profileData.clop || null, // Current Level of Play
         division: profileData.division || null, // Division (for College or Varsity)
       school: profileData.highSchool,
@@ -323,70 +352,71 @@ export const PlayerOnboarding: React.FC = () => {
       localStorage.removeItem('pendingEmail');
       localStorage.removeItem('pendingPassword');
       localStorage.removeItem('pendingRole');
+      // Clean up quiz data
+      localStorage.removeItem('quizData');
+      localStorage.removeItem('pendingGender');
       
       // Wait a moment for auth token to be set, then fetch the full profile
       // The backend returns algorithm data in the response, but we need the full profile for the card
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Fetch the full profile data from the backend
+      // Note: getPlayerProfile already converts backend format to frontend PlayerProfile format
       const fullProfile = await getPlayerProfile();
       console.log('Full profile fetched:', fullProfile);
       
-      // Convert backend profile to frontend PlayerProfile format
+      // The fullProfile is already in the correct format from convertBackendPlayerToFrontend
+      // Just ensure we have all required fields and merge with form data as fallbacks
       const profileForCard: PlayerProfile = {
         id: fullProfile.id?.toString() || `player-${Date.now()}`,
         name: fullProfile.name || profileData.name,
-        position: fullProfile.clop || fullProfile.playstyle || 'TBD',
-        photo: fullProfile.profile_image_url || profileData.photo || '/IMG_1918.jpeg',
+        position: fullProfile.position || 'TBD', // Already converted by getPlayerProfile
+        photo: fullProfile.photo || profileData.photo || '/IMG_1918.jpeg',
         school: fullProfile.school || profileData.highSchool,
-        height: fullProfile.height 
-          ? `${Math.floor(fullProfile.height / 12)}'${fullProfile.height % 12}"`
-          : `${profileData.heightFeet}'${profileData.heightInches}"`,
+        height: fullProfile.height || `${profileData.heightFeet}'${profileData.heightInches}"`, // Already formatted
         weight: fullProfile.weight || (profileData.weight ? parseInt(profileData.weight) : undefined),
         age: fullProfile.age || age || undefined,
-        location: fullProfile.city && fullProfile.state 
-          ? `${fullProfile.city}, ${fullProfile.state}`
-          : `${profileData.city}, ${profileData.state}`,
-        classYear: fullProfile.graduation_year || profileData.classYear,
+        location: fullProfile.location || `${profileData.city}, ${profileData.state}`, // Already formatted
+        classYear: fullProfile.classYear || profileData.classYear,
         evaluation: {
-          level: fullProfile.projected_level || 'TBD',
-          comparisons: [
-            fullProfile.comp_player_1,
-            fullProfile.comp_player_2,
-            fullProfile.comp_player_3,
-          ].filter(Boolean) as string[], // Filter out undefined/null values
+          level: fullProfile.evaluation?.level || 'TBD', // Already converted
+          comparisons: fullProfile.evaluation?.comparisons || [], // Already converted
         },
         stats: {
-          ppg: fullProfile.stats?.ppg || parseFloat(profileData.ppg) || 0,
-          rpg: fullProfile.stats?.rpg || parseFloat(profileData.rpg) || 0,
-          apg: fullProfile.stats?.apg || parseFloat(profileData.apg) || 0,
-          // Calculate percentages from makes/attempts for display
-          fgPercentage: fullProfile.stats?.fg_percentage 
-            ? fullProfile.stats.fg_percentage * 100
-            : (profileData.fga && parseFloat(profileData.fga) > 0 
-              ? (parseFloat(profileData.fgm) / parseFloat(profileData.fga)) * 100 
-              : 0),
-          threePtPercentage: fullProfile.stats?.three_pt_percentage
-            ? fullProfile.stats.three_pt_percentage * 100
-            : (profileData.threepa && parseFloat(profileData.threepa) > 0
-              ? (parseFloat(profileData.threepm) / parseFloat(profileData.threepa)) * 100
-              : 0),
+          ppg: typeof fullProfile.stats?.ppg === 'string' 
+            ? parseFloat(fullProfile.stats.ppg) 
+            : (fullProfile.stats?.ppg || parseFloat(profileData.ppg) || 0),
+          rpg: typeof fullProfile.stats?.rpg === 'string'
+            ? parseFloat(fullProfile.stats.rpg)
+            : (fullProfile.stats?.rpg || parseFloat(profileData.rpg) || 0),
+          apg: typeof fullProfile.stats?.apg === 'string'
+            ? parseFloat(fullProfile.stats.apg)
+            : (fullProfile.stats?.apg || parseFloat(profileData.apg) || 0),
+          fgPercentage: fullProfile.stats?.fgPercentage || 0, // Already calculated
+          threePtPercentage: fullProfile.stats?.threePtPercentage || 0, // Already calculated
           steals: fullProfile.stats?.steals || parseFloat(profileData.steals) || 0,
           blocks: fullProfile.stats?.blocks || parseFloat(profileData.blocks) || 0,
+          // Include raw data for percentage calculations if needed
+          fga: fullProfile.stats?.fga,
+          fgm: fullProfile.stats?.fgm,
+          fta: fullProfile.stats?.fta,
+          ftm: fullProfile.stats?.ftm,
+          threepa: fullProfile.stats?.threepa,
+          threepm: fullProfile.stats?.threepm,
         },
         // Include academic info if available (for card display)
         gpa: fullProfile.gpa || (profileData.gpa ? parseFloat(profileData.gpa) : undefined),
         sat: fullProfile.sat || (profileData.sat ? parseInt(profileData.sat) : undefined),
         act: fullProfile.act || (profileData.act ? parseInt(profileData.act) : undefined),
-        highlightVideoLink: fullProfile.highlight_video_link || fullProfile.highlightVideoLink || profileData.highlightUrl || undefined,
+        highlightVideoLink: fullProfile.highlightVideoLink || profileData.highlightUrl || undefined,
         // Include contact info if available (for card display)
         email: fullProfile.email || pendingEmail || undefined,
-        phoneNumber: fullProfile.phone_number || fullProfile.phoneNumber || undefined,
-      statsIntegrityCertified: profileData.statsIntegrityCertified,
-      highStatConfirmations: profileData.highStatConfirmations,
+        phoneNumber: fullProfile.phoneNumber || undefined,
+        statsIntegrityCertified: profileData.statsIntegrityCertified,
+        highStatConfirmations: profileData.highStatConfirmations,
         verificationUrl: undefined,
-        verificationStatus: 'pending_auto_check',
-        verified: false,
+        verificationStatus: fullProfile.verificationStatus || 'pending',
+        verified: fullProfile.verified || false,
       };
 
       setCreatedProfile(profileForCard);

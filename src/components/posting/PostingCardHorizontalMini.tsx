@@ -46,6 +46,12 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
   // Check eligibility for players
   useEffect(() => {
     const checkEligibility = async () => {
+      // Skip eligibility check for demo postings (landing page mock data)
+      if (posting.id.startsWith('demo-')) {
+        setCanApply(true);
+        return;
+      }
+      
       if (!user || user.role !== 'player' || hasApplied) {
         return;
       }

@@ -298,6 +298,20 @@ export const getAllPlayers = async (): Promise<PlayerProfile[]> => {
 };
 
 /**
+ * Get total player cards count
+ * Backend endpoint: GET /player/getCount
+ */
+export const getTotalPlayerCards = async (): Promise<number> => {
+  try {
+    const response = await publicApiClient.get<{ success: boolean; totalCards: number }>('/player/getCount');
+    return response.data.totalCards || 0;
+  } catch (error: any) {
+    console.error('Error fetching total player cards:', error);
+    return 0; // Return 0 on error to prevent breaking the UI
+  }
+};
+
+/**
  * Convert inches to feet'inches" format
  * Example: 74 -> "6'2""
  */

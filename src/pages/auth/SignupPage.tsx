@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
@@ -39,6 +39,24 @@ export const SignupPage: React.FC = () => {
     errors: {},
     loading: false,
   });
+
+  // Pre-fill from quiz data if available
+  useEffect(() => {
+    const quizDataStr = localStorage.getItem('quizData');
+    if (quizDataStr) {
+      try {
+        const quizData = JSON.parse(quizDataStr);
+        // Pre-fill email and auto-select player role
+        setForm(prev => ({
+          ...prev,
+          email: quizData.email || '',
+          role: 'player' as Role
+        }));
+      } catch (error) {
+        console.error('Error parsing quiz data:', error);
+      }
+    }
+  }, []);
 
   const handleEmailBlur = () => {
     const error = validateEmail(form.email);
