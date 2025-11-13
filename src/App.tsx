@@ -33,8 +33,8 @@ function App() {
         <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/landing2" element={<LandingPage2 />} />
+        <Route path="/" element={<LandingPage2 />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<EmailVerification />} />
