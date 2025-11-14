@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Edit, LogOut, ChevronDown } from 'lucide-react';
+import { Edit, LogOut, ChevronDown } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import { NotificationBell, type NotificationBellRef } from '../notifications/NotificationBell';
+import { NotificationsDropdown } from '../notifications/NotificationsDropdown';
 
 interface HeaderProps {
-  notificationCount?: number;
   onEditClick?: () => void;
   showEditButton?: boolean; // Optional override
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  notificationCount = 0,
   onEditClick,
   showEditButton,
 }) => {
@@ -18,7 +18,9 @@ export const Header: React.FC<HeaderProps> = ({
   const location = useLocation();
   const { user, logout } = useAuth(); // Get current user and logout function from context
   const [showLogoutDropdown, setShowLogoutDropdown] = useState(false);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const logoutDropdownRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<NotificationBellRef>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -105,19 +107,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Notification Bell + Logout */}
         <div className="flex items-center gap-2">
-          {/* Notification Bell - Only show if user is logged in */}
-          {user && (
-            <button
-              className="relative p-2 hover:bg-proph-grey-light rounded-lg transition-colors"
-              aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
-            >
-              <Bell className="w-5 h-5 text-proph-white" />
-              {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-proph-error rounded-full text-[10px] font-bold text-white flex items-center justify-center">
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </span>
-              )}
-            </button>
+          {/* Notification Bell - Only show for players */}
+          {user && user.role === 'player' && (
+            <div className="relative">
+              <NotificationBell 
+                ref={bellRef}
+                onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)} 
+              />
+              <NotificationsDropdown 
+                isOpen={showNotificationsDropdown}
+                onClose={() => setShowNotificationsDropdown(false)}
+                onCountChange={() => bellRef.current?.refreshCount()}
+              />
+            </div>
           )}
 
           {/* Logout Dropdown - Only show if user is logged in */}

@@ -195,11 +195,11 @@ const mockPosting: Posting = {
   id: 'demo-posting-1',
   school: {
     id: '1',
-    name: 'Macalester',
-    logo: '/logo_macalester.png',
-    division: 'D3',
-    location: 'St. Paul, MN',
-    conference: 'MIAC'
+    name: 'Duke',
+    logo: '/logo_duke.svg',
+    division: 'D1',
+    location: 'Durham, NC',
+    conference: 'ACC'
   },
   position: 'Guard',
   requirements: {
@@ -210,7 +210,7 @@ const mockPosting: Posting = {
   deadline: '2026-05-15',
   applicantCount: 12,
   description: 'Looking for a guard who can contribute to our program.',
-  coachName: 'Abe Woldeslassie',
+  coachName: 'Jon Scheyer',
   createdAt: '2025-01-15',
   status: 'active'
 };
@@ -219,11 +219,11 @@ const mockPosting2: Posting = {
   id: 'demo-posting-2',
   school: {
     id: '2',
-    name: 'Colorado School of Mines',
-    logo: '/colorado_school_of_mines.png',
-    division: 'D2',
-    location: 'Golden, CO',
-    conference: 'RMAC'
+    name: 'Gonzaga',
+    logo: '/gonzaga.svg',
+    division: 'D1',
+    location: 'Spokane, WA',
+    conference: 'WCC'
   },
   position: 'Guard',
   requirements: {
@@ -234,7 +234,7 @@ const mockPosting2: Posting = {
   deadline: '2026-05-20',
   applicantCount: 8,
   description: 'Seeking a guard for our program.',
-  coachName: 'Coach Smith',
+  coachName: 'Mark Few',
   createdAt: '2025-01-20',
   status: 'active'
 };
@@ -243,11 +243,11 @@ const mockPosting3: Posting = {
   id: 'demo-posting-3',
   school: {
     id: '3',
-    name: 'Eastern Washington',
-    logo: '/Eastern_Washington.png',
+    name: 'Saint John\'s',
+    logo: '/saint_johns.png',
     division: 'D1',
-    location: 'Cheney, WA',
-    conference: 'Big Sky'
+    location: 'Queens, NY',
+    conference: 'Big East'
   },
   position: 'Guard',
   requirements: {
@@ -258,14 +258,14 @@ const mockPosting3: Posting = {
   deadline: '2026-05-25',
   applicantCount: 15,
   description: 'Looking for a skilled guard to join our program.',
-  coachName: 'Coach Riley',
+  coachName: 'Rick Pitino',
   createdAt: '2025-01-22',
   status: 'active'
 };
 
 const mockApplication: Application = {
   id: 'demo-app-1',
-  posting: mockPosting,
+  posting: mockPosting2, // Gonzaga with Mark Few
   player: mockPlayerProfile,
   status: 'accepted',
   appliedAt: '2025-01-18T10:00:00Z'
@@ -273,7 +273,7 @@ const mockApplication: Application = {
 
 const mockApplication2: Application = {
   id: 'demo-app-2',
-  posting: mockPosting2,
+  posting: mockPosting3, // Saint John's with Rick Pitino
   player: mockPlayerProfile,
   status: 'pending',
   appliedAt: '2025-01-20T14:30:00Z',
@@ -282,13 +282,13 @@ const mockApplication2: Application = {
 
 const mockCoach: Coach = {
   id: 'demo-coach-1',
-  name: 'Abe Woldeslassie',
+  name: 'Mark Few',
   school: {
-    id: '1',
-    name: 'Macalester',
-    logo: '/logo_macalester.png',
-    division: 'D3',
-    location: 'St. Paul, MN'
+    id: '2',
+    name: 'Gonzaga',
+    logo: '/gonzaga.svg',
+    division: 'D1',
+    location: 'Spokane, WA'
   },
   position: 'Head Coach',
   verified: true
@@ -641,7 +641,7 @@ export const LandingPage2: React.FC = () => {
                           </label>
                           <div className="w-full min-h-40 bg-proph-black border border-proph-yellow rounded-lg p-3 text-sm text-proph-grey-text">
                             Hey {mockPlayerProfile.name},<br/><br/>
-                            We're interested in having you play {mockPosting.position} at {mockPosting.school.name}. Let's talk about fit.<br/><br/>
+                            We're interested in having you play {mockPosting2.position} at {mockPosting2.school.name}. Let's talk about fit.<br/><br/>
                             You can message me directly through Proph - check your Recruit tab for our conversation.<br/><br/>
                             - Coach {mockCoach.name}
                           </div>

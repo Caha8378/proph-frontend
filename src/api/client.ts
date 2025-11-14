@@ -39,8 +39,13 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       
-      // Redirect to landing page (not signup - let user choose to sign up or login)
-      if (window.location.pathname !== '/signup' && window.location.pathname !== '/') {
+      // Don't redirect if we're on login or signup pages - let those pages handle the error
+      // This allows login/signup pages to show error notifications instead of redirecting
+      const currentPath = window.location.pathname;
+      const isAuthPage = currentPath === '/login' || currentPath === '/signup' || currentPath.startsWith('/auth/');
+      
+      // Only redirect if we're not on an auth page
+      if (!isAuthPage && currentPath !== '/') {
         window.location.href = '/';
       }
     }

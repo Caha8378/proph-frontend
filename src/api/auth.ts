@@ -9,6 +9,9 @@ export interface LoginResponse {
     accountType?: string;  // Or this (camelCase)
     email_verified?: boolean;
     emailVerified?: boolean;
+    gender?: string; // For players: 'Male' or 'Female'
+    gender_coached?: string; // For coaches: 'male' or 'female'
+    genderCoached?: string; // Alternative camelCase
   };
 }
 
@@ -21,6 +24,9 @@ export interface RegisterResponse {
     account_type?: string;
     accountType?: string;
     emailVerified?: boolean;
+    gender?: string; // For players: 'Male' or 'Female'
+    gender_coached?: string; // For coaches: 'male' or 'female'
+    genderCoached?: string; // Alternative camelCase
   };
   nextStep?: string;
   requiresVerification?: boolean;
@@ -31,6 +37,8 @@ export interface User {
   email: string;
   account_type: string;
   email_verified: boolean;
+  gender?: string; // For players: 'Male' or 'Female'
+  gender_coached?: string; // For coaches: 'male' or 'female'
 }
 
 // Helper to normalize user object from backend (handles both camelCase and snake_case)
@@ -42,6 +50,9 @@ export const normalizeBackendUser = (user: any): User => {
     email_verified: user.email_verified !== undefined 
       ? user.email_verified 
       : (user.emailVerified !== undefined ? user.emailVerified : false),
+    // Gender fields: players have 'gender', coaches have 'gender_coached'
+    gender: user.gender || undefined,
+    gender_coached: user.gender_coached || user.genderCoached || undefined,
   };
 };
 
@@ -66,6 +77,8 @@ export const login = async (email: string, password: string): Promise<LoginRespo
         email: user.email,
         account_type: user.account_type || user.accountType || 'player', // Normalize to snake_case
         email_verified: user.email_verified !== undefined ? user.email_verified : (user.emailVerified !== undefined ? user.emailVerified : false),
+        gender: user.gender || undefined, // For players
+        gender_coached: user.gender_coached || user.genderCoached || undefined, // For coaches
       };
       
       localStorage.setItem('user', JSON.stringify(normalizedUser));
@@ -109,6 +122,8 @@ export const signup = async (
         email: data.user.email,
         account_type: data.user.accountType || data.user.account_type || accountType,
         email_verified: data.user.emailVerified || false,
+        gender: data.user.gender || undefined, // For players
+        gender_coached: data.user.gender_coached || data.user.genderCoached || undefined, // For coaches
       };
       
       localStorage.setItem('user', JSON.stringify(normalizedUser));

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { X, ChevronLeft, Share2, Users } from 'lucide-react';
 import { PlayerCardFinal1 } from './PlayerCardFinal1';
 import { usePlayer } from '../../hooks';
+import { trackEvent } from '../../api/notifications';
 import type { PlayerProfile } from '../../types';
 
 interface PlayerProfileModalProps {
@@ -53,8 +54,35 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
     }
   }, [isOpen]);
 
-  const handleShare = () => {
+  // Track profile modal opened event when modal opens and player is available
+  useEffect(() => {
+    if (isOpen && player?.id && !loading) {
+      trackEvent({
+        eventType: 'profile_modal_opened',
+        targetUserId: player.id,
+        metadata: {
+          source: playerProp ? 'prop' : 'fetched',
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+  }, [isOpen, player?.id, loading, playerProp]);
+
+  const handleShare = async () => {
     if (!player) return;
+    
+    // Track card shared event
+    if (player.id) {
+      trackEvent({
+        eventType: 'card_shared',
+        targetUserId: player.id,
+        metadata: {
+          shareMethod: 'clipboard',
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+    
     if (onShare) {
       onShare();
       return;

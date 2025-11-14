@@ -112,7 +112,7 @@ export const PlayerHomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-proph-black pb-20">
-      <Header notificationCount={3} />
+      <Header />
 
       <main className="container mx-auto px-4 pt-2 pb-4 space-y-2">
         {/* Hero Section */}

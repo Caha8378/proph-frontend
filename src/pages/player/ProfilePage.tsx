@@ -4,6 +4,7 @@ import { BottomNav } from '../../components/layout/BottomNav';
 import { PlayerCardFinal1 as PlayerCard } from '../../components/player/PlayerCardFinal1';
 import { Share2, Camera, Edit } from 'lucide-react';
 import { useProfile } from '../../hooks';
+import { trackEvent } from '../../api/notifications';
 import type { PlayerProfile } from '../../types';
 import { UploadImageModal } from '../../components/player/UploadImageModal';
 import { EditProfileModal } from '../../components/player/EditProfileModal';
@@ -15,8 +16,20 @@ export const ProfilePage: React.FC = () => {
   const [uploadImageModalOpen, setUploadImageModalOpen] = useState(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!profile) return;
+    
+    // Track card shared event
+    if (profile.id) {
+      trackEvent({
+        eventType: 'card_shared',
+        targetUserId: profile.id,
+        metadata: {
+          shareMethod: (typeof navigator !== 'undefined' && navigator.share && typeof navigator.share === 'function') ? 'native_share' : 'clipboard',
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
     
     // Generate shareable link
     const link = `https://proph.com/p/${profile.id}`;

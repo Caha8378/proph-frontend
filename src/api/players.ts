@@ -329,9 +329,60 @@ function formatHeightInches(inches: number | null | undefined): string {
  */
 export const convertBackendPlayerToFrontend = (backendPlayer: BackendPlayerResponse): any => {
   // Handle both flat and nested formats
+  // For list endpoint: { profile: {...}, stats: {...} }
+  // For single player endpoint: might be flat or nested differently
   const isNested = !!backendPlayer.profile;
   const playerData = isNested ? backendPlayer.profile! : backendPlayer;
-  const stats = backendPlayer.stats || {};
+  
+  // Stats are at top level for list endpoint: backendPlayer.stats
+  // For single player, might be in backendPlayer.stats or nested
+  // Priority: backendPlayer.stats (for list endpoint) > playerData.stats (if nested) > empty object
+  const stats = backendPlayer.stats || playerData.stats || {};
+  
+  // Debug logging for stats that appear to be integers when they should be decimals
+  // This helps identify backend data issues
+  const playerId = isNested 
+    ? (playerData.user_id || backendPlayer.user_id || backendPlayer.id)
+    : (backendPlayer.user_id || backendPlayer.id);
+  
+  // Debug: Log full stats object for problematic players (if you provide user_ids, we can add them here)
+  // Uncomment and add user_ids to debug specific players:
+  // const DEBUG_USER_IDS = [/* add user_ids here */];
+  // if (DEBUG_USER_IDS.includes(Number(playerId))) {
+  //   console.log(`[Stats Debug] Player ${playerId} full stats object:`, JSON.stringify(stats, null, 2));
+  //   console.log(`[Stats Debug] Raw backendPlayer:`, JSON.stringify(backendPlayer, null, 2));
+  // }
+  
+  // Helper to safely get numeric stat values (stats come as decimal(5,1) from DB, so they're numbers)
+  const getStat = (value: any, statName: string, fallback: number = 0): number => {
+    // If value is null or undefined, return fallback
+    if (value === null || value === undefined) return fallback;
+    // If it's already a number, return it (handles decimal(5,1) from DB)
+    if (typeof value === 'number') {
+      // Handle NaN and Infinity
+      if (isNaN(value) || !isFinite(value)) return fallback;
+      
+      // Debug: Log if we see an integer value that might have lost decimal precision
+      // Only log for ppg, rpg, apg and if the value is a whole number (might indicate data loss)
+      if (['ppg', 'rpg', 'apg'].includes(statName) && value % 1 === 0 && value > 0 && value < 50) {
+        console.warn(`[Stats Debug] Player ${playerId} has ${statName} as integer ${value} - might be missing decimal precision. Raw value:`, value, 'Type:', typeof value);
+      }
+      
+      return value;
+    }
+    // If it's a string, try to parse it (shouldn't be needed but just in case)
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? fallback : parsed;
+    }
+    return fallback;
+  };
+  
+  // Get stats directly from stats object (from player_stats table)
+  // These come as decimal(5,1) from the database, so they should be numbers
+  const ppg = getStat(stats.ppg, 'ppg', 0);
+  const rpg = getStat(stats.rpg, 'rpg', 0);
+  const apg = getStat(stats.apg, 'apg', 0);
   
   // Get position/playstyle (clop field in DB)
   const position = playerData.playstyle || playerData.clop || 'Unknown';
@@ -358,7 +409,7 @@ export const convertBackendPlayerToFrontend = (backendPlayer: BackendPlayerRespo
   // If percentage is already provided, use it; otherwise calculate from makes/attempts
   const calculatePercentage = (makes: number | undefined, attempts: number | undefined, existingPercentage?: number): number => {
     if (existingPercentage !== undefined && existingPercentage !== null) {
-      return existingPercentage;
+      return typeof existingPercentage === 'string' ? parseFloat(existingPercentage) || 0 : existingPercentage;
     }
     if (makes !== undefined && attempts !== undefined && attempts > 0) {
       return makes / attempts;
@@ -373,9 +424,7 @@ export const convertBackendPlayerToFrontend = (backendPlayer: BackendPlayerRespo
   // Get the correct ID - backend uses user_id for player queries
   // Backend response has both id (player_profiles.id) and user_id
   // Use user_id if available, otherwise fall back to id
-  const playerId = isNested 
-    ? (playerData.user_id || backendPlayer.user_id || backendPlayer.id)
-    : (backendPlayer.user_id || backendPlayer.id);
+  // (Note: playerId was already defined above for debug logging)
   
   // Get weight from correct location (may be in profile or top level)
   const weight = playerData.weight || (isNested ? backendPlayer.weight : undefined);
@@ -399,24 +448,24 @@ export const convertBackendPlayerToFrontend = (backendPlayer: BackendPlayerRespo
       comparisons: comparisons,
     },
     stats: {
-      ppg: stats.ppg || 0,
-      rpg: stats.rpg || 0,
-      apg: stats.apg || 0,
+      ppg: ppg,
+      rpg: rpg,
+      apg: apg,
       fgPercentage: fgPercentage,
       threePtPercentage: threePtPercentage,
       ftPercentage: ftPercentage,
-      steals: stats.spg || stats.steals || 0, // Database uses spg, fallback to steals
-      blocks: stats.bpg || stats.blocks || 0, // Database uses bpg, fallback to blocks
+      steals: getStat(stats.spg || stats.steals, 'steals', 0), // Database uses spg, fallback to steals
+      blocks: getStat(stats.bpg || stats.blocks, 'blocks', 0), // Database uses bpg, fallback to blocks
       // Include database field names for direct access
-      spg: stats.spg,
-      bpg: stats.bpg,
+      spg: getStat(stats.spg, 'spg'),
+      bpg: getStat(stats.bpg, 'bpg'),
       // Include raw makes/attempts for frontend calculation
-      fga: stats.fga,
-      fgm: stats.fgm,
-      fta: stats.fta,
-      ftm: stats.ftm,
-      threepa: stats.threepa,
-      threepm: stats.threepm,
+      fga: getStat(stats.fga, 'fga'),
+      fgm: getStat(stats.fgm, 'fgm'),
+      fta: getStat(stats.fta, 'fta'),
+      ftm: getStat(stats.ftm, 'ftm'),
+      threepa: getStat(stats.threepa, 'threepa'),
+      threepm: getStat(stats.threepm, 'threepm'),
     },
     verified: isVerified,
     verificationStatus: isVerified ? 'verified' : 'pending',

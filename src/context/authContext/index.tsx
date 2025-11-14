@@ -8,6 +8,8 @@ interface User {
   verified: boolean;
   profileComplete: boolean;
   emailVerified: boolean;
+  gender?: string; // For players: 'Male' or 'Female'
+  genderCoached?: string; // For coaches: 'male' or 'female'
 }
 
 interface AuthContextType {
@@ -44,6 +46,9 @@ const convertBackendUser = (backendUser: authService.User): User => {
     // Backend may return email_verified as 1/0 (number) or true/false (boolean)
     // Convert to boolean: !! converts any truthy value (1, true) to true, falsy (0, false) to false
     emailVerified: !!(backendUser.email_verified as any),
+    // Gender fields: players have 'gender', coaches have 'gender_coached'
+    gender: backendUser.gender || undefined,
+    genderCoached: backendUser.gender_coached || undefined,
   };
 };
 
