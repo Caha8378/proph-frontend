@@ -379,7 +379,7 @@ export const LandingPage2: React.FC = () => {
 
           {/* Hero Headline */}
           <h2 className="text-[clamp(1.25rem,3.5vw,3.5rem)] font-black leading-[1.1] mb-6 px-4 text-center">
-            Every hooper needs the right fit.<br />Find yours here.
+            Every player has the right fit.<br />Find yours here.
           </h2>
 
           {/* Interactive Quiz */}
@@ -401,9 +401,7 @@ export const LandingPage2: React.FC = () => {
       <section className="bg-proph-black py-20">
         <div className="max-w-10xl mx-auto px-4">
           <h3 className="text-4xl md:text-5xl font-black text-center mb-4">How It Works</h3>
-          <p className="text-center text-proph-grey-text text-lg mb-12 max-w-2xl mx-auto">
-            Built for players and coaches who want results, not promises
-          </p>
+          
 
           {/* Tab Navigation */}
           <div className="flex justify-center gap-2 mb-12">
@@ -437,7 +435,7 @@ export const LandingPage2: React.FC = () => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-proph-yellow flex items-center justify-center flex-shrink-0">
                   <User className="w-8 h-8 text-proph-black" />
                 </div>
-                <h4 className="text-xl font-bold mb-2 text-center">Create Your Profile</h4>
+                <h4 className="text-xl font-bold mb-2 text-center">Create Your Card</h4>
                 <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
                   Create your profile and get your digital basketball resume, evaluated by our AI to find the perfect fit for you.
                 </p>
@@ -684,9 +682,7 @@ export const LandingPage2: React.FC = () => {
           <h3 className="text-4xl md:text-5xl font-black text-center text-proph-yellow mb-4">
             Why Players Choose Proph
           </h3>
-          <p className="text-center text-xl text-proph-grey-text max-w-3xl mx-auto mb-12">
-            Stop wasting time on dream schools that'll never recruit you
-          </p>
+          
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Benefit 1: Know Your Level */}
@@ -694,31 +690,31 @@ export const LandingPage2: React.FC = () => {
               <div className="w-12 h-12 rounded-full bg-proph-yellow flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-proph-black" />
               </div>
-              <h4 className="text-2xl font-bold mb-3">Know Your Level</h4>
+              <h4 className="text-2xl font-bold mb-3">Find the right school</h4>
               <p className="text-proph-grey-text">
-                Our AI projects whether you're D1, D2, D3, or NAIA material—based on real data, not hype.
+                Our AI projects whether you're D1, D2, D3, or NAIA material-based on real data, not hype.
               </p>
             </div>
 
             {/* Benefit 2: Apply Smarter */}
             <div className="bg-proph-grey rounded-2xl p-8 border-2 border-proph-yellow/20 hover:border-proph-yellow/40 transition-colors">
               <div className="w-12 h-12 rounded-full bg-proph-yellow flex items-center justify-center mb-4">
-                <Check className="w-6 h-6 text-proph-black" />
+                <Eye className="w-6 h-6 text-proph-black" />
               </div>
-              <h4 className="text-2xl font-bold mb-3">Apply Smarter</h4>
+              <h4 className="text-2xl font-bold mb-3">Get Noticed</h4>
               <p className="text-proph-grey-text">
-                Only see programs actively recruiting your position and skill level. No more ghosting.
+                Only see programs actively recruiting your position and skill level.
               </p>
             </div>
 
             {/* Benefit 3: Get Noticed */}
             <div className="bg-proph-grey rounded-2xl p-8 border-2 border-proph-yellow/20 hover:border-proph-yellow/40 transition-colors">
               <div className="w-12 h-12 rounded-full bg-proph-yellow flex items-center justify-center mb-4">
-                <Eye className="w-6 h-6 text-proph-black" />
+                <Check className="w-6 h-6 text-proph-black" />
               </div>
-              <h4 className="text-2xl font-bold mb-3">Get Noticed</h4>
+              <h4 className="text-2xl font-bold mb-3">Play in College</h4>
               <p className="text-proph-grey-text">
-                Coaches see your full profile, stats, and highlights. No agent fees. No gatekeepers.
+                Coaches see your full profile, stats, and highlights.
               </p>
             </div>
           </div>
@@ -729,7 +725,7 @@ export const LandingPage2: React.FC = () => {
               onClick={() => navigate('/signup')}
               className="px-12 py-4 rounded-xl bg-proph-yellow text-proph-black font-black text-lg hover:bg-proph-yellow/90 active:scale-95 transition-all shadow-lg shadow-proph-yellow/20"
             >
-              See Your Projected Level — Free
+              See Your Projected Level - Free
             </button>
           </div>
         </div>
