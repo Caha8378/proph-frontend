@@ -44,29 +44,7 @@ export const MissionPage: React.FC = () => {
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
             We're Carter and Coby. We both went through the recruiting chaos and kept thinking the same thing: there has to be a better way.
           </p>
-        </section>
-
-        {/* The Problem We Lived */}
-        <section className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-black mb-8">The Problem We Lived</h2>
-          
-          <div className="space-y-6 mb-6">
-            <div>
-              <p className="text-lg font-bold text-proph-yellow mb-2">Carter:</p>
-              <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
-                I was a fringe D3 kid who didn't play AAU. I didn't know which schools needed my position, and most of my outreach went nowhere.
-              </p>
-            </div>
-            
-            <div>
-              <p className="text-lg font-bold text-proph-yellow mb-2">Coby:</p>
-              <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
-                I ended up at Macalester University, but once I got there, I saw the system from the inside. Even good players slipped through the cracks because everything ran on word of mouth.
-              </p>
-            </div>
-          </div>
-          
-          <p className="text-base md:text-lg text-proph-white font-semibold leading-relaxed">
+          <p className="mt-6 text-base md:text-lg text-proph-white font-semibold leading-relaxed">
             We both realized something simple: recruiting shouldn't feel like guessing in the dark.
           </p>
         </section>
@@ -97,19 +75,15 @@ export const MissionPage: React.FC = () => {
               <span>Algorithms don't replace relationships — they enable them.</span>
             </li>
           </ol>
-          
-          <p className="mt-6 text-base md:text-lg text-proph-grey-text leading-relaxed">
-            We're also working with AAU and club programs to help more players get real visibility and real opportunities.
-          </p>
         </section>
 
         {/* Why Basketball (For Now) */}
-        <section className="mb-20">
+        {/* <section className="mb-20">
           <h2 className="text-3xl md:text-4xl font-black mb-6">Why Basketball (For Now)</h2>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
             Basketball is the sport we know best. We'll expand eventually, but right now we're focused on fixing basketball recruiting.
           </p>
-        </section>
+        </section> */}
 
         {/* The Mission */}
         <section className="mb-20">
@@ -117,9 +91,9 @@ export const MissionPage: React.FC = () => {
           <p className="text-xl md:text-2xl text-proph-white font-semibold leading-relaxed">
             Make recruiting transparent, accessible, and built on data — not connections.
           </p>
-          <p className="mt-4 text-base md:text-lg text-proph-grey-text leading-relaxed">
+          {/* <p className="mt-4 text-base md:text-lg text-proph-grey-text leading-relaxed">
             Whether you're a D3 prospect in a small town or a D1 prospect in a major city, you deserve a real shot.
-          </p>
+          </p> */}
         </section>
 
         {/* Get in Touch */}
