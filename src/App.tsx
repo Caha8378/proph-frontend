@@ -11,6 +11,7 @@ import { PostingDetailPage } from './pages/PostingDetailPage';
 import { SchoolPage } from './pages/SchoolPage';
 import { LandingPage } from './pages/LandingPage';
 import { LandingPage2 } from './pages/LandingPage2';
+import { MissionPage } from './pages/MissionPage';
 import { CoachHome } from './pages/coach/CoachHome';
 import { CoachPostings } from './pages/coach/CoachPostings';
 import { ReviewApplications } from './pages/coach/ReviewApplications';
@@ -35,6 +36,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<LandingPage2 />} />
         <Route path="/landing" element={<LandingPage />} />
+        <Route path="/mission" element={<MissionPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<EmailVerification />} />

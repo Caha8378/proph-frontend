@@ -345,14 +345,20 @@ export const LandingPage2: React.FC = () => {
             </h1>
           </button>
 
-          {/* Auth buttons */}
+          {/* Navigation */}
           <nav className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/mission')}
+              className="px-4 py-2 text-proph-white hover:text-proph-yellow transition-colors"
+            >
+              Mission
+            </button>
             <button 
               onClick={() => navigate('/login')}
               className="px-4 py-2 rounded-lg hover:bg-proph-grey-light active:scale-95 transition-all flex items-center gap-1.5 text-sm font-semibold text-proph-white"
             >
               <LogIn className="w-4 h-4" />
-              Sign In
+              Log In
             </button>
             <button 
               onClick={() => navigate('/signup')}
