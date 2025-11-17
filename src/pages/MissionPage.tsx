@@ -42,10 +42,10 @@ export const MissionPage: React.FC = () => {
             The smartest path from high school hoops to college ball.
           </p>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
-            We're Carter and Coby. We both went through the recruiting chaos and kept thinking the same thing: there has to be a better way.
+            We're Carter and Coby. We saw the recruiting process first-hand and knew this needed to exist.
           </p>
           <p className="mt-6 text-base md:text-lg text-proph-white font-semibold leading-relaxed">
-            We both realized something simple: recruiting shouldn't feel like guessing in the dark.
+            Recruiting shouldn't feel like guessing in the dark.
           </p>
         </section>
 
@@ -64,14 +64,6 @@ export const MissionPage: React.FC = () => {
             </li>
             <li className="flex gap-3">
               <span className="text-proph-yellow font-bold flex-shrink-0">3.</span>
-              <span>Recruiting should work like a job search — based on fit, skills, and need.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-proph-yellow font-bold flex-shrink-0">4.</span>
-              <span>Coaches need clarity too — not random emails.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-proph-yellow font-bold flex-shrink-0">5.</span>
               <span>Algorithms don't replace relationships — they enable them.</span>
             </li>
           </ol>
