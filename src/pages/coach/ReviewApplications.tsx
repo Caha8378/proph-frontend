@@ -32,6 +32,7 @@ export const ReviewApplications: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedPostings, setExpandedPostings] = useState<Set<string>>(new Set());
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [acceptingApplication, setAcceptingApplication] = useState<Application | null>(null);
   const [rejectingApplication, setRejectingApplication] = useState<Application | null>(null);
@@ -131,10 +132,11 @@ export const ReviewApplications: React.FC = () => {
     setExpandedPostings(next);
   };
 
-  const handleViewProfile = (playerId: string) => {
+  const handleViewProfile = (playerId: string, application: Application) => {
     // Use playerId to fetch full player data (with stats) via PlayerProfileModal
     // The modal will use usePlayer hook to fetch complete data
     setSelectedPlayerId(playerId);
+    setSelectedApplication(application);
     setIsProfileOpen(true);
   };
 
@@ -321,9 +323,14 @@ export const ReviewApplications: React.FC = () => {
       <PlayerProfileModal
         playerId={selectedPlayerId}
         isOpen={isProfileOpen}
+        is_being_reviewed={!!selectedApplication}
+        application={selectedApplication}
+        onAccept={handleAccept}
+        onReject={handleReject}
         onClose={() => {
           setIsProfileOpen(false);
           setSelectedPlayerId(null);
+          setSelectedApplication(null);
         }}
       />
 

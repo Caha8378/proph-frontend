@@ -5,7 +5,7 @@ import { formatRelativeDate } from '../../utils/helpers';
 
 interface ApplicationCardCoachProps {
   application: Application;
-  onViewProfile: (playerId: string) => void;
+  onViewProfile: (playerId: string, application: Application) => void;
   onAccept: (applicationId: string) => void;
   onReject: (applicationId: string) => void;
 }
@@ -18,7 +18,7 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
     // Use userId (numeric) if available, otherwise use id (string)
     // The API expects the player's user_id
     const playerId = player.userId ? String(player.userId) : player.id;
-    onViewProfile(playerId);
+    onViewProfile(playerId, application);
   };
 
   const handleButtonClick = (e: React.MouseEvent, action: () => void) => {

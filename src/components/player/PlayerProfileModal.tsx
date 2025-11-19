@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { X, ChevronLeft, Share2, Users } from 'lucide-react';
+import { X, ChevronLeft, Share2, Users, Check, X as XIcon } from 'lucide-react';
 import { PlayerCardFinal1 } from './PlayerCardFinal1';
 import { usePlayer, useNotification } from '../../hooks';
 import { trackEvent } from '../../api/notifications';
 import type { PlayerProfile } from '../../types';
+import type { Application } from '../../types';
 
 interface PlayerProfileModalProps {
   player?: PlayerProfile | null; // Optional - can pass player directly
@@ -12,6 +13,10 @@ interface PlayerProfileModalProps {
   onClose: () => void;
   onShare?: () => void;
   showViewTeam?: boolean;
+  is_being_reviewed?: boolean; // Show Accept/Reject buttons when true
+  application?: Application | null; // Application data needed for Accept/Reject modals
+  onAccept?: (applicationId: string) => void; // Callback when Accept button is clicked
+  onReject?: (applicationId: string) => void; // Callback when Reject button is clicked
 }
 
 export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
@@ -21,6 +26,10 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
   onClose,
   onShare,
   showViewTeam = false,
+  is_being_reviewed = false,
+  application = null,
+  onAccept,
+  onReject,
 }) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [entered, setEntered] = React.useState(false);
@@ -227,22 +236,65 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
 
         {/* Actions */}
         <div className="p-4 space-y-3 border-t border-proph-grey-text/20 pb-safe">
-          <button
-            onClick={handleShare}
-            className="w-full bg-proph-grey-light hover:bg-proph-grey-text/20 text-proph-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Share2 className="w-5 h-5" />
-            Share Profile
-          </button>
+          {is_being_reviewed && application ? (
+            <>
+              {/* Accept and Reject buttons for review mode */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (onAccept && application.id) {
+                      onAccept(application.id);
+                      onClose(); // Close profile modal when opening accept modal
+                    }
+                  }}
+                  className="flex-1 bg-proph-black text-proph-yellow font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                >
+                  <Check className="w-3 h-3 md:w-4 md:h-4" />
+                  Accept
+                </button>
+                <button
+                  onClick={() => {
+                    if (onReject && application.id) {
+                      onReject(application.id);
+                      onClose(); // Close profile modal when opening reject modal
+                    }
+                  }}
+                  className="flex-1 bg-proph-black text-proph-white font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                >
+                  <XIcon className="w-3 h-3 md:w-4 md:h-4" />
+                  Dismiss
+                </button>
+              </div>
+              {/* Share button below Accept/Reject */}
+              <button
+                onClick={handleShare}
+                className="w-full bg-proph-grey-light hover:bg-proph-grey-text/20 text-proph-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Share2 className="w-5 h-5" />
+                Share Profile
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Normal mode - just Share button */}
+              <button
+                onClick={handleShare}
+                className="w-full bg-proph-grey-light hover:bg-proph-grey-text/20 text-proph-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Share2 className="w-5 h-5" />
+                Share Profile
+              </button>
 
-          {showViewTeam && (
-            <button
-              onClick={() => console.log('View Team Page')}
-              className="w-full bg-proph-yellow hover:bg-proph-yellow/90 text-proph-black font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <Users className="w-5 h-5" />
-              View Team Page
-            </button>
+              {showViewTeam && (
+                <button
+                  onClick={() => console.log('View Team Page')}
+                  className="w-full bg-proph-yellow hover:bg-proph-yellow/90 text-proph-black font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Users className="w-5 h-5" />
+                  View Team Page
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
