@@ -657,7 +657,7 @@ export const PlayerOnboarding: React.FC = () => {
                   type="radio"
                   name="gender"
                   value="Male"
-                  checked={profileData.gender === 'Male'}
+                  checked={profileData.gender === 'male'}
                   onChange={(e) => setProfileData(prev => ({ ...prev, gender: e.target.value }))}
                   className="w-4 h-4 border-2 border-proph-grey-text/40 bg-proph-black text-proph-yellow focus:ring-2 focus:ring-proph-yellow/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer checked:bg-proph-yellow checked:border-proph-yellow"
                 />
@@ -668,7 +668,7 @@ export const PlayerOnboarding: React.FC = () => {
                   type="radio"
                   name="gender"
                   value="Female"
-                  checked={profileData.gender === 'Female'}
+                  checked={profileData.gender === 'female'}
                   onChange={(e) => setProfileData(prev => ({ ...prev, gender: e.target.value }))}
                   className="w-4 h-4 border-2 border-proph-grey-text/40 bg-proph-black text-proph-yellow focus:ring-2 focus:ring-proph-yellow/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer checked:bg-proph-yellow checked:border-proph-yellow"
                 />

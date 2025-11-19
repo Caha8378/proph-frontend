@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Clock, Users, CheckCircle, Edit, Share2, ChevronLeft } from 'lucide-react';
+import { Clock, Users, CheckCircle, Edit, Share2, ChevronLeft, Target } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import { ApplyModalMinC } from '../components/application/ApplyModalMinC';
 import * as postingsService from '../api/postings';
@@ -155,6 +155,27 @@ export const PostingDetailPage: React.FC = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto bg-proph-grey rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-6 space-y-6">
+            {/* General Interest Banner */}
+            {posting.is_general && (
+              <div className="bg-proph-purple/10 border-2 border-proph-purple rounded-xl p-6 mb-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-proph-purple/20 rounded-lg">
+                    <Target className="w-6 h-6 text-proph-purple" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-proph-white mb-2">
+                      Open to All Players
+                    </h3>
+                    <p className="text-proph-grey-text">
+                      This is a general interest posting. All players are welcome to apply 
+                      regardless of position, class year, or specific requirements. The coaching 
+                      staff will review your application and reach out if there's a potential fit.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-4 pb-6 border-b border-proph-grey-text/20">
               <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center">
                 <img 
@@ -175,22 +196,28 @@ export const PostingDetailPage: React.FC = () => {
 
             <div>
               <h3 className="text-sm font-bold uppercase text-proph-yellow tracking-wide mb-3">Requirements</h3>
-              <div className="space-y-2 text-base text-proph-white">
-                {(() => {
-                  // Get height in display format (check heightInches first, then fall back to height string)
-                  const heightDisplay = (posting.requirements as any)?.heightInches 
-                    ? formatHeight((posting.requirements as any).heightInches)
-                    : posting.requirements.height || null;
-                  return heightDisplay && <p>• Height: {heightDisplay}</p>;
-                })()}
-                {posting.requirements.classYear && (
-                  <p>• Class: {String(posting.requirements.classYear)}</p>
-                )}
-                {posting.requirements.class && posting.requirements.class.length > 0 && (
-                  <p>• Class: {posting.requirements.class.join(', ')}</p>
-                )}
-                {posting.requirements.gpa && <p>• Minimum GPA: {posting.requirements.gpa}</p>}
-              </div>
+              {posting.is_general ? (
+                <div className="text-proph-grey-text italic">
+                  No specific requirements - open to all qualified players
+                </div>
+              ) : (
+                <div className="space-y-2 text-base text-proph-white">
+                  {(() => {
+                    // Get height in display format (check heightInches first, then fall back to height string)
+                    const heightDisplay = (posting.requirements as any)?.heightInches 
+                      ? formatHeight((posting.requirements as any).heightInches)
+                      : posting.requirements.height || null;
+                    return heightDisplay && <p>• Height: {heightDisplay}</p>;
+                  })()}
+                  {posting.requirements.classYear !== undefined && posting.requirements.classYear !== null && (
+                    <p>• Class: {posting.requirements.classYear === 0 ? 'Eligible next season' : String(posting.requirements.classYear)}</p>
+                  )}
+                  {posting.requirements.class && posting.requirements.class.length > 0 && (
+                    <p>• Class: {posting.requirements.class.join(', ')}</p>
+                  )}
+                  {posting.requirements.gpa && <p>• Minimum GPA: {posting.requirements.gpa}</p>}
+                </div>
+              )}
             </div>
 
             {posting.description && (

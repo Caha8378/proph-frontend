@@ -334,7 +334,7 @@ export const LandingPage2: React.FC = () => {
     <div className="min-h-screen bg-proph-black text-proph-white">
       {/* 1. STICKY HEADER */}
       <header className="sticky top-0 z-[70] bg-proph-grey/95 backdrop-blur-sm border-b border-proph-grey-text/20">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <button onClick={() => navigate('/')} className="active:scale-95 transition-transform">
             <h1 

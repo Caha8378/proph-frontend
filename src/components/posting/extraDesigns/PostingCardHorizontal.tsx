@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Posting } from '../../types';
+import type { Posting } from '../../../types';
 import { Clock } from 'lucide-react';
 
 interface PostingCardProps {

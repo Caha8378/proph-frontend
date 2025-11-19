@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X, ChevronLeft, Share2, Users } from 'lucide-react';
 import { PlayerCardFinal1 } from './PlayerCardFinal1';
-import { usePlayer } from '../../hooks';
+import { usePlayer, useNotification } from '../../hooks';
 import { trackEvent } from '../../api/notifications';
 import type { PlayerProfile } from '../../types';
 
@@ -24,6 +24,7 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
 }) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [entered, setEntered] = React.useState(false);
+  const { showNotification } = useNotification();
   
   // Fetch player data if playerId is provided (instead of player prop)
   // Only fetch if playerId is valid (not undefined/null/empty)
@@ -71,25 +72,74 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
   const handleShare = async () => {
     if (!player) return;
     
-    // Track card shared event
-    if (player.id) {
-      trackEvent({
-        eventType: 'card_shared',
-        targetUserId: player.id,
-        metadata: {
-          shareMethod: 'clipboard',
-          timestamp: new Date().toISOString(),
-        },
-      });
+    const url = `${window.location.origin}/p/${player.id}`;
+    const shareData = {
+      title: `${player.name}'s Profile`,
+      text: `Check out ${player.name}'s basketball profile`,
+      url: url,
+    };
+    
+    // Helper function to copy to clipboard and show notification
+    const copyToClipboard = async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        showNotification('Profile link copied to clipboard!', 'success');
+        
+        // Track clipboard share
+        if (player.id) {
+          trackEvent({
+            eventType: 'card_shared',
+            targetUserId: player.id,
+            metadata: {
+              shareMethod: 'clipboard',
+              timestamp: new Date().toISOString(),
+            },
+          });
+        }
+      } catch (err) {
+        console.error('Error copying to clipboard:', err);
+        showNotification('Failed to copy link. Please try again.', 'error');
+      }
+    };
+    
+    // Try native share API first (mobile/desktop with share support)
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        // Track successful native share
+        if (player.id) {
+          trackEvent({
+            eventType: 'card_shared',
+            targetUserId: player.id,
+            metadata: {
+              shareMethod: 'native',
+              timestamp: new Date().toISOString(),
+            },
+          });
+        }
+        return; // Successfully shared via native API
+      } catch (err: any) {
+        // User cancelled or error occurred - fall through to clipboard
+        if (err.name === 'AbortError') {
+          // User cancelled - copy to clipboard automatically
+          await copyToClipboard();
+          return;
+        } else {
+          // Other error, fall back to clipboard
+          console.error('Error sharing:', err);
+          await copyToClipboard();
+          return;
+        }
+      }
     }
     
+    // Fallback to clipboard (if native share not available)
+    await copyToClipboard();
+    
+    // Call custom onShare handler if provided
     if (onShare) {
       onShare();
-      return;
     }
-    const url = `${window.location.origin}/?player=${player.id}`;
-    navigator.clipboard.writeText(url);
-    alert('Profile link copied to clipboard!');
   };
 
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {

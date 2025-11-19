@@ -123,15 +123,21 @@ export const CoachPostings: React.FC = () => {
     if (!editing) return;
     
     try {
-      // Convert frontend posting format to backend format
-      const updateData = {
-        position_title: updatedPosting.position || editing.position,
-        graduation_year: updatedPosting.requirements?.classYear || editing.requirements?.classYear || undefined,
-        min_height: (updatedPosting.requirements as any)?.heightInches || undefined, // Height in inches
-        gpa: updatedPosting.requirements?.gpa !== undefined ? updatedPosting.requirements.gpa : editing.requirements?.gpa,
-        position_description: updatedPosting.description !== undefined ? updatedPosting.description : editing.description,
-        application_deadline: updatedPosting.deadline || editing.deadline,
-      };
+      // For general postings, only send description
+      const isGeneralPosting = editing.is_general === true;
+      const updateData = isGeneralPosting
+        ? {
+            position_description: updatedPosting.description !== undefined ? updatedPosting.description : editing.description,
+          }
+        : {
+            // Convert frontend posting format to backend format
+            position_title: updatedPosting.position || editing.position,
+            graduation_year: updatedPosting.requirements?.classYear || editing.requirements?.classYear || undefined,
+            min_height: (updatedPosting.requirements as any)?.heightInches || undefined, // Height in inches
+            gpa: updatedPosting.requirements?.gpa !== undefined ? updatedPosting.requirements.gpa : editing.requirements?.gpa,
+            position_description: updatedPosting.description !== undefined ? updatedPosting.description : editing.description,
+            application_deadline: updatedPosting.deadline || editing.deadline,
+          };
 
       // Call API to update posting
       await postingsService.updatePosting(editing.id, updateData);

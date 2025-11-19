@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { Posting } from '../../types';
-import { X, ArrowLeft } from 'lucide-react';
+import { X, ArrowLeft, Info } from 'lucide-react';
 import { useNotification } from '../../hooks';
 
 // Helper functions for height conversion
@@ -83,6 +83,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
 
   if (!isOpen) return null;
 
+  const isGeneralPosting = posting?.is_general === true;
+
   const handleChange = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }));
   const handleReqChange = (key: string, value: any) => setForm(prev => ({ ...prev, requirements: { ...(prev.requirements || {}), [key]: value } }));
 
@@ -91,20 +93,30 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
     
     try {
       setSaving(true);
-      // Convert height to inches before saving
-      const heightInInches = (heightFeet > 0 || heightInches > 0) 
-        ? feetAndInchesToInches(heightFeet, heightInches) 
-        : undefined;
       
-      const formToSave = {
-        ...form,
-        requirements: {
-          ...form.requirements,
-          heightInches: heightInInches, // Store as heightInches for API
-        }
-      };
+      // For general postings, only send description
+      if (isGeneralPosting) {
+        const formToSave = {
+          description: form.description || posting.description,
+        };
+        await onSave(formToSave);
+      } else {
+        // Convert height to inches before saving
+        const heightInInches = (heightFeet > 0 || heightInches > 0) 
+          ? feetAndInchesToInches(heightFeet, heightInches) 
+          : undefined;
+        
+        const formToSave = {
+          ...form,
+          requirements: {
+            ...form.requirements,
+            heightInches: heightInInches, // Store as heightInches for API
+          }
+        };
+        
+        await onSave(formToSave);
+      }
       
-      await onSave(formToSave);
       showNotification('Posting updated successfully!', 'success');
     } catch (err: any) {
       console.error('Error updating posting:', err);
@@ -138,10 +150,31 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
 
           {/* Body */}
           <div className="h-[calc(85vh-180px)] overflow-y-auto p-4 space-y-4">
+            {/* Warning banner for general postings */}
+            {isGeneralPosting && (
+              <div className="bg-proph-purple/10 border border-proph-purple rounded-lg p-4 mb-2">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-proph-purple flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-proph-white">General Interest Posting</p>
+                    <p className="text-sm text-proph-grey-text mt-1">
+                      Only the description can be edited for general interest postings. 
+                      Title and requirements are fixed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Position */}
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Position *</label>
-              <select value={(form.position as string) || posting.position} onChange={(e) => handleChange('position', e.target.value)} className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white">
+              <select 
+                value={(form.position as string) || posting.position} 
+                onChange={(e) => handleChange('position', e.target.value)} 
+                disabled={isGeneralPosting}
+                className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
                 {['Point Guard','Shooting Guard','Small Forward','Power Forward','Center'].map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
@@ -150,22 +183,34 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
               <select
-                value={form.requirements?.classYear || ''}
+                value={form.requirements?.classYear !== undefined && form.requirements?.classYear !== null ? form.requirements.classYear : ''}
                 onChange={(e) => handleReqChange('classYear', e.target.value === '' ? undefined : Number(e.target.value))}
-                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+                disabled={isGeneralPosting}
+                className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <option value="">Select graduation year</option>
-                <option value="2025">2025</option>
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
                 <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="0">Any Eligibility Next Season</option>
               </select>
             </div>
 
             {/* GPA */}
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Minimum GPA</label>
-              <input type="number" step="0.1" min="0" max="4" value={(form.requirements?.gpa ?? posting.requirements.gpa) as any} onChange={(e) => handleReqChange('gpa', e.target.value === '' ? undefined : Number(e.target.value))} className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" placeholder="e.g., 3.0" />
+              <input 
+                type="number" 
+                step="0.1" 
+                min="0" 
+                max="4" 
+                value={(form.requirements?.gpa ?? posting.requirements.gpa) as any} 
+                onChange={(e) => handleReqChange('gpa', e.target.value === '' ? undefined : Number(e.target.value))} 
+                disabled={isGeneralPosting}
+                className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                placeholder="e.g., 3.0" 
+              />
             </div>
 
             {/* Height - Feet and Inches */}
@@ -180,7 +225,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                     max="8"
                     value={heightFeet || ''}
                     onChange={(e) => setHeightFeet(Number(e.target.value) || 0)}
-                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    disabled={isGeneralPosting}
+                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     placeholder="6"
                   />
                 </div>
@@ -192,7 +238,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                     max="11"
                     value={heightInches || ''}
                     onChange={(e) => setHeightInches(Number(e.target.value) || 0)}
-                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
+                    disabled={isGeneralPosting}
+                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     placeholder="2"
                   />
                 </div>
@@ -217,7 +264,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                   }
                 })()}
                 onChange={(e) => handleChange('deadline', e.target.value)} 
-                className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white" 
+                disabled={isGeneralPosting}
+                className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
             </div>
 

@@ -12,6 +12,7 @@ import { SchoolPage } from './pages/SchoolPage';
 import { LandingPage } from './pages/LandingPage';
 import { LandingPage2 } from './pages/LandingPage2';
 import { MissionPage } from './pages/MissionPage';
+import { PlayerProfileRedirect } from './pages/PlayerProfileRedirect';
 import { CoachHome } from './pages/coach/CoachHome';
 import { CoachPostings } from './pages/coach/CoachPostings';
 import { ReviewApplications } from './pages/coach/ReviewApplications';
@@ -167,6 +168,9 @@ function App() {
         
         {/* Public school page route */}
         <Route path="/school/:schoolId" element={<SchoolPage />} />
+        
+        {/* Public player profile redirect route */}
+        <Route path="/p/:playerId" element={<PlayerProfileRedirect />} />
       </Routes>
     </Router>
       </NotificationProvider>

@@ -32,7 +32,7 @@ export const ProfilePage: React.FC = () => {
     }
     
     // Generate shareable link
-    const link = `https://proph.com/p/${profile.id}`;
+    const link = `https://tryproph.com/p/${profile.id}`;
     
     if (navigator.share) {
       navigator.share({

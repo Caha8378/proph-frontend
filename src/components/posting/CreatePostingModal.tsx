@@ -60,7 +60,7 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
       showNotification('Position is required', 'error');
       return;
     }
-    if (!form.requirements?.classYear) {
+    if (form.requirements?.classYear === undefined || form.requirements?.classYear === null) {
       showNotification('Graduation year is required', 'error');
       return;
     }
@@ -133,15 +133,16 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
               <select
-                value={form.requirements?.classYear || ''}
+                value={form.requirements?.classYear !== undefined && form.requirements?.classYear !== null ? form.requirements.classYear : ''}
                 onChange={(e) => handleReqChange('classYear', e.target.value === '' ? undefined : Number(e.target.value))}
                 className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
               >
                 <option value="">Select graduation year</option>
-                <option value="2025">2025</option>
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
                 <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="0">Any Eligibility Next Season</option>
               </select>
             </div>
 

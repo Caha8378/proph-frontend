@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Posting } from '../../types';
-import { Clock } from 'lucide-react';
+import { Clock, Target } from 'lucide-react';
 import { useAuth } from '../../context/authContext';
 import * as postingsService from '../../api/postings';
 
@@ -39,7 +39,9 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
 
   const reqString = [
     heightDisplay,
-    req.classYear ? `Class ${req.classYear}` : null,
+    req.classYear !== undefined && req.classYear !== null
+      ? (req.classYear === 0 ? 'Eligible next season' : `Class ${req.classYear}`)
+      : null,
     req.gpa ? `${req.gpa} GPA` : null
   ].filter(Boolean).join(' • ');
 
@@ -73,7 +75,11 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
   }, [posting.id, user, hasApplied]);
 
   return (
-    <div className="bg-proph-grey rounded-2xl p-2 md:p-4 border border-proph-grey-text/20 w-full max-w-[600px] mx-auto cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>
+    <div className={`bg-proph-grey rounded-2xl p-2 md:p-4 w-full max-w-[600px] mx-auto cursor-pointer ${
+      posting.is_general 
+        ? 'border-2 border-proph-purple bg-proph-purple/5' 
+        : 'border border-proph-grey-text/20'
+    }`} onClick={() => navigate(`/posting/${posting.id}`)}>
       <div className="flex gap-3 md:gap-4 items-center">
         {/* Logo left */}
         {posting.school.logo && (
@@ -90,7 +96,14 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="mb-0.5">
-            <h3 className="text-sm md:text-base font-bold text-proph-white truncate">{posting.school.name}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm md:text-base font-bold text-proph-white truncate">{posting.school.name}</h3>
+              {posting.is_general && (
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-proph-purple/20 border border-proph-purple rounded-full">
+                  <span className="text-xs font-semibold text-proph-purple">Open to All</span>
+                </div>
+              )}
+            </div>
             {posting.school.division && (
               <p className="text-xs md:text-sm text-proph-grey-text truncate">
                 {[posting.school.division, posting.school.conference].filter(Boolean).join(' • ')}
@@ -99,7 +112,10 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
           </div>
 
           {/* Position */}
-          <h4 className="text-base md:text-lg font-extrabold text-proph-white">{posting.position}</h4>
+          <div className="flex items-center gap-2">
+            {posting.is_general}
+            <h4 className="text-base md:text-lg font-extrabold text-proph-white">{posting.position}</h4>
+          </div>
 
           {/* Requirements line */}
           {reqString && (

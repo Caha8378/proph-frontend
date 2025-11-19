@@ -329,7 +329,7 @@ export const updatePosting = async (postingId: string | number, data: UpdatePost
 
 /**
  * Check if player is eligible to apply to a posting
- * Backend endpoint: GET /api/postings/:postingId/can-apply
+ * Backend endpoint: GET /postings/:postingId/can-apply
  * Authentication: Required (player must be authenticated)
  */
 export interface EligibilityResponse {
@@ -345,7 +345,7 @@ export interface EligibilityResponse {
 
 export const checkEligibility = async (postingId: string | number): Promise<EligibilityResponse> => {
   try {
-    const response = await apiClient.get<EligibilityResponse>(`/api/postings/${postingId}/can-apply`);
+    const response = await apiClient.get<EligibilityResponse>(`/postings/${postingId}/can-apply`);
     return response.data;
   } catch (error: any) {
     // Handle 404 for player profile not found or posting not found
@@ -501,6 +501,8 @@ function convertBackendPostingToFrontend(backendPosting: Posting): FrontendPosti
     createdAt: backendPosting.created_at || new Date().toISOString(),
     status: backendPosting.is_active ? 'active' : 'expired',
     hasApplied,
+    is_general: (backendPosting as any).is_general === true || (backendPosting as any).is_general === 1,
+    can_delete: (backendPosting as any).can_delete !== false && (backendPosting as any).can_delete !== 0,
   };
 }
 

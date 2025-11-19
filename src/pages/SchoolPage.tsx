@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // import { Header } from '../components/layout/Header';
 import { PostingCardHorizontalMini } from '../components/posting/PostingCardHorizontalMini';
 import { ApplyModalMinC } from '../components/application/ApplyModalMinC';
 import { EmptyState } from '../components/common/EmptyState';
-import { FileText, Share2, ChevronLeft, LogIn, UserPlus } from 'lucide-react';
+import { FileText, Share2, ChevronLeft, LogIn, UserPlus, Target } from 'lucide-react';
 import { useAuth } from '../context/authContext';
+import { useNotification } from '../hooks';
 import * as postingsService from '../api/postings';
 import type { Posting, School } from '../types';
 
@@ -13,6 +14,7 @@ export const SchoolPage: React.FC = () => {
   const { schoolId } = useParams<{ schoolId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showNotification } = useNotification();
   
   const [school, setSchool] = useState<School | null>(null);
   const [postings, setPostings] = useState<Posting[]>([]);
@@ -48,7 +50,7 @@ export const SchoolPage: React.FC = () => {
   const handleShare = () => {
     const url = `${window.location.origin}/school/${schoolId}`;
     navigator.clipboard.writeText(url);
-    alert('School page link copied to clipboard!');
+    showNotification('School page link copied to clipboard!', 'success');
   };
 
   const handleApply = (postingId: string) => {
@@ -62,7 +64,7 @@ export const SchoolPage: React.FC = () => {
       }
       if (user.role !== 'player') {
         // Logged in but not a player - show message or redirect
-        alert('Only players can apply to postings. Please sign up as a player to apply.');
+        showNotification('Only players can apply to postings. Please sign up as a player to apply.', 'error');
         return;
       }
       // Player can apply - open modal
@@ -82,6 +84,20 @@ export const SchoolPage: React.FC = () => {
     }
     setSelectedPosting(null);
   };
+
+  // Sort postings by created date (newest first)
+  const sortedPostings = useMemo(() => {
+    return [...postings].sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [postings]);
+
+  // Separate general and specific postings
+  const generalPostings = sortedPostings.filter(p => p.is_general && p.status === 'active');
+  const specificPostings = sortedPostings.filter(p => !p.is_general && p.status === 'active');
+  const expiredPostings = sortedPostings.filter(p => p.status === 'expired');
 
   if (loading) {
     return (
@@ -171,8 +187,8 @@ export const SchoolPage: React.FC = () => {
         </div>
 
         {/* Postings List */}
-        <div className="space-y-4">
-          {postings.length === 0 ? (
+        <div className="space-y-6">
+          {sortedPostings.length === 0 ? (
             <EmptyState
               icon={FileText}
               title="No postings available"
@@ -180,29 +196,62 @@ export const SchoolPage: React.FC = () => {
             />
           ) : (
             <>
-              <h2 className="text-sm font-semibold text-proph-grey-text">
-                ACTIVE POSTINGS ({postings.filter(p => p.status === 'active').length})
-              </h2>
-              {postings.filter(p => p.status === 'active').map((posting) => (
-                <PostingCardHorizontalMini
-                  key={posting.id}
-                  posting={posting}
-                  onApply={handleApply}
-                />
-              ))}
+              {/* Position-Specific Postings Section */}
+              {specificPostings.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-bold text-proph-white mb-4">Open Opportunities</h2>
+                  <div className="space-y-4">
+                    {specificPostings.map((posting) => (
+                      <PostingCardHorizontalMini
+                        key={posting.id}
+                        posting={posting}
+                        onApply={handleApply}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {postings.filter(p => p.status === 'expired').length > 0 && (
+              {/* Divider if both types exist */}
+              {generalPostings.length > 0 && specificPostings.length > 0 && (
+                <div className="border-t border-proph-grey-text/20 my-6" />
+              )}
+
+              {/* General Interest Postings Section */}
+              {generalPostings.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Target className="w-5 h-5 text-proph-purple" />
+                    <h2 className="text-xl font-bold text-proph-white">General Interest</h2>
+                  </div>
+                  <div className="space-y-4">
+                    {generalPostings.map((posting) => (
+                      <PostingCardHorizontalMini
+                        key={posting.id}
+                        posting={posting}
+                        onApply={handleApply}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Expired Postings */}
+              {expiredPostings.length > 0 && (
                 <>
-                  <h2 className="text-sm font-semibold text-proph-grey-text pt-4">
-                    EXPIRED ({postings.filter(p => p.status === 'expired').length})
+                  <div className="border-t border-proph-grey-text/20 my-6" />
+                  <h2 className="text-sm font-semibold text-proph-grey-text">
+                    EXPIRED ({expiredPostings.length})
                   </h2>
-                  {postings.filter(p => p.status === 'expired').map((posting) => (
-                    <PostingCardHorizontalMini
-                      key={posting.id}
-                      posting={posting}
-                      onApply={handleApply}
-                    />
-                  ))}
+                  <div className="space-y-4">
+                    {expiredPostings.map((posting) => (
+                      <PostingCardHorizontalMini
+                        key={posting.id}
+                        posting={posting}
+                        onApply={handleApply}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
             </>

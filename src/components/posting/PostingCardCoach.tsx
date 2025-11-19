@@ -32,16 +32,33 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
     <div className="bg-proph-grey rounded-2xl p-4 md:p-6 border border-proph-grey-text/20 relative max-w-[600px] mx-auto">
       {/* Top row: status + actions */}
       <div className="flex items-start justify-between mb-3 md:mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {posting.status && <PostingStatusBadge status={posting.status} />}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => onEdit(posting.id)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Edit posting">
             <Pencil className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
           </button>
-          <button onClick={() => onDelete(posting)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
-            <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
-          </button>
+          {(posting.is_general || !posting.can_delete) ? (
+            <div className="relative group">
+              <button 
+                disabled 
+                className="p-2 md:p-2.5 rounded-lg opacity-50 cursor-not-allowed" 
+                aria-label="Delete posting (protected)"
+              >
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
+              </button>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
+                <div className="bg-proph-black text-proph-white text-xs rounded py-1 px-2 whitespace-nowrap border border-proph-grey-text/20">
+                  General interest postings cannot be deleted
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => onDelete(posting)} className="p-2 md:p-2.5 rounded-lg hover:bg-proph-grey-light" aria-label="Delete posting">
+              <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-proph-white" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -76,7 +93,9 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
 
       {/* Requirements inline */}
       <p className="text-xs md:text-sm text-proph-grey-text mb-3 md:mb-4">
-        {[heightDisplay, posting.requirements.classYear ? `Class of ${posting.requirements.classYear}` : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
+        {[heightDisplay, posting.requirements.classYear !== undefined && posting.requirements.classYear !== null 
+          ? (posting.requirements.classYear === 0 ? 'Eligible next season' : `Class of ${posting.requirements.classYear}`)
+          : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
           .filter(Boolean)
           .join(' • ')}
       </p>

@@ -27,6 +27,8 @@ export interface Posting {
   coachName: string;
   createdAt: string;
   status?: 'active' | 'expired' | 'filled' | 'draft';
+  is_general?: boolean; // General interest posting (open to all players)
+  can_delete?: boolean; // Whether coach can delete this posting
 }
 
 export interface PlayerProfile {

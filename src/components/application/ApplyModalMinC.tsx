@@ -121,6 +121,17 @@ export const ApplyModalMinC: React.FC<Props> = ({ open, posting, onSuccess, onCl
 
             <div className="p-6 flex-1 overflow-y-auto">
               <div className="space-y-2">
+                {posting.is_general ? (
+                  <p className="text-proph-grey-text text-sm mb-3">
+                    You're applying to the general interest posting for {posting.school.name}. 
+                    The coaching staff will review your full profile and reach out if there's 
+                    a potential fit for their program.
+                  </p>
+                ) : (
+                  <p className="text-proph-grey-text text-sm mb-3">
+                    You're applying for the {posting.position} position at {posting.school.name}.
+                  </p>
+                )}
                 <textarea 
                   value={message} 
                   onChange={(e) => { if (e.target.value.length <= 250) setMessage(e.target.value); }} 

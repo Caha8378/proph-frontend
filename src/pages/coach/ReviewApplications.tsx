@@ -3,7 +3,7 @@ import { Header } from '../../components/layout/Header';
 import { CoachBottomNav } from '../../components/layout/CoachBottomNav';
 import { ApplicationCardCoach } from '../../components/application/ApplicationCardCoach';
 import { EmptyState } from '../../components/common/EmptyState';
-import { Inbox, ChevronDown, ChevronUp } from 'lucide-react';
+import { Inbox, ChevronDown, ChevronUp, Target } from 'lucide-react';
 import { PlayerProfileModal } from '../../components/player/PlayerProfileModal';
 import { AcceptModal } from '../../components/application/AcceptModal';
 import { RejectModal } from '../../components/application/RejectModal';
@@ -81,6 +81,22 @@ export const ReviewApplications: React.FC = () => {
     
     return grouped;
   }, [pendingApplications, postingsWithZeroApps]);
+
+  // Get posting info (including is_general) for display
+  const getPostingInfo = (postingId: string) => {
+    const app = pendingApplications.find(a => a.posting.id === postingId);
+    if (app) {
+      return { name: app.posting.position, is_general: app.posting.is_general };
+    }
+    const zeroAppPosting = postingsWithZeroApps.find(p => String(p.posting.id) === postingId);
+    if (zeroAppPosting) {
+      return { 
+        name: zeroAppPosting.posting.position_title, 
+        is_general: (zeroAppPosting.posting as any).is_general 
+      };
+    }
+    return { name: 'Unknown Posting', is_general: false };
+  };
 
   // Get posting display name (just position, no school name)
   const getPostingName = (postingId: string) => {
@@ -233,9 +249,19 @@ export const ReviewApplications: React.FC = () => {
           ) : applicationsByPosting.size === 0 && postingsWithZeroApps.length === 0 ? (
             <EmptyState icon={Inbox} title="No pending applications" description="All applications have been reviewed" />
           ) : (
-            Array.from(applicationsByPosting.entries()).map(([postingId, applications]) => {
+            Array.from(applicationsByPosting.entries())
+              .sort(([aId], [bId]) => {
+                // Sort general postings first
+                const aInfo = getPostingInfo(aId);
+                const bInfo = getPostingInfo(bId);
+                if (aInfo.is_general && !bInfo.is_general) return -1;
+                if (!aInfo.is_general && bInfo.is_general) return 1;
+                return 0;
+              })
+              .map(([postingId, applications]) => {
               const isExpanded = expandedPostings.has(postingId);
               const postingName = getPostingName(postingId);
+              const postingInfo = getPostingInfo(postingId);
               
               return (
                 <div key={postingId} className="bg-transparent overflow-hidden">
@@ -244,7 +270,15 @@ export const ReviewApplications: React.FC = () => {
                     onClick={() => togglePosting(postingId)}
                     className="w-full p-3 flex items-center justify-between hover:bg-proph-grey-light/20 rounded-lg transition-colors"
                   >
-                    <h3 className="text-lg font-bold text-proph-white">{postingName}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold text-proph-white">{postingName}</h3>
+                      {postingInfo.is_general && (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-proph-purple/20 border border-proph-purple rounded-full">
+                          <Target className="w-3 h-3 text-proph-purple" />
+                          <span className="text-xs font-semibold text-proph-purple">General</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-proph-grey-text">
                         {getApplicationCount(postingId)} {getApplicationCount(postingId) === 1 ? 'application' : 'applications'}

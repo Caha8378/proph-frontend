@@ -96,7 +96,7 @@ export function formatHeight(inches: number): string {
  * @returns Proph share link
  */
 export function generateShareLink(playerId: string): string {
-  return `https://proph.com/p/${playerId}`;
+  return `https://tryproph.com/p/${playerId}`;
 }
 
 /**
