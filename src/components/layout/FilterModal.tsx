@@ -3,7 +3,6 @@ import { X, Check, ChevronDown, Search } from 'lucide-react';
 
 export interface Filters {
   state?: string[];
-  region?: string[];
   division?: string[];
   qualifyOnly?: boolean;
 }
@@ -25,7 +24,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const [selectedDivisions, setSelectedDivisions] = useState<string[]>(initialFilters.division || []);
   const [selectedStates, setSelectedStates] = useState<string[]>(initialFilters.state || []);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>(initialFilters.region || []);
   const [qualifyOnly, setQualifyOnly] = useState<boolean>(initialFilters.qualifyOnly || false);
   const [stateDropdownOpen, setStateDropdownOpen] = useState(false);
   const [stateSearchQuery, setStateSearchQuery] = useState('');
@@ -34,7 +32,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   useEffect(() => {
     setSelectedDivisions(initialFilters.division || []);
     setSelectedStates(initialFilters.state || []);
-    setSelectedRegions(initialFilters.region || []);
     setQualifyOnly(initialFilters.qualifyOnly || false);
   }, [initialFilters]);
 
@@ -59,7 +56,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
   ];
-  const regions = ['West', 'Midwest', 'South', 'Northeast'];
 
   // Filter states based on search query
   const filteredStates = useMemo(() => {
@@ -81,7 +77,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   const clearAll = () => {
     setSelectedDivisions([]);
     setSelectedStates([]);
-    setSelectedRegions([]);
     setQualifyOnly(false);
   };
 
@@ -89,7 +84,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     const filters: Filters = {
       division: selectedDivisions.length > 0 ? selectedDivisions : undefined,
       state: selectedStates.length > 0 ? selectedStates : undefined,
-      region: selectedRegions.length > 0 ? selectedRegions : undefined,
       qualifyOnly: qualifyOnly || undefined,
     };
     
@@ -256,25 +250,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Region */}
-          <div>
-            <p className={`${sectionClass} text-proph-yellow mb-3`}>Region</p>
-            <div className="flex flex-wrap gap-2">
-              {regions.map((region) => (
-                <button
-                  key={region}
-                  onClick={() => toggleSelection(region, selectedRegions, setSelectedRegions)}
-                  className={chipClass(selectedRegions.includes(region))}
-                >
-                  <span className="flex items-center gap-2">
-                    {selectedRegions.includes(region) && <Check className={variant === 'bold' ? 'w-5 h-5' : 'w-4 h-4'} />}
-                    {region}
-                  </span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Division */}

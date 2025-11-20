@@ -89,31 +89,9 @@ export const PlayerHomePage: React.FC = () => {
           />
         </div>
 
-        {/* Top Recruits Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-center">
-            <div>
-              <h2 className="text-2xl font-extrabold text-proph-white">Top Recruits</h2>
-            </div>
-          </div>
-          
-          {playersLoading ? (
-            <div className="flex items-center justify-center h-[650px]">
-              <p className="text-proph-grey-text">Loading players...</p>
-            </div>
-          ) : (
-            <PlayerAccordion 
-              players={mockPlayers}
-              autoRotate={true}
-              autoRotateInterval={4000}
-              onPlayerClick={(p) => { setSelectedPlayerProfile(p); setIsProfileOpen(true); }}
-            />
-          )}
-        </div>
-
         {/* Recommended Positions Section */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="max-w-[600px] mx-auto flex items-center justify-between">
             <div>
               <h2 className="text-xl font-black text-proph-white">Recommended Positions</h2>
               <p className="text-sm text-proph-grey-text">Positions matched to your profile</p>
@@ -122,7 +100,7 @@ export const PlayerHomePage: React.FC = () => {
               onClick={handleViewMorePostings}
               className="text-proph-purple hover:text-proph-purple-dark font-semibold text-sm transition-colors"
             >
-              View All →
+              View All Postings →
             </button>
           </div>
 
@@ -145,6 +123,28 @@ export const PlayerHomePage: React.FC = () => {
               ))
             )}
           </div>
+        </div>
+
+        {/* Top Recruits Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-center">
+            <div>
+              <h2 className="text-2xl font-extrabold text-proph-white">Top Recruits</h2>
+            </div>
+          </div>
+          
+          {playersLoading ? (
+            <div className="flex items-center justify-center h-[650px]">
+              <p className="text-proph-grey-text">Loading players...</p>
+            </div>
+          ) : (
+            <PlayerAccordion 
+              players={mockPlayers}
+              autoRotate={true}
+              autoRotateInterval={4000}
+              onPlayerClick={(p) => { setSelectedPlayerProfile(p); setIsProfileOpen(true); }}
+            />
+          )}
         </div>
       </main>
 

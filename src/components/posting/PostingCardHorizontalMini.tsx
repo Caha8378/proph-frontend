@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Posting } from '../../types';
-import { Clock, Target } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { useAuth } from '../../context/authContext';
 import * as postingsService from '../../api/postings';
 
@@ -19,7 +19,7 @@ interface PostingCardMiniProps {
   hasApplied?: boolean; // Legacy prop, will use posting.hasApplied if not provided
 }
 
-export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ posting, onApply, hasApplied: hasAppliedProp }) => {
+export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ posting, hasApplied: hasAppliedProp }) => {
   const due = new Date(posting.deadline).toLocaleString('en-US', { month: 'short', day: 'numeric' });
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -74,12 +74,31 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
     checkEligibility();
   }, [posting.id, user, hasApplied]);
 
+  // Determine application status text
+  const getApplicationStatus = (): string => {
+    if (hasApplied) {
+      return 'Applied';
+    }
+    if (isCheckingEligibility) {
+      return 'Checking...';
+    }
+    if (canApply === false) {
+      return 'Not Eligible';
+    }
+    return 'Open';
+  };
+
   return (
-    <div className={`bg-proph-grey rounded-2xl p-2 md:p-4 w-full max-w-[600px] mx-auto cursor-pointer ${
+    <div className={`bg-proph-grey rounded-2xl p-2 md:p-4 w-full max-w-[600px] mx-auto cursor-pointer relative ${
       posting.is_general 
         ? 'border-2 border-proph-purple bg-proph-purple/5' 
         : 'border border-proph-grey-text/20'
     }`} onClick={() => navigate(`/posting/${posting.id}`)}>
+      {/* Application Status - Top Right */}
+      <div className="absolute top-2 right-2 md:top-4 md:right-4">
+        <p className="text-xs text-proph-grey-text">{getApplicationStatus()}</p>
+      </div>
+
       <div className="flex gap-3 md:gap-4 items-center">
         {/* Logo left */}
         {posting.school.logo && (
@@ -95,7 +114,7 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
         {/* Content right */}
         <div className="flex-1 min-w-0">
           {/* Header */}
-          <div className="mb-0.5">
+          <div className="mb-0.5 pr-16 md:pr-20">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm md:text-base font-bold text-proph-white truncate">{posting.school.name}</h3>
               {posting.is_general && (
@@ -113,7 +132,6 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
 
           {/* Position */}
           <div className="flex items-center gap-2">
-            {posting.is_general}
             <h4 className="text-base md:text-lg font-extrabold text-proph-white">{posting.position}</h4>
           </div>
 
@@ -134,26 +152,15 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
               )}
             </div>
 
-            {hasApplied ? (
-              <button disabled className="flex-shrink-0 bg-white/10 text-proph-yellow text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg" onClick={(e) => e.stopPropagation()}>
-                Applied
-              </button>
-            ) : isCheckingEligibility ? (
-              <button disabled className="flex-shrink-0 bg-proph-grey-light text-proph-grey-text text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg" onClick={(e) => e.stopPropagation()}>
-                Checking...
-              </button>
-            ) : canApply === false ? (
-              <button disabled className="flex-shrink-0 bg-proph-grey-light text-proph-error text-xs md:text-sm font-bold px-3 md:px-4 py-1.5 md:py-2 rounded-lg opacity-50 cursor-not-allowed" onClick={(e) => e.stopPropagation()}>
-                Not Eligible
-              </button>
-            ) : (
-              <button
-                onClick={(e) => { e.stopPropagation(); onApply(posting.id); }}
-                className="flex-shrink-0 bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-[#E6D436] transition-colors"
-              >
-                APPLY
-              </button>
-            )}
+            <button
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                navigate(`/posting/${posting.id}`); 
+              }}
+              className="flex-shrink-0 bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-[#E6D436] transition-colors"
+            >
+              View Posting
+            </button>
           </div>
         </div>
       </div>
