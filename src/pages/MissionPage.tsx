@@ -32,10 +32,10 @@ export const MissionPage: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-20">
+      <main className="max-w-4xl mx-auto px-4 py-10">
         {/* Hero Section */}
-        <section className="mb-20">
-          <h1 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
+        <section className="mb-10">
+          <h1 className="text-3xl md:text-4xl font-black mb-6 leading-tight">
             We Built What We Wish Existed
           </h1>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
@@ -44,8 +44,8 @@ export const MissionPage: React.FC = () => {
         </section>
 
         {/* What We Believe */}
-        <section className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-black mb-8">What We Believe</h2>
+        <section className="mb-10">
+          <h2 className="text-2xl md:text-3xl font-black mb-8">What We Believe</h2>
           
           <ol className="space-y-4 text-base md:text-lg text-proph-grey-text leading-relaxed">
             <li className="flex gap-3">
@@ -72,16 +72,16 @@ export const MissionPage: React.FC = () => {
         </section> */}
 
         {/* The Mission */}
-        <section className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-black mb-6">The Mission</h2>
+        <section className="mb-15">
+          <h2 className="text-2xl md:text-3xl font-black mb-6">The Mission</h2>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
             We're on a mission to make recruiting transparent, accessible, and built on data — not connections.
           </p>
         </section>
 
         {/* Get in Touch */}
-        <section className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-black mb-6">Get in Touch</h2>
+        <section className="mb-15">
+          <h2 className="text-2xl md:text-3xl font-black mb-6">Get in Touch</h2>
           <p className="text-base md:text-lg text-proph-grey-text mb-4">
             Email: <a href="mailto:hello@tryproph.com" className="text-proph-yellow hover:text-proph-yellow/80 transition-colors">hello@tryproph.com</a>
           </p>
