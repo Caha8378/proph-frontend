@@ -6,7 +6,7 @@ import type { Notification } from '../../api/notifications';
 
 interface NotificationItemProps {
   notification: Notification;
-  onRead: (id: number) => void;
+  onDismiss: (id: number) => void;
   onClose: () => void;
 }
 
@@ -57,18 +57,13 @@ const formatTimestamp = (timestamp: string | undefined | null): string => {
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({ 
   notification, 
-  onRead, 
+  onDismiss, 
   onClose 
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const handleClick = async () => {
-    // Mark as read
-    if (!notification.is_read) {
-      await onRead(notification.id);
-    }
-    
     // Navigate to link if provided and not pointing to current user's profile
     if (notification.link) {
       // Don't navigate if link points to current user's profile (e.g., /profile/32 where 32 is current user ID)
@@ -91,12 +86,9 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   };
 
   // Handle dismiss without navigating
-  const handleDismiss = async (e: React.MouseEvent) => {
+  const handleDismissClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering handleClick
-    
-    if (!notification.is_read) {
-      await onRead(notification.id);
-    }
+    onDismiss(notification.id);
   };
 
   return (
@@ -136,16 +128,14 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
         </div>
       </div>
 
-      {/* Dismiss button (X) - only show if unread */}
-      {!notification.is_read && (
-        <button
-          onClick={handleDismiss}
-          className="flex-shrink-0 p-1 hover:bg-proph-grey rounded-lg transition-colors group ml-2"
-          aria-label="Dismiss notification"
-        >
-          <X className="w-4 h-4 text-proph-grey-text group-hover:text-proph-white" />
-        </button>
-      )}
+      {/* Dismiss button (X) - always visible */}
+      <button
+        onClick={handleDismissClick}
+        className="flex-shrink-0 p-1 hover:bg-proph-grey rounded-lg transition-colors group ml-2"
+        aria-label="Dismiss notification"
+      >
+        <X className="w-4 h-4 text-proph-grey-text group-hover:text-proph-white" />
+      </button>
     </div>
   );
 };

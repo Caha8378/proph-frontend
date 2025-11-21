@@ -30,11 +30,35 @@ export const formatTime = (timestamp: string): string => {
 
 // Check if timestamp should be shown
 export const shouldShowTimestamp = (
-  currentMsg: { timestamp: string },
-  previousMsg?: { timestamp: string },
+  currentMsg: { timestamp: string; senderId?: string },
+  previousMsg?: { timestamp: string; senderId?: string },
 ): boolean => {
+  // Always show timestamp for first message
   if (!previousMsg) return true;
-  const diffMinutes = (new Date(currentMsg.timestamp).getTime() - new Date(previousMsg.timestamp).getTime()) / 60000;
-  return diffMinutes > 5;
+  
+  // Show timestamp if messages are from different senders
+  // (This helps distinguish who sent what)
+  if (currentMsg.senderId && previousMsg.senderId && currentMsg.senderId !== previousMsg.senderId) {
+    return true;
+  }
+  
+  // Show timestamp if more than 1 minute has passed (reduced from 5 minutes for better UX)
+  try {
+    const currentTime = new Date(currentMsg.timestamp).getTime();
+    const previousTime = new Date(previousMsg.timestamp).getTime();
+    
+    // Validate timestamps
+    if (isNaN(currentTime) || isNaN(previousTime)) {
+      console.warn('Invalid timestamp in shouldShowTimestamp:', { currentMsg, previousMsg });
+      return true; // Show timestamp if parsing fails
+    }
+    
+    const diffMinutes = (currentTime - previousTime) / 60000;
+    return diffMinutes > 1;
+  } catch (error) {
+    // If timestamp parsing fails, show it anyway
+    console.warn('Error parsing timestamp in shouldShowTimestamp:', error);
+    return true;
+  }
 };
 

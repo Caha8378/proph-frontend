@@ -12,8 +12,12 @@ export interface BackendMessage {
   conversation_id: number;
   sender_user_id: number;
   message_text: string;
-  sent_at: string;
+  sent_at: string; // This is the timestamp field from the database
   read_at?: string | null;
+  // Additional fields that may be returned from the backend query
+  sender_name?: string;
+  sender_image?: string;
+  sender_role?: 'player' | 'coach';
   [key: string]: any;
 }
 
@@ -84,7 +88,13 @@ export const getMessages = async (conversationId: string | number): Promise<Back
   try {
     const response = await apiClient.get<ConversationMessagesResponse>(`/messages/conversations/${conversationId}`);
     // Backend returns { conversation_id, participant, messages }
-    return response.data.messages || [];
+    const messages = response.data.messages || [];
+    // Ensure conversation_id is set on each message if missing
+    const conversationIdNum = typeof conversationId === 'string' ? parseInt(conversationId, 10) : conversationId;
+    return messages.map(msg => ({
+      ...msg,
+      conversation_id: msg.conversation_id || conversationIdNum,
+    }));
   } catch (error: any) {
     throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch messages');
   }
@@ -186,12 +196,19 @@ export const getUnreadCount = async (): Promise<number> => {
 export function convertBackendMessageToFrontend(
   backendMessage: BackendMessage
 ): FrontendMessage {
+  // Ensure sent_at is available - use current time as fallback if missing
+  // Check both sent_at and any alternative field names that might be used
+  const timestamp = backendMessage.sent_at 
+    || (backendMessage as any).sentAt 
+    || (backendMessage as any).timestamp
+    || new Date().toISOString();
+  
   return {
     id: String(backendMessage.id),
     conversationId: String(backendMessage.conversation_id),
     senderId: String(backendMessage.sender_user_id),
     text: backendMessage.message_text,
-    timestamp: backendMessage.sent_at,
+    timestamp: timestamp,
     read: !!backendMessage.read_at,
   };
 }

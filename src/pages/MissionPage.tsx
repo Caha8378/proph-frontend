@@ -80,7 +80,7 @@ export const MissionPage: React.FC = () => {
         {/* The Mission */}
         <section className="mb-20">
           <h2 className="text-3xl md:text-4xl font-black mb-6">The Mission</h2>
-          <p className="text-xl md:text-2xl text-proph-white font-semibold leading-relaxed">
+          <p className="text-lg md:text-xl text-proph-white font-semibold leading-relaxed">
             Make recruiting transparent, accessible, and built on data — not connections.
           </p>
           {/* <p className="mt-4 text-base md:text-lg text-proph-grey-text leading-relaxed">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Bell } from 'lucide-react';
 import { NotificationItem } from './NotificationItem';
-import { getNotifications, markAsRead, markAllAsRead } from '../../api/notifications';
+import { getNotifications, markAllAsRead, dismissNotification, clearAllNotifications } from '../../api/notifications';
 import type { Notification } from '../../api/notifications';
 
 interface NotificationsDropdownProps {
@@ -17,11 +17,12 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dismissingIds, setDismissingIds] = useState<Set<number>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      fetchNotifications();
+      fetchAndMarkAsRead();
     }
   }, [isOpen]);
 
@@ -59,11 +60,30 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     };
   }, [isOpen, onClose]);
 
-  const fetchNotifications = async () => {
+  const fetchAndMarkAsRead = async () => {
     setLoading(true);
     try {
+      // Fetch notifications
       const data = await getNotifications();
       setNotifications(data);
+      
+      // Auto-mark all as read when modal opens
+      if (data.length > 0) {
+        try {
+          await markAllAsRead();
+          // Update local state to mark all as read
+          setNotifications(prev => 
+            prev.map(n => ({ ...n, is_read: true }))
+          );
+          // Clear unread badge count
+          if (onCountChange) {
+            onCountChange();
+          }
+        } catch (error) {
+          console.error('Error marking all as read:', error);
+          // Continue even if marking as read fails
+        }
+      }
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -71,45 +91,63 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     }
   };
 
-  const handleMarkAsRead = async (id: number) => {
+  const handleDismiss = async (id: number) => {
+    // Optimistic update - mark as dismissing for animation
+    setDismissingIds(prev => new Set(prev).add(id));
+    
+    // Remove from UI after animation
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      setDismissingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 300); // Match animation duration
+    
     try {
-      await markAsRead(id);
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, is_read: true } : n)
-      );
-      
+      await dismissNotification(id);
       // Refresh badge count
       if (onCountChange) {
         onCountChange();
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error dismissing notification:', error);
+      // Revert optimistic update on error
+      setDismissingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      // Refetch to get accurate state
+      fetchAndMarkAsRead();
     }
   };
 
-  const handleMarkAllAsRead = async () => {
+  const handleClearAll = async () => {
+    // Confirmation prompt
+    const confirmed = window.confirm('Clear all notifications?');
+    if (!confirmed) return;
+    
+    // Optimistic update
+    const previousNotifications = notifications;
+    setNotifications([]);
+    
     try {
-      await markAllAsRead();
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
-      
+      const response = await clearAllNotifications();
+      console.log(`Cleared ${response.dismissed_count} notifications`);
       // Refresh badge count
       if (onCountChange) {
         onCountChange();
       }
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error('Error clearing all notifications:', error);
+      // Revert on error
+      setNotifications(previousNotifications);
     }
   };
 
   if (!isOpen) return null;
-
-  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
     <div className="fixed inset-0 z-[60] md:relative md:inset-auto md:z-50">
@@ -147,44 +185,61 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-proph-yellow border-t-transparent" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4">
-              <Bell className="w-12 h-12 text-proph-grey-text mb-3" />
-              <p className="text-proph-grey-text text-center">No notifications yet</p>
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <Bell className="w-16 h-16 text-proph-grey-text mb-4" />
+              <p className="text-lg font-semibold text-proph-white mb-1">No notifications</p>
+              <p className="text-sm text-proph-grey-text">We'll notify you when something happens</p>
             </div>
           ) : (
             <div className="divide-y divide-proph-grey-text/10">
               {notifications.map(notification => (
-                <NotificationItem
+                <div
                   key={notification.id}
-                  notification={notification}
-                  onRead={handleMarkAsRead}
-                  onClose={onClose}
-                />
+                  className={`
+                    transition-all duration-300 ease-in-out
+                    ${dismissingIds.has(notification.id) 
+                      ? 'opacity-0 translate-x-full max-h-0 overflow-hidden' 
+                      : 'opacity-100 translate-x-0 max-h-96'
+                    }
+                  `}
+                >
+                  <NotificationItem
+                    notification={notification}
+                    onDismiss={handleDismiss}
+                    onClose={onClose}
+                  />
+                </div>
               ))}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        {notifications.length > 0 && (
-          <div className="p-4 border-t border-proph-grey-text/20 bg-proph-grey flex-shrink-0">
-            {unreadCount > 0 ? (
+        <div className="p-4 border-t border-proph-grey-text/20 bg-proph-grey flex-shrink-0">
+          {notifications.length > 0 ? (
+            <div className="flex gap-3">
               <button
-                onClick={handleMarkAllAsRead}
-                className="w-full py-3 bg-proph-yellow text-proph-black font-bold rounded-lg hover:bg-proph-yellow/90 transition-colors active:scale-95"
+                onClick={handleClearAll}
+                className="flex-1 py-3 bg-transparent border border-proph-error text-proph-error font-semibold rounded-lg hover:bg-proph-error/10 transition-colors active:scale-95"
               >
-                Mark All as Read
+                Clear All
               </button>
-            ) : (
               <button
                 onClick={onClose}
-                className="w-full py-3 bg-proph-grey-light text-proph-white font-semibold rounded-lg hover:bg-proph-grey transition-colors"
+                className="flex-1 py-3 bg-proph-yellow text-proph-black font-bold rounded-lg hover:bg-proph-yellow/90 transition-colors active:scale-95"
               >
                 Close
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          ) : (
+            <button
+              onClick={onClose}
+              className="w-full py-3 bg-proph-yellow text-proph-black font-bold rounded-lg hover:bg-proph-yellow/90 transition-colors active:scale-95"
+            >
+              Close
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

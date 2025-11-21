@@ -247,7 +247,7 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
                       onClose(); // Close profile modal when opening accept modal
                     }
                   }}
-                  className="flex-1 bg-proph-black text-proph-yellow font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-yellow/90 transition-colors flex items-center justify-center gap-2"
                 >
                   <Check className="w-3 h-3 md:w-4 md:h-4" />
                   Accept
@@ -259,7 +259,7 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({
                       onClose(); // Close profile modal when opening reject modal
                     }
                   }}
-                  className="flex-1 bg-proph-black text-proph-white font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-proph-black border border-proph-yellow text-proph-yellow font-semibold text-sm md:text-base py-2.5 md:py-3 px-4 md:px-6 rounded-lg hover:bg-proph-grey-light/40 transition-colors flex items-center justify-center gap-2"
                 >
                   <XIcon className="w-3 h-3 md:w-4 md:h-4" />
                   Dismiss

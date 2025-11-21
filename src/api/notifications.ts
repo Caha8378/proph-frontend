@@ -81,6 +81,37 @@ export const markAllAsRead = async (): Promise<void> => {
 };
 
 /**
+ * Dismiss/delete a specific notification
+ * Backend endpoint: DELETE /events/:id
+ */
+export const dismissNotification = async (eventId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/events/${eventId}`);
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.response?.data?.error || 'Failed to dismiss notification');
+  }
+};
+
+/**
+ * Clear all notifications
+ * Backend endpoint: DELETE /events/clear-all
+ * Returns: { success: true, dismissed_count: number }
+ */
+export interface ClearAllResponse {
+  success: boolean;
+  dismissed_count: number;
+}
+
+export const clearAllNotifications = async (): Promise<ClearAllResponse> => {
+  try {
+    const response = await apiClient.delete<ClearAllResponse>('/events/clear-all');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.response?.data?.error || 'Failed to clear all notifications');
+  }
+};
+
+/**
  * Track frontend-triggered events
  * Backend endpoint: POST /events/track
  * Body: { eventType, targetUserId, metadata }
