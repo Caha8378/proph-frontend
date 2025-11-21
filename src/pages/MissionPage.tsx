@@ -42,7 +42,7 @@ export const MissionPage: React.FC = () => {
             The smartest path from high school hoops to college ball.
           </p>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
-            We're Carter and Coby. We saw the recruiting process first-hand and knew this needed to exist.
+            We're Proph. We saw the recruiting process first-hand and knew this needed to exist.
           </p>
           <p className="mt-6 text-base md:text-lg text-proph-white font-semibold leading-relaxed">
             Recruiting shouldn't feel like guessing in the dark.

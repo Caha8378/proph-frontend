@@ -384,7 +384,7 @@ export const LandingPage2: React.FC = () => {
           </div>
 
           {/* Hero Headline */}
-          <h2 className="text-[clamp(1.25rem,3.5vw,3.5rem)] font-black leading-[1.1] mb-6 px-4 text-center">
+          <h2 className="text-[clamp(1rem,2.8vw,2.8rem)] font-black leading-[1.1] mb-6 px-4 text-center">
             Every player has the right fit.<br />Find yours here.
           </h2>
 
