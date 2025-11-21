@@ -38,14 +38,8 @@ export const MissionPage: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
             We Built What We Wish Existed
           </h1>
-          <p className="text-xl md:text-2xl text-proph-grey-text mb-8">
-            The smartest path from high school hoops to college ball.
-          </p>
           <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
-            We're Proph. We saw the recruiting process first-hand and knew this needed to exist.
-          </p>
-          <p className="mt-6 text-base md:text-lg text-proph-white font-semibold leading-relaxed">
-            Recruiting shouldn't feel like guessing in the dark.
+            We're Carter and Coby. We saw the recruiting process first hand and thought the same thing: there has to be a better way
           </p>
         </section>
 
@@ -56,15 +50,15 @@ export const MissionPage: React.FC = () => {
           <ol className="space-y-4 text-base md:text-lg text-proph-grey-text leading-relaxed">
             <li className="flex gap-3">
               <span className="text-proph-yellow font-bold flex-shrink-0">1.</span>
-              <span>Every player deserves to know where they fit — no more guessing if you're good enough.</span>
+              <span>Whether you're a D3 prospect in a small town or a D1 prospect in a major city, you deserve a REAL shot</span>
             </li>
             <li className="flex gap-3">
               <span className="text-proph-yellow font-bold flex-shrink-0">2.</span>
-              <span>D2/D3/NAIA players are underserved, and we're changing that.</span>
+              <span>Recruiting should work like a job search - based on fit, skills, and need</span>
             </li>
             <li className="flex gap-3">
               <span className="text-proph-yellow font-bold flex-shrink-0">3.</span>
-              <span>Algorithms don't replace relationships — they enable them.</span>
+              <span>Coaches need clarity too</span>
             </li>
           </ol>
         </section>
@@ -80,12 +74,9 @@ export const MissionPage: React.FC = () => {
         {/* The Mission */}
         <section className="mb-20">
           <h2 className="text-3xl md:text-4xl font-black mb-6">The Mission</h2>
-          <p className="text-lg md:text-xl text-proph-white font-semibold leading-relaxed">
-            Make recruiting transparent, accessible, and built on data — not connections.
+          <p className="text-base md:text-lg text-proph-grey-text leading-relaxed">
+            We're on a mission to make recruiting transparent, accessible, and built on data — not connections.
           </p>
-          {/* <p className="mt-4 text-base md:text-lg text-proph-grey-text leading-relaxed">
-            Whether you're a D3 prospect in a small town or a D1 prospect in a major city, you deserve a real shot.
-          </p> */}
         </section>
 
         {/* Get in Touch */}
@@ -95,7 +86,7 @@ export const MissionPage: React.FC = () => {
             Email: <a href="mailto:hello@tryproph.com" className="text-proph-yellow hover:text-proph-yellow/80 transition-colors">hello@tryproph.com</a>
           </p>
           <p className="text-base md:text-lg text-proph-grey-text">
-            We read every message.
+            We pride ourselves on getting back to everyone.
           </p>
         </section>
       </main>
