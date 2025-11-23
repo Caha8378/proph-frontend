@@ -39,10 +39,10 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
 
   const reqString = [
     heightDisplay,
+        req.gpa ? `${req.gpa} GPA` : null,
     req.classYear !== undefined && req.classYear !== null
       ? (req.classYear === 0 ? 'Eligible next season' : `Class ${req.classYear}`)
-      : null,
-    req.gpa ? `${req.gpa} GPA` : null
+      : null
   ].filter(Boolean).join(' • ');
 
   // Check eligibility for players

@@ -463,10 +463,15 @@ function convertBackendPostingToFrontend(backendPosting: Posting): FrontendPosti
 
   // Build requirements object
   // Handle both new schema (graduation_year) and old schema (graduation_year_min/max) for backwards compatibility
-  const graduationYear = backendPosting.graduation_year || backendPosting.graduation_year_min;
+  // Note: graduation_year can be 0 (meaning "any eligibility"), so we need to check for null/undefined explicitly
+  const graduationYear = backendPosting.graduation_year !== undefined && backendPosting.graduation_year !== null
+    ? backendPosting.graduation_year
+    : (backendPosting.graduation_year_min !== undefined && backendPosting.graduation_year_min !== null
+      ? backendPosting.graduation_year_min
+      : undefined);
   const requirements: FrontendPosting['requirements'] & { heightInches?: number } = {
     gpa: backendPosting.gpa || undefined,
-    classYear: graduationYear || undefined,
+    classYear: graduationYear, // Can be 0, so don't use || undefined
     // Store height in inches for frontend use (internal field for modals)
     heightInches: backendPosting.min_height || undefined,
   };
