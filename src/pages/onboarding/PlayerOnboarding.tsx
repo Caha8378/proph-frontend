@@ -130,7 +130,7 @@ export const PlayerOnboarding: React.FC = () => {
           heightInches: quizData.heightInches || '',
           weight: quizData.weight || '',
           classYear: quizData.graduationYear ? parseInt(quizData.graduationYear) : new Date().getFullYear() + 1,
-          gender: quizData.gender === 'male' ? 'Male' : quizData.gender === 'female' ? 'Female' : ''
+          gender: quizData.gender || '' // Keep lowercase 'male' or 'female'
         }));
 
         // Store gender separately for the backend registration call (use 'male'/'female' format)
@@ -306,7 +306,7 @@ export const PlayerOnboarding: React.FC = () => {
         height: height, // Total inches
         weight: profileData.weight ? parseInt(profileData.weight) : null,
         age: age, // Calculated from date of birth
-        gender: pendingGender || profileData.gender || null, // From quiz data or form, Male or Female
+        gender: pendingGender || profileData.gender || null, // Backend expects lowercase 'male' or 'female'
         clop: profileData.clop || null, // Current Level of Play
         division: profileData.division || null, // Division (for College or Varsity)
       school: profileData.highSchool,
@@ -651,29 +651,80 @@ export const PlayerOnboarding: React.FC = () => {
             <label className="block text-proph-white font-semibold text-sm mb-2">
               Gender <span className="text-proph-error">*</span>
             </label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Male"
-                  checked={profileData.gender === 'male'}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, gender: e.target.value }))}
-                  className="w-4 h-4 border-2 border-proph-grey-text/40 bg-proph-black text-proph-yellow focus:ring-2 focus:ring-proph-yellow/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer checked:bg-proph-yellow checked:border-proph-yellow"
-                />
-                <span className="text-proph-white text-sm group-hover:text-proph-yellow transition-colors">Male</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Female"
-                  checked={profileData.gender === 'female'}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, gender: e.target.value }))}
-                  className="w-4 h-4 border-2 border-proph-grey-text/40 bg-proph-black text-proph-yellow focus:ring-2 focus:ring-proph-yellow/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer checked:bg-proph-yellow checked:border-proph-yellow"
-                />
-                <span className="text-proph-white text-sm group-hover:text-proph-yellow transition-colors">Female</span>
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div
+                onClick={() => setProfileData(prev => ({ ...prev, gender: 'male' }))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setProfileData(prev => ({ ...prev, gender: 'male' }));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label="Select Male"
+                className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
+                  profileData.gender === 'male'
+                    ? 'border-proph-yellow bg-proph-yellow/5'
+                    : 'border-proph-grey-light hover:border-proph-yellow/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-proph-white text-lg mb-1">
+                      Male
+                    </p>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      profileData.gender === 'male'
+                        ? 'border-proph-yellow bg-proph-yellow'
+                        : 'border-proph-grey-text'
+                    }`}
+                  >
+                    {profileData.gender === 'male' && (
+                      <div className="w-3 h-3 rounded-full bg-proph-black" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setProfileData(prev => ({ ...prev, gender: 'female' }))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setProfileData(prev => ({ ...prev, gender: 'female' }));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label="Select Female"
+                className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
+                  profileData.gender === 'female'
+                    ? 'border-proph-yellow bg-proph-yellow/5'
+                    : 'border-proph-grey-light hover:border-proph-yellow/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-proph-white text-lg mb-1">
+                      Female
+                    </p>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      profileData.gender === 'female'
+                        ? 'border-proph-yellow bg-proph-yellow'
+                        : 'border-proph-grey-text'
+                    }`}
+                  >
+                    {profileData.gender === 'female' && (
+                      <div className="w-3 h-3 rounded-full bg-proph-black" />
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

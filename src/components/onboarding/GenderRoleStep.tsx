@@ -126,6 +126,15 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div
             onClick={() => onGenderChange('mens')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onGenderChange('mens');
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Select Men's Basketball"
             className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
               genderCoached === 'mens'
                 ? 'border-proph-yellow bg-proph-yellow/5'
@@ -157,6 +166,15 @@ export const GenderRoleStep: React.FC<GenderRoleStepProps> = ({
 
           <div
             onClick={() => onGenderChange('womens')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onGenderChange('womens');
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Select Women's Basketball"
             className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
               genderCoached === 'womens'
                 ? 'border-proph-yellow bg-proph-yellow/5'
