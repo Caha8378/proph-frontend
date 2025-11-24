@@ -127,13 +127,25 @@ export const LoginPage: React.FC = () => {
         localStorage.removeItem('pendingPassword');
         localStorage.removeItem('pendingRole');
         
-        // Get role from stored user
+        // Get role and account_status from stored user
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           try {
             const user = JSON.parse(storedUser);
             const accountType = user.account_type;
             userRole = accountType === 'fan' ? 'supporter' : accountType || 'player';
+            
+            // Check account_status and redirect to onboarding if inactive
+            const accountStatus = user.account_status || user.accountStatus;
+            if (accountStatus === 'inactive') {
+              if (accountType === 'coach') {
+                navigate('/onboarding/coach');
+                return;
+              } else if (accountType === 'player') {
+                navigate('/onboarding/player');
+                return;
+              }
+            }
           } catch (error) {
             console.error('Failed to parse user:', error);
           }

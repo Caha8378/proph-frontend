@@ -5,6 +5,7 @@ interface User {
   id: number;
   email: string;
   role: 'player' | 'coach' | 'supporter' | 'admin' | 'fan';
+  accountStatus: 'active' | 'inactive' | null; // From backend account_status
   verified: boolean;
   profileComplete: boolean;
   emailVerified: boolean;
@@ -37,10 +38,16 @@ const mapAccountTypeToRole = (accountType: string): 'player' | 'coach' | 'suppor
 
 // Convert backend user to frontend User format
 const convertBackendUser = (backendUser: authService.User): User => {
+  // Normalize account_status to 'active' | 'inactive' | null
+  const accountStatus = backendUser.account_status;
+  const normalizedAccountStatus: 'active' | 'inactive' | null = 
+    accountStatus === 'active' || accountStatus === 'inactive' ? accountStatus : null;
+  
   return {
     id: backendUser.id,
     email: backendUser.email,
     role: mapAccountTypeToRole(backendUser.account_type),
+    accountStatus: normalizedAccountStatus,
     verified: false, // Will be determined from profile data
     profileComplete: false, // Will be determined from profile data
     // Backend may return email_verified as 1/0 (number) or true/false (boolean)

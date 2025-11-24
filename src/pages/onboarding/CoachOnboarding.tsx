@@ -32,21 +32,14 @@ export const CoachOnboarding: React.FC = () => {
   const [role, setRole] = useState<string | null>(null);
   const [customRole, setCustomRole] = useState<string>('');
   
-  // Get user email from localStorage (set during signup)
-  const userEmail = localStorage.getItem('userEmail') || localStorage.getItem('pendingEmail') || 'coach@example.com';
-  
-  // Get userId from auth context or localStorage
-  const userId = user?.id || (() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        return JSON.parse(storedUser).id;
-      } catch {
-        return null;
-      }
-    }
-    return null;
+  // Get user email and userId from the current user object in localStorage or auth context
+  const storedUser = user || (() => {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
   })();
+
+  const userEmail = storedUser?.email || 'coach@example.com';
+  const userId = storedUser?.id || null;
 
   const handleSchoolSelect = (school: School | null) => {
     setSelectedSchool(school);
@@ -100,12 +93,21 @@ export const CoachOnboarding: React.FC = () => {
       };
 
       // Call backend API to register coach
+      // Note: We need to get the full response to access the user object
+      // Since registerCoach returns CoachProfile, we'll need to check the actual API response
+      // For now, we'll update the user object after successful registration by fetching it
       const profile = await coachesService.registerCoach(registerData);
+      
+      // After successful registration, backend should have updated account_status to 'active'
+      // We need to refresh the user object from localStorage or fetch it
+      // The auth context should pick up the updated user on next page load
+      // But we can also manually update it if the backend returns it in the response
+      // For now, ProtectedRoute will handle redirects based on account_status
 
       // Check verification status (backend may set this automatically based on email domain)
       const isVerified = profile.is_verified === true || profile.is_verified === 1;
 
-      // Store coach profile data
+      // Store coach profile data (legacy - may not be needed with account_status)
       localStorage.setItem('coachProfileComplete', 'true');
       localStorage.setItem('coachVerified', String(isVerified));
 

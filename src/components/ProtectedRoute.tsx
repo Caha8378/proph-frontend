@@ -41,6 +41,20 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo || '/'} replace />;
   }
 
+  // Check account_status and redirect to onboarding if inactive
+  // Skip this check if already on an onboarding page to prevent redirect loops
+  const currentPath = window.location.pathname;
+  const isOnboardingPage = currentPath.includes('/onboarding/');
+  
+  if (!isOnboardingPage && user.accountStatus === 'inactive') {
+    if (user.role === 'coach') {
+      return <Navigate to="/onboarding/coach" replace />;
+    } else if (user.role === 'player') {
+      return <Navigate to="/onboarding/player" replace />;
+    }
+    // For other roles (supporter/fan), account_status should be 'active' so no redirect needed
+  }
+
   // If role-based access control is specified
   if (allowedRoles && allowedRoles.length > 0) {
     // Check if user's role is allowed

@@ -10,17 +10,38 @@ import type { PlayerProfile } from '../types';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedRole, setSelectedRole] = useState<'player' | 'coach'>('player');
   const playerParam = searchParams.get('player');
   
-  // Redirect coaches to their home page
+  // Redirect logged-in users based on account_status
   useEffect(() => {
-    if (user && user.role === 'coach') {
-      navigate('/coach/home', { replace: true });
+    // Wait for auth to finish loading
+    if (loading) return;
+    
+    if (user) {
+      // If account_status is inactive, redirect to onboarding
+      if (user.accountStatus === 'inactive') {
+        if (user.role === 'coach') {
+          navigate('/onboarding/coach', { replace: true });
+        } else if (user.role === 'player') {
+          navigate('/onboarding/player', { replace: true });
+        }
+        return;
+      }
+      
+      // If account_status is active, redirect to appropriate home page
+      if (user.accountStatus === 'active') {
+        if (user.role === 'coach') {
+          navigate('/coach/home', { replace: true });
+        } else if (user.role === 'player') {
+          navigate('/player/home', { replace: true });
+        }
+        return;
+      }
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
   
   // Fetch random players for accordion
   const { players: featuredPlayers, loading: playersLoading } = useRandomPlayers(5);

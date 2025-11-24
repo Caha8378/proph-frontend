@@ -19,14 +19,8 @@ export const PlayerHomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Fetch player profile on mount to ensure profile photo is available in BottomNav
+  // Note: Redirect to onboarding is now handled by ProtectedRoute based on account_status
   const { profileNotFound } = useProfile();
-
-  // Redirect to onboarding if profile doesn't exist
-  useEffect(() => {
-    if (profileNotFound) {
-      navigate('/onboarding/player', { replace: true });
-    }
-  }, [profileNotFound, navigate]);
 
   // Fetch random players for accordion
   const { players: mockPlayers, loading: playersLoading } = useRandomPlayers(5);

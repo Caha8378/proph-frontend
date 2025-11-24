@@ -7,7 +7,6 @@ import { ConsolidatedHighStatWarning } from '../../components/onboarding/Consoli
 // import { VerificationSourceModal } from '../../components/onboarding/VerificationSourceModal'; // Kept for future use
 import { PlayerCardFinal1 } from '../../components/player/PlayerCardFinal1';
 import type { PlayerProfile } from '../../types';
-import { useAuth } from '../../context/authContext';
 import apiClient from '../../api/client';
 import { getPlayerProfile } from '../../api/players';
 
@@ -75,7 +74,6 @@ const getStatThresholds = () => {
 
 export const PlayerOnboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>('pledge');
   const [profileData, setProfileData] = useState<PlayerProfileData>({
     statsIntegrityCertified: false,
@@ -256,12 +254,28 @@ export const PlayerOnboarding: React.FC = () => {
 
   const handleCreateProfile = async () => {
     try {
-      // Get pending signup data
-      const pendingEmail = localStorage.getItem('pendingEmail');
-      const pendingPassword = localStorage.getItem('pendingPassword');
-      const pendingGender = localStorage.getItem('pendingGender');
-      
-      if (!pendingEmail || !pendingPassword) {
+      // Get user from localStorage
+      const storedUserString = localStorage.getItem('user');
+      if (!storedUserString) {
+        alert('Session expired. Please sign up again.');
+        navigate('/signup');
+        return;
+      }
+
+      let user: { id?: number; email?: string; account_type?: string; email_verified?: boolean } | null = null;
+      try {
+        user = JSON.parse(storedUserString);
+      } catch (error) {
+        console.error('Failed to parse user from localStorage:', error);
+        alert('Session expired. Please sign up again.');
+        navigate('/signup');
+        return;
+      }
+
+      const userEmail = user?.email;
+      const userId = user?.id || null;
+
+      if (!userEmail) {
         alert('Session expired. Please sign up again.');
         navigate('/signup');
         return;
@@ -286,27 +300,15 @@ export const PlayerOnboarding: React.FC = () => {
       
       setCurrentStep('processing');
       
-      // Get user ID if available (user may have signed up and have token stored)
-      const storedUser = localStorage.getItem('user');
-      let userId = null;
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          userId = user.id || null;
-        } catch (error) {
-          console.error('Failed to parse user from localStorage:', error);
-        }
-      }
-      
       // Build request body according to backend's standardized JSON format
       const requestBody = {
         userId: userId, // null for unclaimed profiles, or user ID if available
-        email: pendingEmail,
+        email: userEmail,
       name: profileData.name,
         height: height, // Total inches
         weight: profileData.weight ? parseInt(profileData.weight) : null,
         age: age, // Calculated from date of birth
-        gender: pendingGender || profileData.gender || null, // Backend expects lowercase 'male' or 'female'
+        gender: profileData.gender || null, // Backend expects lowercase 'male' or 'female' (from form)
         clop: profileData.clop || null, // Current Level of Play
         division: profileData.division || null, // Division (for College or Varsity)
       school: profileData.highSchool,
@@ -345,16 +347,17 @@ export const PlayerOnboarding: React.FC = () => {
       const registerData = response.data;
       console.log('Profile created:', registerData);
       
-      // Auto-login after profile creation
-      await login(pendingEmail, pendingPassword);
+      // Backend should return updated user object with account_status = 'active'
+      // Update user in localStorage if provided
+      if (registerData.user) {
+        const { normalizeBackendUser } = await import('../../api/auth');
+        const normalizedUser = normalizeBackendUser(registerData.user);
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+      }
       
-      // Clear pending data (security: remove password from localStorage)
-      localStorage.removeItem('pendingEmail');
-      localStorage.removeItem('pendingPassword');
-      localStorage.removeItem('pendingRole');
+      // User is already authenticated (has token from signup), no need to login again
       // Clean up quiz data
       localStorage.removeItem('quizData');
-      localStorage.removeItem('pendingGender');
       
       // Wait a moment for auth token to be set, then fetch the full profile
       // The backend returns algorithm data in the response, but we need the full profile for the card
@@ -410,7 +413,7 @@ export const PlayerOnboarding: React.FC = () => {
         act: fullProfile.act || (profileData.act ? parseInt(profileData.act) : undefined),
         highlightVideoLink: fullProfile.highlightVideoLink || profileData.highlightUrl || undefined,
         // Include contact info if available (for card display)
-        email: fullProfile.email || pendingEmail || undefined,
+        email: fullProfile.email || userEmail || undefined,
         phoneNumber: fullProfile.phoneNumber || undefined,
         statsIntegrityCertified: profileData.statsIntegrityCertified,
         highStatConfirmations: profileData.highStatConfirmations,

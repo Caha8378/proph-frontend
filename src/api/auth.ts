@@ -7,6 +7,8 @@ export interface LoginResponse {
     email: string;
     account_type?: string; // Backend might send this
     accountType?: string;  // Or this (camelCase)
+    account_status?: string; // 'active' | 'inactive' | null
+    accountStatus?: string;  // Or this (camelCase)
     email_verified?: boolean;
     emailVerified?: boolean;
     gender?: string; // For players: 'Male' or 'Female'
@@ -23,6 +25,8 @@ export interface RegisterResponse {
     email: string;
     account_type?: string;
     accountType?: string;
+    account_status?: string; // 'active' | 'inactive' | null
+    accountStatus?: string;  // Or this (camelCase)
     emailVerified?: boolean;
     gender?: string; // For players: 'Male' or 'Female'
     gender_coached?: string; // For coaches: 'male' or 'female'
@@ -36,6 +40,7 @@ export interface User {
   id: number;
   email: string;
   account_type: string;
+  account_status: string | null; // 'active' | 'inactive' | null
   email_verified: boolean;
   gender?: string; // For players: 'Male' or 'Female'
   gender_coached?: string; // For coaches: 'male' or 'female'
@@ -47,6 +52,7 @@ export const normalizeBackendUser = (user: any): User => {
     id: user.id,
     email: user.email,
     account_type: user.account_type || user.accountType || 'player',
+    account_status: user.account_status || user.accountStatus || null, // 'active' | 'inactive' | null
     email_verified: user.email_verified !== undefined 
       ? user.email_verified 
       : (user.emailVerified !== undefined ? user.emailVerified : false),
@@ -76,6 +82,7 @@ export const login = async (email: string, password: string): Promise<LoginRespo
         id: user.id,
         email: user.email,
         account_type: user.account_type || user.accountType || 'player', // Normalize to snake_case
+        account_status: user.account_status || user.accountStatus || null, // 'active' | 'inactive' | null
         email_verified: user.email_verified !== undefined ? user.email_verified : (user.emailVerified !== undefined ? user.emailVerified : false),
         gender: user.gender || undefined, // For players
         gender_coached: user.gender_coached || user.genderCoached || undefined, // For coaches
@@ -121,6 +128,7 @@ export const signup = async (
         id: data.user.id,
         email: data.user.email,
         account_type: data.user.accountType || data.user.account_type || accountType,
+        account_status: data.user.account_status || data.user.accountStatus || null, // 'active' | 'inactive' | null
         email_verified: data.user.emailVerified || false,
         gender: data.user.gender || undefined, // For players
         gender_coached: data.user.gender_coached || data.user.genderCoached || undefined, // For coaches
@@ -167,10 +175,19 @@ export const logout = (): void => {
 
 /**
  * Verify email with token from email link
+ * Backend returns updated user object with account_status
  */
-export const verifyEmail = async (token: string): Promise<void> => {
+export const verifyEmail = async (token: string): Promise<{ user?: any }> => {
   try {
-    await apiClient.get(`/auth/verify-email/${token}`);
+    const response = await apiClient.get<{ user?: any }>(`/auth/verify-email/${token}`);
+    
+    // Update user in localStorage if backend returns updated user object
+    if (response.data.user) {
+      const normalizedUser = normalizeBackendUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(normalizedUser));
+    }
+    
+    return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Email verification failed');
   }

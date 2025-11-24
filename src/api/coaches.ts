@@ -113,6 +113,16 @@ export const registerCoach = async (data: RegisterCoachData): Promise<CoachProfi
         userId: number;
         profileImageUrl?: string;
       };
+      user?: {
+        id: number;
+        email: string;
+        account_type?: string;
+        accountType?: string;
+        account_status?: string;
+        accountStatus?: string;
+        email_verified?: boolean;
+        emailVerified?: boolean;
+      };
     }>(
       '/auth/register/coach',
       {

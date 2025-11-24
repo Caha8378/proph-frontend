@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
+import { verifyEmail } from '../../api/auth';
 
 export const EmailVerification: React.FC = () => {
   const navigate = useNavigate();
@@ -13,9 +14,48 @@ export const EmailVerification: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     if (token) {
-      // Simulate email verification
-      localStorage.setItem('emailVerified', 'true');
-      navigate('/onboarding/coach');
+      // Call verifyEmail API which will return updated user object with account_status
+      verifyEmail(token)
+        .then(() => {
+          // After verification, backend should return updated user object
+          // Refresh user from localStorage (updated by backend response)
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            try {
+              const user = JSON.parse(storedUser);
+              const accountStatus = user.account_status || user.accountStatus;
+              const accountType = user.account_type || user.accountType;
+              
+              // Redirect based on account_status and account_type
+              if (accountStatus === 'inactive') {
+                if (accountType === 'coach') {
+                  navigate('/onboarding/coach');
+                } else if (accountType === 'player') {
+                  navigate('/onboarding/player');
+                }
+              } else {
+                // If active, redirect to appropriate home
+                if (accountType === 'coach') {
+                  navigate('/coach/home');
+                } else if (accountType === 'player') {
+                  navigate('/player/home');
+                } else {
+                  navigate('/');
+                }
+              }
+            } catch (error) {
+              console.error('Failed to parse user:', error);
+              navigate('/login');
+            }
+          } else {
+            navigate('/login');
+          }
+        })
+        .catch((error) => {
+          console.error('Email verification failed:', error);
+          // Still navigate to login on error
+          navigate('/login');
+        });
     }
   }, [navigate]);
 

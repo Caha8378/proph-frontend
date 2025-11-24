@@ -25,12 +25,7 @@ export const CoachHome: React.FC = () => {
   // Handle both boolean and number (1/0) from backend
   const isVerified = !!user?.emailVerified;
 
-  // Redirect to onboarding if profile doesn't exist
-  useEffect(() => {
-    if (profileNotFound) {
-      navigate('/onboarding/coach', { replace: true });
-    }
-  }, [profileNotFound, navigate]);
+  // Note: Redirect to onboarding is now handled by ProtectedRoute based on account_status
 
   // Fetch application info (pending count)
   const { pendingCount } = useApplicationInfo();
