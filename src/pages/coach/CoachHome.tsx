@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { CoachBottomNav } from '../../components/layout/CoachBottomNav';
 import { SearchBar } from '../../components/common/SearchBar';
@@ -14,12 +13,11 @@ import type { PlayerProfile } from '../../types';
 import { useSearchParams } from 'react-router-dom';
 
 export const CoachHome: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [createOpen, setCreateOpen] = useState(false);
   
   // Fetch coach profile
-  const { profileNotFound } = useProfile();
+  useProfile();
   
   // Use user.emailVerified as the source of truth for verification status
   // Handle both boolean and number (1/0) from backend
