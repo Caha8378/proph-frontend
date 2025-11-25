@@ -3,6 +3,7 @@ import type { PlayerProfile } from '../../types';
 import { ExternalLink } from 'lucide-react';
 import { UnderReviewBadge } from '../onboarding/UnderReviewBadge';
 import { useAuth } from '../../context/authContext';
+import { getOptimizedCloudinaryUrl } from '../../utils/cloudinary';
 
 interface PlayerCardProps {
   player: PlayerProfile;
@@ -95,8 +96,10 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           {/* Photo Section - 60% */}
           <div className="relative h-[60%] overflow-hidden">
             <img 
-              src={player.photo || '/defualt.webp'} 
+              src={getOptimizedCloudinaryUrl(player.photo, 315, 324) || '/defualt.webp'} 
               alt={player.name}
+              width={315}
+              height={324}
               className="w-full h-full object-cover"
             />
             {/* Dark gradient overlay for top corners (for logo/badge contrast) */}

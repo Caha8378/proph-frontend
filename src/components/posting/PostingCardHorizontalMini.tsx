@@ -4,6 +4,7 @@ import type { Posting } from '../../types';
 import { Clock } from 'lucide-react';
 import { useAuth } from '../../context/authContext';
 import * as postingsService from '../../api/postings';
+import { getOptimizedCloudinaryUrl } from '../../utils/cloudinary';
 
 // Helper function to convert inches to feet'inches" format
 const formatHeight = (heightInches: number | undefined | null): string | null => {
@@ -107,8 +108,10 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
         {posting.school.logo && (
           <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden bg-white/5 flex items-center justify-center">
             <img
-              src={posting.school.logo}
+              src={getOptimizedCloudinaryUrl(posting.school.logo, 48, 48)}
               alt={posting.school.name}
+              width={48}
+              height={48}
               className="w-full h-full rounded-lg object-contain p-0.5 md:p-1"
             />
           </div>
