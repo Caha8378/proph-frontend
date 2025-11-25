@@ -17,9 +17,10 @@ interface PostingCardMiniProps {
   posting: Posting & { hasApplied?: boolean };
   onApply: (postingId: string) => void;
   hasApplied?: boolean; // Legacy prop, will use posting.hasApplied if not provided
+  isDemo?: boolean; // Disables navigation for demo/landing page usage
 }
 
-export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ posting, hasApplied: hasAppliedProp }) => {
+export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ posting, hasApplied: hasAppliedProp, isDemo = false }) => {
   const due = new Date(posting.deadline).toLocaleString('en-US', { month: 'short', day: 'numeric' });
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -89,11 +90,13 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
   };
 
   return (
-    <div className={`bg-proph-grey rounded-2xl p-2 md:p-4 w-full max-w-[600px] mx-auto cursor-pointer relative ${
+    <div className={`bg-proph-grey rounded-2xl p-2 md:p-4 w-full max-w-[600px] mx-auto relative ${
+      isDemo ? '' : 'cursor-pointer'
+    } ${
       posting.is_general 
         ? 'border-2 border-proph-purple bg-proph-purple/5' 
         : 'border border-proph-grey-text/20'
-    }`} onClick={() => navigate(`/posting/${posting.id}`)}>
+    }`} onClick={() => !isDemo && navigate(`/posting/${posting.id}`)}>
       {/* Application Status - Top Right */}
       <div className="absolute top-2 right-2 md:top-4 md:right-4">
         <p className="text-xs text-proph-grey-text">{getApplicationStatus()}</p>
@@ -155,9 +158,12 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
             <button
               onClick={(e) => { 
                 e.stopPropagation(); 
-                navigate(`/posting/${posting.id}`); 
+                if (!isDemo) navigate(`/posting/${posting.id}`); 
               }}
-              className="flex-shrink-0 bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-[#E6D436] transition-colors"
+              disabled={isDemo}
+              className={`flex-shrink-0 bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition-colors ${
+                isDemo ? 'opacity-75 cursor-default' : 'hover:bg-[#E6D436]'
+              }`}
             >
               View Posting
             </button>

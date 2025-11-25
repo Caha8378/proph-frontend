@@ -11,9 +11,10 @@ interface Props {
   onMessage: (id: string) => Promise<void> | void;
   onWithdraw: (id: string) => Promise<void> | void;
   onRemove: (id: string) => Promise<void> | void;
+  isDemo?: boolean; // Disables navigation for demo/landing page usage
 }
 
-export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage: _onMessage, onWithdraw, onRemove }) => {
+export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage: _onMessage, onWithdraw, onRemove, isDemo = false }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -92,8 +93,14 @@ export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage: _on
       {/* Actions */}
       {status === 'pending' && (
         <div className="flex items-center justify-between">
-          <button onClick={handleViewPosting} className="bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl hover:bg-proph-yellow/90">View Posting</button>
-          <button disabled={loading} onClick={handleWithdrawClick} className="text-proph-error text-sm md:text-base hover:underline">Withdraw</button>
+          <button 
+            onClick={isDemo ? undefined : handleViewPosting} 
+            disabled={isDemo}
+            className={`bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl ${isDemo ? 'opacity-75 cursor-default' : 'hover:bg-proph-yellow/90'}`}
+          >
+            View Posting
+          </button>
+          <button disabled={loading || isDemo} onClick={isDemo ? undefined : handleWithdrawClick} className={`text-proph-error text-sm md:text-base ${isDemo ? 'opacity-75 cursor-default' : 'hover:underline'}`}>Withdraw</button>
         </div>
       )}
 
@@ -104,21 +111,27 @@ export const ApplicationCardV1: React.FC<Props> = ({ application, onMessage: _on
           </div>
           <div className="flex items-center justify-between">
             <button
-              disabled={loading}
-              onClick={() => navigate('/player/messages')}
-              className="bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl hover:bg-proph-yellow/90"
+              disabled={loading || isDemo}
+              onClick={isDemo ? undefined : () => navigate('/player/messages')}
+              className={`bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl ${isDemo ? 'opacity-75 cursor-default' : 'hover:bg-proph-yellow/90'}`}
             >
               Message
             </button>
-            <button disabled={loading} onClick={handleWithdrawClick} className="text-proph-error text-sm md:text-base hover:underline">Withdraw</button>
+            <button disabled={loading || isDemo} onClick={isDemo ? undefined : handleWithdrawClick} className={`text-proph-error text-sm md:text-base ${isDemo ? 'opacity-75 cursor-default' : 'hover:underline'}`}>Withdraw</button>
           </div>
         </div>
       )}
 
       {status === 'rejected' && (
         <div className="flex items-center justify-between">
-          <button onClick={handleViewPosting} className="bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl hover:bg-proph-yellow/90">View Posting</button>
-          <button disabled={loading} onClick={handleRemove} className="text-proph-grey-text text-sm md:text-base hover:underline">Remove</button>
+          <button 
+            onClick={isDemo ? undefined : handleViewPosting} 
+            disabled={isDemo}
+            className={`bg-proph-yellow text-proph-black font-semibold text-sm md:text-base py-1 md:py-2 px-4 md:px-6 rounded-xl ${isDemo ? 'opacity-75 cursor-default' : 'hover:bg-proph-yellow/90'}`}
+          >
+            View Posting
+          </button>
+          <button disabled={loading || isDemo} onClick={isDemo ? undefined : handleRemove} className={`text-proph-grey-text text-sm md:text-base ${isDemo ? 'opacity-75 cursor-default' : 'hover:underline'}`}>Remove</button>
         </div>
       )}
 

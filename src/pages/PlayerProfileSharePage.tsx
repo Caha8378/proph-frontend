@@ -101,7 +101,7 @@ export const PlayerProfileSharePage: React.FC = () => {
       updateMetaTag('og:url', `${window.location.origin}/p/${player.id}`);
       const imageUrl = player.photo && player.photo !== '/defualt.webp' 
         ? (player.photo.startsWith('http') ? player.photo : `${window.location.origin}${player.photo}`)
-        : `${window.location.origin}/prophLogo.png`;
+        : `${window.location.origin}/prophLogo.webp`;
       updateMetaTag('og:image', imageUrl);
       
       updateNameMetaTag('description', `${player.name} - Class of ${player.classYear} ${player.position || 'Basketball Player'} on Proph`);

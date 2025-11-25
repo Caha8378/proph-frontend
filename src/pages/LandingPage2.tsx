@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Megaphone, Check, LogIn, UserPlus, Eye, MessageCircle, Target, ArrowRight, X as XIcon } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 import { PlayerProfileModal } from '../components/player/PlayerProfileModal';
 import { useAuth } from '../context/authContext';
 import { getTotalPlayerCards } from '../api/players';
-import { PlayerCardFinal1 } from '../components/player/PlayerCardFinal1';
-import { PostingCardHorizontalMini } from '../components/posting/PostingCardHorizontalMini';
-import { ApplicationCardV1 } from '../components/application/ApplicationCardV1';
 import type { PlayerProfile, Posting, Coach, Application } from '../types';
+
+// Lazy load heavy demo components
+const PlayerCardFinal1 = lazy(() => 
+  import('../components/player/PlayerCardFinal1').then(m => ({ default: m.PlayerCardFinal1 }))
+);
+const PostingCardHorizontalMini = lazy(() => 
+  import('../components/posting/PostingCardHorizontalMini').then(m => ({ default: m.PostingCardHorizontalMini }))
+);
+const ApplicationCardV1 = lazy(() => 
+  import('../components/application/ApplicationCardV1').then(m => ({ default: m.ApplicationCardV1 }))
+);
 
 // Quick Evaluation Quiz Component
 const QuickEvalQuiz: React.FC = () => {
@@ -160,13 +169,127 @@ const QuickEvalQuiz: React.FC = () => {
   );
 };
 
+// Lazy loading wrapper for PlayerCard demos
+const LazyPlayerCard: React.FC<{
+  player: PlayerProfile;
+  flippable?: boolean;
+  showReviewBadge?: boolean;
+}> = ({ player, flippable = false, showReviewBadge = false }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+    rootMargin: '200px'
+  });
+
+  return (
+    <div ref={ref} className="w-full flex justify-center -mx-8 md:-mx-12 lg:-mx-16">
+      {inView ? (
+        <Suspense fallback={
+          <div className="w-[315px] h-[500px] bg-proph-grey/50 animate-pulse rounded-2xl border border-proph-grey-text/20" />
+        }>
+          <PlayerCardFinal1 
+            player={player}
+            flippable={flippable}
+            showReviewBadge={showReviewBadge}
+          />
+        </Suspense>
+      ) : (
+        <div className="w-[315px] h-[500px] bg-proph-grey/50 rounded-2xl border border-proph-grey-text/20" />
+      )}
+    </div>
+  );
+};
+
+// Lazy loading wrapper for PostingCard demos
+const LazyPostingCards: React.FC<{
+  postings: Posting[];
+}> = ({ postings }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+    rootMargin: '200px'
+  });
+
+  return (
+    <div ref={ref} className="w-full flex flex-col gap-3 items-center">
+      {inView ? (
+        <Suspense fallback={
+          <div className="space-y-3">
+            {postings.map((_, i) => (
+              <div key={i} className="w-full max-w-md h-24 bg-proph-grey/50 animate-pulse rounded-xl border border-proph-grey-text/20" />
+            ))}
+          </div>
+        }>
+          {postings.map((posting) => (
+            <PostingCardHorizontalMini 
+              key={posting.id}
+              posting={posting}
+              onApply={() => {}}
+              hasApplied={false}
+              isDemo={true}
+            />
+          ))}
+        </Suspense>
+      ) : (
+        <div className="space-y-3">
+          {postings.map((_, i) => (
+            <div key={i} className="w-full max-w-md h-24 bg-proph-grey/50 rounded-xl border border-proph-grey-text/20" />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Lazy loading wrapper for ApplicationCard demos
+const LazyApplicationCards: React.FC<{
+  applications: Application[];
+}> = ({ applications }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+    rootMargin: '200px'
+  });
+
+  return (
+    <div ref={ref} className="w-full flex flex-col gap-3 items-center">
+      {inView ? (
+        <Suspense fallback={
+          <div className="space-y-3">
+            {applications.map((_, i) => (
+              <div key={i} className="w-full max-w-md h-32 bg-proph-grey/50 animate-pulse rounded-xl border border-proph-grey-text/20" />
+            ))}
+          </div>
+        }>
+          {applications.map((application) => (
+            <ApplicationCardV1 
+              key={application.id}
+              application={application}
+              onMessage={async () => {}}
+              onWithdraw={async () => {}}
+              onRemove={async () => {}}
+              isDemo={true}
+            />
+          ))}
+        </Suspense>
+      ) : (
+        <div className="space-y-3">
+          {applications.map((_, i) => (
+            <div key={i} className="w-full max-w-md h-32 bg-proph-grey/50 rounded-xl border border-proph-grey-text/20" />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Mock data for demo components
 const mockPlayerProfile: PlayerProfile = {
   id: 'demo-1',
   userId: 1,
   name: 'Coby Gold',
   position: 'Knockdown 3-Level Scorer',
-  photo: '/demoCoby.jpeg',
+  photo: '/demoCoby.webp',
   school: 'Kent Denver',
   height: "6'2\"",
   weight: 180,
@@ -201,7 +324,7 @@ const mockPosting: Posting = {
     location: 'Durham, NC',
     conference: 'ACC'
   },
-  position: 'Guard',
+  position: 'Shooting Guard',
   requirements: {
     height: "6'0\"+",
     classYear: 2019,
@@ -225,7 +348,7 @@ const mockPosting2: Posting = {
     location: 'Spokane, WA',
     conference: 'WCC'
   },
-  position: 'Guard',
+  position: 'Combo Guard',
   requirements: {
     height: "6'2\"+",
     classYear: 2019,
@@ -249,7 +372,7 @@ const mockPosting3: Posting = {
     location: 'Queens, NY',
     conference: 'Big East'
   },
-  position: 'Guard',
+  position: 'Defensive Guard',
   requirements: {
     height: "6'1\"+",
     classYear: 2019,
@@ -398,7 +521,7 @@ export const LandingPage2: React.FC = () => {
           {/* Proph Logo with Bounce */}
           <div className="flex justify-center mb-4 animate-bounce-subtle" aria-hidden="true">
             <img
-              src="/prophLogo.png"
+              src="/prophLogo.webp"
               alt="Proph logo"
               className="w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 object-contain"
             />
@@ -466,13 +589,11 @@ export const LandingPage2: React.FC = () => {
                 <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
                   Create your profile and get your digital basketball resume, evaluated by our AI to find the perfect fit for you.
                 </p>
-                <div className="w-full flex justify-center -mx-8 md:-mx-12 lg:-mx-16">
-                  <PlayerCardFinal1 
-                    player={mockPlayerProfile} 
-                    flippable={false}
-                    showReviewBadge={false}
-                  />
-                </div>
+                <LazyPlayerCard 
+                  player={mockPlayerProfile}
+                  flippable={false}
+                  showReviewBadge={false}
+                />
               </div>
 
               {/* Step 2 */}
@@ -484,23 +605,7 @@ export const LandingPage2: React.FC = () => {
                 <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
                   Apply to postings from real, verified coaching staffs.
                 </p>
-                <div className="w-full flex flex-col gap-3 items-center">
-                  <PostingCardHorizontalMini 
-                    posting={mockPosting}
-                    onApply={() => {}}
-                    hasApplied={false}
-                  />
-                  <PostingCardHorizontalMini 
-                    posting={mockPosting2}
-                    onApply={() => {}}
-                    hasApplied={false}
-                  />
-                  <PostingCardHorizontalMini 
-                    posting={mockPosting3}
-                    onApply={() => {}}
-                    hasApplied={false}
-                  />
-                </div>
+                <LazyPostingCards postings={[mockPosting, mockPosting2, mockPosting3]} />
               </div>
 
               {/* Step 3 */}
@@ -512,20 +617,7 @@ export const LandingPage2: React.FC = () => {
                 <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
                   Connect and message with coaches you know are already interested in you.
                 </p>
-                <div className="w-full flex flex-col gap-3 items-center">
-                  <ApplicationCardV1 
-                    application={mockApplication}
-                    onMessage={async () => {}}
-                    onWithdraw={async () => {}}
-                    onRemove={async () => {}}
-                  />
-                  <ApplicationCardV1 
-                    application={mockApplication2}
-                    onMessage={async () => {}}
-                    onWithdraw={async () => {}}
-                    onRemove={async () => {}}
-                  />
-                </div>
+                <LazyApplicationCards applications={[mockApplication, mockApplication2]} />
               </div>
             </div>
           )}
@@ -606,9 +698,9 @@ export const LandingPage2: React.FC = () => {
                 <p className="text-sm text-proph-grey-text mb-4 text-center max-w-xs">
                   Review applications from qualified athletes.
                 </p>
-                <div className="w-full flex flex-col items-center gap-4 -mx-8 md:-mx-12 lg:-mx-16">
-                  <PlayerCardFinal1 
-                    player={mockPlayerProfile} 
+                <div className="w-full flex flex-col items-center gap-4">
+                  <LazyPlayerCard 
+                    player={mockPlayerProfile}
                     flippable={false}
                     showReviewBadge={false}
                   />

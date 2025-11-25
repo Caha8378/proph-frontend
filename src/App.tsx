@@ -1,12 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PlayerHomePage, PostingFeedPage, ApplicationsPage, ProfilePage } from './pages';
-// Comparison design pages - commented out until files exist
-// import { PostingCardComparison } from './pages/comparisonDesigns/PostingCardComparison.tsx';
-// import { PlayerCardComparison } from './pages/comparisonDesigns/PlayerCardComparison.tsx';
-// import { HeaderComparison } from './pages/comparisonDesigns/HeaderComparison.tsx';
-// import { ApplyModalComparison } from './pages/comparisonDesigns/ApplyModalComparison.tsx';
-// import { ApplicationCardComparison } from './pages/comparisonDesigns/ApplicationCardComparison.tsx';
-// import { BottomNavComparison } from './pages/comparisonDesigns/BottomNavComparison';
+
 import { PostingDetailPage } from './pages/PostingDetailPage';
 import { SchoolPage } from './pages/SchoolPage';
 import { LandingPage } from './pages/LandingPage';
