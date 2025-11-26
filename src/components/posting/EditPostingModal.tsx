@@ -183,7 +183,7 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
             <div>
               <label className="block text-sm font-semibold text-proph-white mb-2">Graduation Year *</label>
               <select
-                value={form.requirements?.classYear !== undefined && form.requirements?.classYear !== null ? form.requirements.classYear : ''}
+                value={form.requirements?.classYear !== undefined && form.requirements?.classYear !== null ? String(form.requirements.classYear) : ''}
                 onChange={(e) => handleReqChange('classYear', e.target.value === '' ? undefined : Number(e.target.value))}
                 disabled={isGeneralPosting}
                 className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -193,7 +193,7 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                 <option value="2027">2027</option>
                 <option value="2028">2028</option>
                 <option value="2029">2029</option>
-                <option value="0">Any Eligibility Next Season</option>
+                <option value="1">Any Eligibility Next Season</option>
               </select>
             </div>
 
@@ -226,8 +226,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                     value={heightFeet || ''}
                     onChange={(e) => setHeightFeet(Number(e.target.value) || 0)}
                     disabled={isGeneralPosting}
-                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    placeholder="6"
+                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white placeholder:text-proph-grey-text ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    placeholder="Feet"
                   />
                 </div>
                 <div className="flex-1">
@@ -239,8 +239,8 @@ export const EditPostingModal: React.FC<EditPostingModalProps> = ({ posting, isO
                     value={heightInches || ''}
                     onChange={(e) => setHeightInches(Number(e.target.value) || 0)}
                     disabled={isGeneralPosting}
-                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    placeholder="2"
+                    className={`w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white placeholder:text-proph-grey-text ${isGeneralPosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    placeholder="Inches"
                   />
                 </div>
               </div>

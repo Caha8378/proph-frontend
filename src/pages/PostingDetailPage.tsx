@@ -210,7 +210,7 @@ export const PostingDetailPage: React.FC = () => {
                     return heightDisplay && <p>• Height: {heightDisplay}</p>;
                   })()}
                   {posting.requirements.classYear !== undefined && posting.requirements.classYear !== null && (
-                    <p>• Class: {posting.requirements.classYear === 0 ? 'Eligible next season' : String(posting.requirements.classYear)}</p>
+                    <p>• Class: {posting.requirements.classYear === 1 ? 'Eligible next season' : String(posting.requirements.classYear)}</p>
                   )}
                   {posting.requirements.class && posting.requirements.class.length > 0 && (
                     <p>• Class: {posting.requirements.class.join(', ')}</p>

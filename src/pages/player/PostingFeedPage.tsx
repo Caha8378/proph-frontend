@@ -7,7 +7,6 @@ import { PostingCardHorizontalMini as PostingCard } from '../../components/posti
 import { ApplyModalMinC as ApplyModal } from '../../components/application/ApplyModalMinC';
 import { useSearchPostings } from '../../hooks';
 import type { Posting } from '../../types';
-import { mockPlayer } from '../../data/mockData';
 import { Filter } from 'lucide-react';
 import type { PostingFilters } from '../../api/postings';
 import { useSearchParams } from 'react-router-dom';
@@ -17,29 +16,6 @@ interface Filters {
   division?: string[];
   qualifyOnly?: boolean;
 }
-
-// Helper to check if player qualifies for a posting
-const doesPlayerQualify = (posting: Posting, player: typeof mockPlayer): boolean => {
-  const req = posting.requirements;
-  
-  // Check height if required
-  // Note: In real app would convert to inches and compare properly
-  // For now, only checking if requirement exists and isn't "Any height"
-  if (req.height && req.height !== 'Any height') {
-    // Height comparison would go here in production
-  }
-  
-  // Check class year
-  if (req.classYear && player.classYear !== req.classYear) {
-    return false;
-  }
-  
-  // Check GPA if required (assuming player GPA is calculated from stats or stored separately)
-  // For now, we'll assume player qualifies if class year matches
-  // In real app, you'd compare player GPA to req.gpa
-  
-  return true;
-};
 
 // Helper to get region from state - COMMENTED OUT FOR NOW
 // const getRegionFromState = (state: string): string => {
@@ -129,22 +105,14 @@ export const PostingFeedPage: React.FC = () => {
     setFilters(newFilters);
   };
 
-  // Apply frontend-only filters (region, qualifyOnly) that aren't supported by backend
+  // Apply frontend-only filters that aren't supported by backend
   const filteredPostings = useMemo(() => {
     let result = [...allPostings];
 
-    // Apply region filter (frontend-only) - COMMENTED OUT FOR NOW
-    // if (filters.region && filters.region.length > 0) {
-    //   result = result.filter(p => {
-    //     const state = p.school.location || '';
-    //     const region = getRegionFromState(state);
-    //     return filters.region!.includes(region);
-    //   });
-    // }
-
-    // Apply qualify filter (frontend-only)
+    // Apply qualify filter - hide postings already applied to
+    // Note: Full eligibility check would require backend to return can_apply on each posting
     if (filters.qualifyOnly) {
-      result = result.filter(p => doesPlayerQualify(p, mockPlayer));
+      result = result.filter(p => !(p as any).hasApplied);
     }
 
     // Backend already sorts by created_at DESC, so we keep that order

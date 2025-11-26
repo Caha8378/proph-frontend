@@ -111,10 +111,11 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
     }
   }, [conversationId, conversation, messages, messagesLoading, user?.id]);
 
-  // Auto-scroll to bottom on new message
+  // Auto-scroll to bottom on new message (within container only)
   useEffect(() => {
-    if (messages.length > 0 && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0 && messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
     }
   }, [messages]);
 

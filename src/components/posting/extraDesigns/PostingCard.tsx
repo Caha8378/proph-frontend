@@ -26,7 +26,7 @@ export const PostingCard: React.FC<PostingCardProps> = ({
     requirementParts.push(`${posting.requirements.height}+`);
   }
   if (posting.requirements.classYear !== undefined && posting.requirements.classYear !== null) {
-    if (posting.requirements.classYear === 0) {
+    if (posting.requirements.classYear === 1) {
       requirementParts.push('Eligible next season');
     } else {
       requirementParts.push(`Class ${posting.requirements.classYear}`);

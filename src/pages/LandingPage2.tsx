@@ -478,11 +478,11 @@ export const LandingPage2: React.FC = () => {
     <div className="min-h-screen bg-proph-black text-proph-white">
       {/* 1. STICKY HEADER */}
       <header className="sticky top-0 z-[70] bg-proph-grey/95 backdrop-blur-sm border-b border-proph-grey-text/20">
-        <div className="mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
           {/* Logo */}
-          <button onClick={() => navigate('/')} className="active:scale-95 transition-transform">
+          <button onClick={() => navigate('/')} className="active:scale-95 transition-transform flex-shrink-0">
             <h1 
-              className="text-2xl font-extrabold text-proph-yellow" 
+              className="text-xl sm:text-2xl font-extrabold text-proph-yellow" 
               style={{ textShadow: '0 0 10px rgba(255, 236, 60, 0.5)', letterSpacing: '-2px' }}
             >
               Proph
@@ -490,23 +490,17 @@ export const LandingPage2: React.FC = () => {
           </button>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/mission')}
-              className="px-4 py-2 text-proph-white hover:text-proph-yellow transition-colors"
-            >
-              Mission
-            </button>
+          <nav className="flex items-center gap-2 sm:gap-3">
             <button 
               onClick={() => navigate('/login')}
-              className="px-4 py-2 rounded-lg hover:bg-proph-grey-light active:scale-95 transition-all flex items-center gap-1.5 text-sm font-semibold text-proph-white"
+              className="px-3 sm:px-4 py-2 rounded-lg hover:bg-proph-grey-light active:scale-95 transition-all flex items-center gap-1.5 text-sm font-semibold text-proph-white whitespace-nowrap"
             >
               <LogIn className="w-4 h-4" />
               Log In
             </button>
             <button 
               onClick={() => navigate('/signup')}
-              className="px-5 py-2.5 rounded-lg bg-proph-yellow text-proph-black active:scale-95 transition-all text-sm font-bold shadow-lg shadow-proph-yellow/20"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-proph-yellow text-proph-black active:scale-95 transition-all text-sm font-bold shadow-lg shadow-proph-yellow/20 whitespace-nowrap"
             >
               <UserPlus className="w-4 h-4 inline mr-1.5" />
               Sign Up
@@ -547,6 +541,14 @@ export const LandingPage2: React.FC = () => {
               {playerCount.toLocaleString()}
             </p>
           </div>
+
+          {/* Mission Link */}
+          <button
+            onClick={() => navigate('/mission')}
+            className="mt-6 px-6 py-2 border-2 border-proph-black/40 hover:border-proph-black rounded-lg text-proph-black/80 hover:text-proph-black text-sm font-semibold transition-all active:scale-95"
+          >
+            Our Mission
+          </button>
         </div>
       </section>
 

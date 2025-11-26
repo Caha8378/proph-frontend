@@ -94,7 +94,7 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
       {/* Requirements inline */}
       <p className="text-xs md:text-sm text-proph-grey-text mb-3 md:mb-4">
         {[heightDisplay, posting.requirements.classYear !== undefined && posting.requirements.classYear !== null 
-          ? (posting.requirements.classYear === 0 ? 'Eligible next season' : `Class of ${posting.requirements.classYear}`)
+          ? (posting.requirements.classYear === 1 ? 'Eligible next season' : `Class of ${posting.requirements.classYear}`)
           : null, posting.requirements.gpa ? `${posting.requirements.gpa} GPA` : null]
           .filter(Boolean)
           .join(' • ')}

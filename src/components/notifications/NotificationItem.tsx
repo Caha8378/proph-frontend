@@ -64,20 +64,28 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   const { user } = useAuth();
 
   const handleClick = async () => {
+    // Determine the link to navigate to
+    let link = notification.link;
+    
+    // Override link for accepted applications - go to messages
+    if (notification.event_type === 'application_accepted') {
+      link = '/player/messages';
+    }
+    
     // Navigate to link if provided and not pointing to current user's profile
-    if (notification.link) {
+    if (link) {
       // Don't navigate if link points to current user's profile (e.g., /profile/32 where 32 is current user ID)
-      if (user && notification.link.includes(`/profile/${user.id}`)) {
+      if (user && link.includes(`/profile/${user.id}`)) {
         // Just close dropdown, don't navigate
         onClose();
         return;
       }
       
       // Handle both relative and absolute URLs
-      if (notification.link.startsWith('http')) {
-        window.location.href = notification.link;
+      if (link.startsWith('http')) {
+        window.location.href = link;
       } else {
-        navigate(notification.link);
+        navigate(link);
       }
     }
     

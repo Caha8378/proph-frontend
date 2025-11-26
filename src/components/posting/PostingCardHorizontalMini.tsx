@@ -43,7 +43,7 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
     heightDisplay,
         req.gpa ? `${req.gpa} GPA` : null,
     req.classYear !== undefined && req.classYear !== null
-      ? (req.classYear === 0 ? 'Eligible next season' : `Class ${req.classYear}`)
+      ? (req.classYear === 1 ? 'Eligible next season' : `Class ${req.classYear}`)
       : null
   ].filter(Boolean).join(' • ');
 

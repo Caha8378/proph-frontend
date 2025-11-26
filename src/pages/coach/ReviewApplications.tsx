@@ -103,12 +103,20 @@ export const ReviewApplications: React.FC = () => {
   const getPostingName = (postingId: string) => {
     const app = pendingApplications.find(a => a.posting.id === postingId);
     if (app) {
+      // For general postings, condense "General Interest - Men's Basketball" to "General Interest"
+      if (app.posting.position.startsWith('General Interest') && app.posting.position.includes(' - ')) {
+        return app.posting.position.split(' - ')[0];
+      }
       return app.posting.position;
     }
     // Check postings with zero apps
     const zeroAppPosting = postingsWithZeroApps.find(p => String(p.posting.id) === postingId);
     if (zeroAppPosting) {
-      return zeroAppPosting.posting.position_title;
+      const title = zeroAppPosting.posting.position_title;
+      if (title.startsWith('General Interest') && title.includes(' - ')) {
+        return title.split(' - ')[0];
+      }
+      return title;
     }
     return 'Unknown Posting';
   };

@@ -142,7 +142,7 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
                 <option value="2027">2027</option>
                 <option value="2028">2028</option>
                 <option value="2029">2029</option>
-                <option value="0">Any Eligibility Next Season</option>
+                <option value="1">Any Eligibility Next Season</option>
               </select>
             </div>
 
@@ -178,8 +178,8 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
                     max="8"
                     value={heightFeet || ''}
                     onChange={(e) => setHeightFeet(Number(e.target.value) || 0)}
-                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
-                    placeholder="6"
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white placeholder:text-proph-grey-text"
+                    placeholder="Feet"
                   />
                 </div>
                 <div className="flex-1">
@@ -190,8 +190,8 @@ export const CreatePostingModal: React.FC<CreatePostingModalProps> = ({ open, on
                     max="11"
                     value={heightInches || ''}
                     onChange={(e) => setHeightInches(Number(e.target.value) || 0)}
-                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white"
-                    placeholder="2"
+                    className="w-full bg-proph-black border border-proph-grey-text/20 rounded-lg p-3 text-proph-white placeholder:text-proph-grey-text"
+                    placeholder="Inches"
                   />
                 </div>
               </div>
