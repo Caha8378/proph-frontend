@@ -102,7 +102,21 @@ export interface RegisterCoachData {
   phone_number?: string | null; // Optional, not collected in onboarding
 }
 
-export const registerCoach = async (data: RegisterCoachData): Promise<CoachProfile> => {
+export interface RegisterCoachResponse {
+  profile: CoachProfile;
+  user?: {
+    id: number;
+    email: string;
+    account_type?: string;
+    accountType?: string;
+    account_status?: string;
+    accountStatus?: string;
+    email_verified?: boolean;
+    emailVerified?: boolean;
+  };
+}
+
+export const registerCoach = async (data: RegisterCoachData): Promise<RegisterCoachResponse> => {
   try {
     // Backend expects fields at top level (not nested in profile object)
     // Backend will get userId from body or from authenticated token
@@ -135,11 +149,17 @@ export const registerCoach = async (data: RegisterCoachData): Promise<CoachProfi
       }
     );
     
-    // Backend returns { message, profile: { id, userId, profileImageUrl } }
+    // Backend returns { message, profile: { id, userId, profileImageUrl }, user: { id, account_status } }
     // We need to fetch the full profile after registration
     if (response.data.profile) {
       // Fetch the full profile to get all fields
-      return await getCoachProfile();
+      const fullProfile = await getCoachProfile();
+      
+      // Return both profile and user object from response
+      return {
+        profile: fullProfile,
+        user: response.data.user
+      };
     }
     
     throw new Error('Unexpected response format from backend');

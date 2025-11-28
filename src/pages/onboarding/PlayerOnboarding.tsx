@@ -9,6 +9,8 @@ import { PlayerCardFinal1 } from '../../components/player/PlayerCardFinal1';
 import type { PlayerProfile } from '../../types';
 import apiClient from '../../api/client';
 import { getPlayerProfile } from '../../api/players';
+import { useAuth } from '../../context/authContext';
+import { normalizeBackendUser } from '../../api/auth';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -74,6 +76,7 @@ const getStatThresholds = () => {
 
 export const PlayerOnboarding: React.FC = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>('pledge');
   const [profileData, setProfileData] = useState<PlayerProfileData>({
     statsIntegrityCertified: false,
@@ -350,9 +353,28 @@ export const PlayerOnboarding: React.FC = () => {
       // Backend should return updated user object with account_status = 'active'
       // Update user in localStorage if provided
       if (registerData.user) {
-        const { normalizeBackendUser } = await import('../../api/auth');
-        const normalizedUser = normalizeBackendUser(registerData.user);
+        // Merge with existing user data to preserve account_type from signup
+        const normalizedUser = normalizeBackendUser({
+          ...user,          // Preserve existing data (especially account_type)
+          ...registerData.user,  // Override with new data (especially account_status)
+        });
         localStorage.setItem('user', JSON.stringify(normalizedUser));
+        
+        // Also update auth context immediately so user doesn't get redirected
+        // Convert backend user format to frontend format for context
+        // Use existing account_type if backend didn't provide it
+        const accountType = normalizedUser.account_type || user?.account_type || 'player';
+        const frontendUser = {
+          id: normalizedUser.id,
+          email: normalizedUser.email,
+          role: accountType === 'player' ? 'player' as const : 'coach' as const,
+          accountStatus: normalizedUser.account_status as 'active' | 'inactive' | null,
+          verified: false, // Will be determined from profile
+          profileComplete: true, // Profile was just created
+          emailVerified: normalizedUser.email_verified,
+          gender: normalizedUser.gender,
+        };
+        setUser(frontendUser);
       }
       
       // User is already authenticated (has token from signup), no need to login again

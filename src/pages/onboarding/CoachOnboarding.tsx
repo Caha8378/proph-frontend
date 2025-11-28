@@ -7,6 +7,7 @@ import type { School } from '../../types';
 import * as coachesService from '../../api/coaches';
 import { useNotification } from '../../hooks';
 import { useAuth } from '../../context/authContext';
+import { normalizeBackendUser } from '../../api/auth';
 
 // Local School type for onboarding (extends the main School type)
 interface OnboardingSchool extends Omit<School, 'id' | 'logo' | 'division' | 'location'> {
@@ -24,7 +25,7 @@ type Step = 1 | 2 | 'processing' | 'success';
 export const CoachOnboarding: React.FC = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [selectedSchool, setSelectedSchool] = useState<OnboardingSchool | null>(null);
   const [name, setName] = useState<string>('');
@@ -93,16 +94,40 @@ export const CoachOnboarding: React.FC = () => {
       };
 
       // Call backend API to register coach
-      // Note: We need to get the full response to access the user object
-      // Since registerCoach returns CoachProfile, we'll need to check the actual API response
-      // For now, we'll update the user object after successful registration by fetching it
-      const profile = await coachesService.registerCoach(registerData);
+      // Backend returns both profile and user object with updated account_status
+      const result = await coachesService.registerCoach(registerData);
+      const profile = result.profile;
       
-      // After successful registration, backend should have updated account_status to 'active'
-      // We need to refresh the user object from localStorage or fetch it
-      // The auth context should pick up the updated user on next page load
-      // But we can also manually update it if the backend returns it in the response
-      // For now, ProtectedRoute will handle redirects based on account_status
+      // Update localStorage with the new account_status from backend response
+      if (result.user) {
+        // Merge with existing user data to preserve account_type from signup
+        const existingUser = storedUser || (() => {
+          const userStr = localStorage.getItem('user');
+          return userStr ? JSON.parse(userStr) : null;
+        })();
+        
+        const normalizedUser = normalizeBackendUser({
+          ...existingUser, // Preserve existing data (especially account_type)
+          ...result.user,  // Override with new data (especially account_status)
+        });
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        
+        // Also update auth context immediately so user doesn't get redirected
+        // Convert backend user format to frontend format for context
+        // Use existing account_type if backend didn't provide it
+        const accountType = normalizedUser.account_type || existingUser?.account_type || 'coach';
+        const frontendUser = {
+          id: normalizedUser.id,
+          email: normalizedUser.email,
+          role: accountType === 'coach' ? 'coach' as const : 'player' as const,
+          accountStatus: normalizedUser.account_status as 'active' | 'inactive' | null,
+          verified: false, // Will be determined from profile
+          profileComplete: true, // Profile was just created
+          emailVerified: normalizedUser.email_verified,
+          genderCoached: normalizedUser.gender_coached,
+        };
+        setUser(frontendUser);
+      }
 
       // Check verification status (backend may set this automatically based on email domain)
       const isVerified = profile.is_verified === true || profile.is_verified === 1;

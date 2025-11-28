@@ -48,17 +48,37 @@ export interface User {
 
 // Helper to normalize user object from backend (handles both camelCase and snake_case)
 export const normalizeBackendUser = (user: any): User => {
+  const accountType = user.account_type || user.accountType || 'player';
+  
+  // Convert email_verified from 1/0 (number) to boolean
+  const emailVerified = user.email_verified !== undefined 
+    ? (user.email_verified === 1 || user.email_verified === true)
+    : (user.emailVerified !== undefined 
+        ? (user.emailVerified === 1 || user.emailVerified === true)
+        : false);
+  
+  // Handle gender fields:
+  // - For players: backend sends 'gender'
+  // - For coaches: backend sends 'gender' (which is actually gender_coached), map to gender_coached
+  let gender: string | undefined = undefined;
+  let gender_coached: string | undefined = undefined;
+  
+  if (accountType === 'coach') {
+    // For coaches, backend sends gender_coached as 'gender', map it to gender_coached
+    gender_coached = user.gender || user.gender_coached || user.genderCoached || undefined;
+  } else {
+    // For players, use gender field
+    gender = user.gender || undefined;
+  }
+  
   return {
     id: user.id,
     email: user.email,
-    account_type: user.account_type || user.accountType || 'player',
+    account_type: accountType,
     account_status: user.account_status || user.accountStatus || null, // 'active' | 'inactive' | null
-    email_verified: user.email_verified !== undefined 
-      ? user.email_verified 
-      : (user.emailVerified !== undefined ? user.emailVerified : false),
-    // Gender fields: players have 'gender', coaches have 'gender_coached'
-    gender: user.gender || undefined,
-    gender_coached: user.gender_coached || user.genderCoached || undefined,
+    email_verified: emailVerified,
+    gender: gender,
+    gender_coached: gender_coached,
   };
 };
 
@@ -76,17 +96,8 @@ export const login = async (email: string, password: string): Promise<LoginRespo
     if (response.data.token) {
       localStorage.setItem('authToken', response.data.token);
       
-      // Normalize user object: handle both accountType (camelCase) and account_type (snake_case)
-      const user = response.data.user;
-      const normalizedUser = {
-        id: user.id,
-        email: user.email,
-        account_type: user.account_type || user.accountType || 'player', // Normalize to snake_case
-        account_status: user.account_status || user.accountStatus || null, // 'active' | 'inactive' | null
-        email_verified: user.email_verified !== undefined ? user.email_verified : (user.emailVerified !== undefined ? user.emailVerified : false),
-        gender: user.gender || undefined, // For players
-        gender_coached: user.gender_coached || user.genderCoached || undefined, // For coaches
-      };
+      // Normalize user object using the shared normalization function
+      const normalizedUser = normalizeBackendUser(response.data.user);
       
       localStorage.setItem('user', JSON.stringify(normalizedUser));
       
@@ -123,16 +134,8 @@ export const signup = async (
     if (data.token && data.user) {
       localStorage.setItem('authToken', data.token);
       
-      // Normalize user object
-      const normalizedUser = {
-        id: data.user.id,
-        email: data.user.email,
-        account_type: data.user.accountType || data.user.account_type || accountType,
-        account_status: data.user.account_status || data.user.accountStatus || null, // 'active' | 'inactive' | null
-        email_verified: data.user.emailVerified || false,
-        gender: data.user.gender || undefined, // For players
-        gender_coached: data.user.gender_coached || data.user.genderCoached || undefined, // For coaches
-      };
+      // Normalize user object using the shared normalization function
+      const normalizedUser = normalizeBackendUser(data.user);
       
       localStorage.setItem('user', JSON.stringify(normalizedUser));
     }
