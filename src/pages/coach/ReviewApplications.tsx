@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { CoachBottomNav } from '../../components/layout/CoachBottomNav';
 import { ApplicationCardCoach } from '../../components/application/ApplicationCardCoach';
@@ -17,6 +18,7 @@ export const ReviewApplications: React.FC = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const coachProfile = profile as CoachProfile | null;
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Use user.emailVerified as the source of truth for verification status
   // Handle both boolean and number (1/0) from backend
@@ -47,8 +49,25 @@ export const ReviewApplications: React.FC = () => {
         setPendingApplications(result.applications);
         setPostingsWithZeroApps(result.postingsWithZeroApps);
         
-        // Start with all postings collapsed (empty set)
-        setExpandedPostings(new Set());
+        // Check for posting ID in query params to auto-expand (only on initial load)
+        const postingId = searchParams.get('id') || searchParams.get('posting'); // Support both 'id' and 'posting' for backward compatibility
+        if (postingId) {
+          // Convert to string to match the format used in expandedPostings Set
+          const postingIdStr = String(postingId);
+          // Expand the specified posting
+          setExpandedPostings(new Set([postingIdStr]));
+          // Remove query param after expanding to clean up URL (only remove 'id', keep 'posting' for backward compatibility if needed)
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete('id');
+          // Only remove 'posting' if it's the same as 'id' to avoid breaking other uses
+          if (newParams.get('posting') === postingId) {
+            newParams.delete('posting');
+          }
+          setSearchParams(newParams, { replace: true });
+        } else {
+          // Start with all postings collapsed (empty set)
+          setExpandedPostings(new Set());
+        }
       } catch (err: any) {
         console.error('Failed to fetch pending applications:', err);
         setError(err.message || 'Failed to load pending applications');
@@ -59,7 +78,8 @@ export const ReviewApplications: React.FC = () => {
     };
 
     fetchPendingApplications();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Group applications by posting
   const applicationsByPosting = useMemo(() => {

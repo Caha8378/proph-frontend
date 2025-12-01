@@ -16,7 +16,7 @@ interface PostingCardCoachProps {
   posting: Posting;
   onEdit: (id: string) => void;
   onDelete: (posting: Posting) => void;
-  onViewApplications: (id: string) => void;
+  onViewApplications?: (id: string) => void; // Optional for backward compatibility
 }
 
 export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onEdit, onDelete, onViewApplications }) => {
@@ -112,7 +112,14 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
             {posting.applicantCount} applications
           </span>
         </div>
-        <button onClick={() => onViewApplications(posting.id)} className="bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-4 md:px-6 py-2 md:py-2.5 rounded-lg hover:bg-[#E6D436] transition-colors">
+        <button 
+          onClick={() => {
+            navigate(`/coach/applications?id=${posting.id}`);
+            // Call callback if provided for backward compatibility
+            onViewApplications?.(posting.id);
+          }} 
+          className="bg-proph-yellow text-proph-black text-xs md:text-sm font-black px-4 md:px-6 py-2 md:py-2.5 rounded-lg hover:bg-[#E6D436] transition-colors"
+        >
           Review Applications
         </button>
       </div>

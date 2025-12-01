@@ -90,7 +90,7 @@ export const CoachPostings: React.FC = () => {
   };
 
   const handleViewApplications = (id: string) => {
-    navigate(`/coach/applications?posting=${id}&status=pending,accepted,rejected`);
+    navigate(`/coach/applications?id=${id}`);
   };
 
   const handlePublish = async (posting: Partial<Posting>) => {

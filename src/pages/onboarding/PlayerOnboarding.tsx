@@ -10,7 +10,7 @@ import type { PlayerProfile } from '../../types';
 import apiClient from '../../api/client';
 import { getPlayerProfile } from '../../api/players';
 import { useAuth } from '../../context/authContext';
-import { normalizeBackendUser } from '../../api/auth';
+import { normalizeBackendUser, logout } from '../../api/auth';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -78,6 +78,30 @@ export const PlayerOnboarding: React.FC = () => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>('pledge');
+  
+  const handleReset = () => {
+    logout();
+    setUser(null);
+    navigate('/');
+  };
+  
+  // Proph Logo Reset Button Component
+  const ResetButton = () => (
+    <div className="mb-4 flex justify-center">
+      <button
+        onClick={handleReset}
+        className="active:scale-95 transition-transform"
+        aria-label="Reset and return to home"
+      >
+        <h1
+          className="text-2xl md:text-3xl font-extrabold text-proph-yellow"
+          style={{ textShadow: '0 0 10px rgba(255, 236, 60, 0.5)', letterSpacing: '-1px' }}
+        >
+          Proph
+        </h1>
+      </button>
+    </div>
+  );
   const [profileData, setProfileData] = useState<PlayerProfileData>({
     statsIntegrityCertified: false,
     name: '',
@@ -461,12 +485,15 @@ export const PlayerOnboarding: React.FC = () => {
   // Render based on current step
   if (currentStep === 'pledge') {
     return (
-      <StatsIntegrityPledge
-        onContinue={() => {
-          setProfileData(prev => ({ ...prev, statsIntegrityCertified: true }));
-          setCurrentStep('step1');
-        }}
-      />
+      <div className="min-h-screen bg-proph-black py-8 px-4">
+        <ResetButton />
+        <StatsIntegrityPledge
+          onContinue={() => {
+            setProfileData(prev => ({ ...prev, statsIntegrityCertified: true }));
+            setCurrentStep('step1');
+          }}
+        />
+      </div>
     );
   }
 
@@ -476,7 +503,9 @@ export const PlayerOnboarding: React.FC = () => {
   if (currentStep === 'processing') {
     return (
       <div className="min-h-screen bg-proph-black flex items-center justify-center px-4">
-        <div className="max-w-lg w-full text-center space-y-6">
+        <div className="max-w-lg w-full">
+          <ResetButton />
+          <div className="text-center space-y-6">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-proph-yellow border-t-transparent mx-auto" />
           <h2 className="text-2xl font-black text-proph-white">
             Building Your Proph
@@ -495,6 +524,7 @@ export const PlayerOnboarding: React.FC = () => {
               <span>Comparing to NBA players</span>
             </div>
           </div>
+          </div>
         </div>
       </div>
     );
@@ -504,6 +534,7 @@ export const PlayerOnboarding: React.FC = () => {
     return (
       <div className="min-h-screen bg-proph-black py-8 px-4">
         <div className="max-w-lg mx-auto space-y-6">
+          <ResetButton />
           <div className="text-center">
             <h2 className="text-3xl font-black text-proph-white mb-2">
               Your Proph is Ready!
@@ -593,6 +624,7 @@ export const PlayerOnboarding: React.FC = () => {
   const renderStep1 = () => (
     <div className="min-h-screen bg-proph-black py-8 px-4">
       <div className="max-w-lg mx-auto">
+        <ResetButton />
         {renderProgress(1, 4)}
         
         <h2 className="text-2xl font-black text-proph-white mb-2">
@@ -773,6 +805,7 @@ export const PlayerOnboarding: React.FC = () => {
   const renderStep2 = () => (
     <div className="min-h-screen bg-proph-black py-8 px-4">
       <div className="max-w-lg mx-auto">
+        <ResetButton />
         {renderProgress(2, 4)}
         
         <h2 className="text-2xl font-black text-proph-white mb-2">
@@ -926,6 +959,7 @@ export const PlayerOnboarding: React.FC = () => {
   const renderStep3 = () => (
     <div className="min-h-screen bg-proph-black py-4 px-4">
       <div className="max-w-lg mx-auto">
+        <ResetButton />
         {renderProgress(3, 4)}
         
         <h2 className="text-2xl font-black text-proph-white mb-1">
@@ -1272,6 +1306,7 @@ export const PlayerOnboarding: React.FC = () => {
   const renderStep4 = () => (
     <div className="min-h-screen bg-proph-black py-8 px-4">
       <div className="max-w-lg mx-auto">
+        <ResetButton />
         {renderProgress(4, 4)}
         
         <h2 className="text-2xl font-black text-proph-white mb-2">

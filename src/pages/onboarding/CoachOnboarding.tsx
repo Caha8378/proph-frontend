@@ -7,7 +7,7 @@ import type { School } from '../../types';
 import * as coachesService from '../../api/coaches';
 import { useNotification } from '../../hooks';
 import { useAuth } from '../../context/authContext';
-import { normalizeBackendUser } from '../../api/auth';
+import { normalizeBackendUser, logout } from '../../api/auth';
 
 // Local School type for onboarding (extends the main School type)
 interface OnboardingSchool extends Omit<School, 'id' | 'logo' | 'division' | 'location'> {
@@ -184,8 +184,30 @@ export const CoachOnboarding: React.FC = () => {
     );
   }
 
+  const handleReset = () => {
+    logout();
+    setUser(null);
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-proph-black py-8 px-4">
+      {/* Proph Logo Reset Button */}
+      <div className="max-w-2xl mx-auto mb-4 flex justify-center">
+        <button
+          onClick={handleReset}
+          className="active:scale-95 transition-transform"
+          aria-label="Reset and return to home"
+        >
+          <h1
+            className="text-2xl md:text-3xl font-extrabold text-proph-yellow"
+            style={{ textShadow: '0 0 10px rgba(255, 236, 60, 0.5)', letterSpacing: '-1px' }}
+          >
+            Proph
+          </h1>
+        </button>
+      </div>
+      
       <div className="max-w-2xl mx-auto bg-proph-grey rounded-2xl p-8">
         {currentStep === 1 ? (
           <SchoolSearchStep
