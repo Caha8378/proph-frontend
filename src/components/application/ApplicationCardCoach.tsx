@@ -26,23 +26,23 @@ export const ApplicationCardCoach: React.FC<ApplicationCardCoachProps> = ({ appl
       className="bg-proph-grey rounded-xl border border-proph-yellow p-4 md:p-6 flex flex-col gap-3 cursor-pointer hover:bg-proph-grey-light transition-colors max-w-[600px] mx-auto relative"
       onClick={handleCardClick}
     >
-      {/* Click to view profile text - top right */}
+      {/* Click to view text - top right */}
       <div className="absolute top-4 right-4">
-        <p className="text-xs text-proph-grey-text">click to view profile</p>
+        <p className="text-xs text-proph-grey-text">click to view</p>
       </div>
 
       {/* Header */}
       <div className="flex items-start gap-3 md:gap-4">
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           {player.photo ? (
-            <img src={player.photo} alt={player.name} className="w-14 h-14 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0" />
+            <img src={player.photo} alt={player.name} className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover flex-shrink-0" />
           ) : (
-            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-proph-grey-light flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 md:w-8 md:h-8 text-proph-white" />
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-proph-grey-light flex items-center justify-center flex-shrink-0">
+              <User className="w-5 h-5 md:w-6 md:h-6 text-proph-white" />
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-lg md:text-xl font-bold text-proph-white truncate">{player.name}</p>
+            <p className="text-base md:text-lg font-bold text-proph-white truncate">{player.name}</p>
             <p className="text-sm md:text-base text-proph-grey-text truncate">
               {(() => {
                 const parts: string[] = [];

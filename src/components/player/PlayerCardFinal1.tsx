@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { PlayerProfile } from '../../types';
 import { ExternalLink } from 'lucide-react';
-import { UnderReviewBadge } from '../onboarding/UnderReviewBadge';
 import { useAuth } from '../../context/authContext';
 import { getOptimizedCloudinaryUrl } from '../../utils/cloudinary';
 
@@ -10,10 +9,9 @@ interface PlayerCardProps {
   flippable?: boolean; // default true
   visitOnClick?: boolean; // default false - open modal instead of flip
   onVisit?: (player: PlayerProfile) => void; // called when visitOnClick
-  showReviewBadge?: boolean; // default true - show "Under Review" badge
 }
 
-export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable = true, visitOnClick = false, onVisit, showReviewBadge = true }) => {
+export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable = true, visitOnClick = false, onVisit }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const { user } = useAuth();
   const percent = (v: number) => `${Math.round(v * 100)}%`;
@@ -89,9 +87,6 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
               Proph
             </h1>
           </div>
-          
-          {/* Under Review Badge - Top Right */}
-          {showReviewBadge && player.verified === false && <UnderReviewBadge />}
 
           {/* Photo Section - 60% */}
           <div className="relative h-[60%] overflow-hidden">

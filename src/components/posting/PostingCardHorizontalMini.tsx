@@ -100,7 +100,7 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
     }`} onClick={() => !isDemo && navigate(`/posting/${posting.id}`)}>
       {/* Application Status - Top Right */}
       <div className="absolute top-2 right-2 md:top-4 md:right-4">
-        <p className="text-xs text-proph-grey-text">{getApplicationStatus()}</p>
+        <p className="text-xs text-proph-yellow font-semibold bg-proph-yellow/10 px-2 py-0.5 rounded-full">{getApplicationStatus()}</p>
       </div>
 
       <div className="flex gap-3 md:gap-4 items-center">
