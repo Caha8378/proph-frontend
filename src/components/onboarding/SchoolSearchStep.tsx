@@ -303,7 +303,9 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
         <ManualSchoolModal
           onClose={() => setShowManualEntry(false)}
           onSave={(school) => {
-            onManualSchool({ ...school, isManual: true });
+            // Extract logoFile before passing to onManualSchool
+            const { logoFile, ...schoolData } = school;
+            onManualSchool({ ...schoolData, isManual: true, logoFile });
             setShowManualEntry(false);
           }}
         />
@@ -314,25 +316,120 @@ export const SchoolSearchStep: React.FC<SchoolSearchStepProps> = ({
 
 interface ManualSchoolModalProps {
   onClose: () => void;
-  onSave: (school: Omit<School, 'id'>) => void;
+  onSave: (school: Omit<School, 'id'> & { logoFile?: File }) => void;
 }
+
+// US States with abbreviations
+const US_STATES = [
+  { name: 'Alabama', abbr: 'AL' },
+  { name: 'Alaska', abbr: 'AK' },
+  { name: 'Arizona', abbr: 'AZ' },
+  { name: 'Arkansas', abbr: 'AR' },
+  { name: 'California', abbr: 'CA' },
+  { name: 'Colorado', abbr: 'CO' },
+  { name: 'Connecticut', abbr: 'CT' },
+  { name: 'Delaware', abbr: 'DE' },
+  { name: 'Florida', abbr: 'FL' },
+  { name: 'Georgia', abbr: 'GA' },
+  { name: 'Hawaii', abbr: 'HI' },
+  { name: 'Idaho', abbr: 'ID' },
+  { name: 'Illinois', abbr: 'IL' },
+  { name: 'Indiana', abbr: 'IN' },
+  { name: 'Iowa', abbr: 'IA' },
+  { name: 'Kansas', abbr: 'KS' },
+  { name: 'Kentucky', abbr: 'KY' },
+  { name: 'Louisiana', abbr: 'LA' },
+  { name: 'Maine', abbr: 'ME' },
+  { name: 'Maryland', abbr: 'MD' },
+  { name: 'Massachusetts', abbr: 'MA' },
+  { name: 'Michigan', abbr: 'MI' },
+  { name: 'Minnesota', abbr: 'MN' },
+  { name: 'Mississippi', abbr: 'MS' },
+  { name: 'Missouri', abbr: 'MO' },
+  { name: 'Montana', abbr: 'MT' },
+  { name: 'Nebraska', abbr: 'NE' },
+  { name: 'Nevada', abbr: 'NV' },
+  { name: 'New Hampshire', abbr: 'NH' },
+  { name: 'New Jersey', abbr: 'NJ' },
+  { name: 'New Mexico', abbr: 'NM' },
+  { name: 'New York', abbr: 'NY' },
+  { name: 'North Carolina', abbr: 'NC' },
+  { name: 'North Dakota', abbr: 'ND' },
+  { name: 'Ohio', abbr: 'OH' },
+  { name: 'Oklahoma', abbr: 'OK' },
+  { name: 'Oregon', abbr: 'OR' },
+  { name: 'Pennsylvania', abbr: 'PA' },
+  { name: 'Rhode Island', abbr: 'RI' },
+  { name: 'South Carolina', abbr: 'SC' },
+  { name: 'South Dakota', abbr: 'SD' },
+  { name: 'Tennessee', abbr: 'TN' },
+  { name: 'Texas', abbr: 'TX' },
+  { name: 'Utah', abbr: 'UT' },
+  { name: 'Vermont', abbr: 'VT' },
+  { name: 'Virginia', abbr: 'VA' },
+  { name: 'Washington', abbr: 'WA' },
+  { name: 'West Virginia', abbr: 'WV' },
+  { name: 'Wisconsin', abbr: 'WI' },
+  { name: 'Wyoming', abbr: 'WY' },
+  { name: 'District of Columbia', abbr: 'DC' },
+];
 
 const ManualSchoolModal: React.FC<ManualSchoolModalProps> = ({ onClose, onSave }) => {
   const [name, setName] = useState('');
+  const [state, setState] = useState('');
+  const [city, setCity] = useState('');
   const [division, setDivision] = useState('');
   const [conference, setConference] = useState('');
-  const [emailDomain, setEmailDomain] = useState('');
+  const [website, setWebsite] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const canSave = name.trim() !== '' && division !== '';
+  const canSave = name.trim() !== '' && state.trim() !== '' && logoFile !== null;
+
+  const handleFileSelect = (file: File) => {
+    if (file && file.type.startsWith('image/')) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file);
+  };
 
   const handleSave = () => {
-    if (!canSave) return;
+    if (!canSave || !logoFile) return;
     onSave({
       name: name.trim(),
-      division,
+      state: state.trim(),
+      city: city.trim() || undefined,
+      division: division || undefined,
       conference: conference.trim() || undefined,
-      email_domain: emailDomain.trim().replace('@', '') || undefined,
+      website: website.trim() || undefined,
       logo_url: undefined,
+      logoFile,
     });
   };
 
@@ -366,9 +463,42 @@ const ManualSchoolModal: React.FC<ManualSchoolModalProps> = ({ onClose, onSave }
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-proph-white font-semibold text-sm mb-2">
+                State <span className="text-proph-error">*</span>
+              </label>
+              <select
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full bg-proph-black border border-proph-grey-light rounded-lg px-4 py-3 text-proph-white focus:outline-none focus:border-proph-yellow focus:ring-1 focus:ring-proph-yellow"
+              >
+                <option value="">Select state...</option>
+                {US_STATES.map((stateOption) => (
+                  <option key={stateOption.abbr} value={stateOption.abbr}>
+                    {stateOption.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-proph-white font-semibold text-sm mb-2">
+                City (Optional)
+              </label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="City name"
+                className="w-full bg-proph-black border border-proph-grey-light rounded-lg px-4 py-3 text-proph-white placeholder-proph-grey-text focus:outline-none focus:border-proph-yellow focus:ring-1 focus:ring-proph-yellow"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-proph-white font-semibold text-sm mb-2">
-              Division <span className="text-proph-error">*</span>
+              Division (Optional)
             </label>
             <select
               value={division}
@@ -400,19 +530,78 @@ const ManualSchoolModal: React.FC<ManualSchoolModalProps> = ({ onClose, onSave }
 
           <div>
             <label className="block text-proph-white font-semibold text-sm mb-2">
-              School Email Domain (Optional)
+              Website (Optional)
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-proph-grey-text">@</span>
-              <input
-                type="text"
-                value={emailDomain}
-                onChange={(e) => setEmailDomain(e.target.value)}
-                placeholder="yourschool.edu"
-                className="w-full bg-proph-black border border-proph-grey-light rounded-lg pl-8 pr-4 py-3 text-proph-white placeholder-proph-grey-text focus:outline-none focus:border-proph-yellow focus:ring-1 focus:ring-proph-yellow"
-              />
+            <input
+              type="url"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="https://yourschool.edu"
+              className="w-full bg-proph-black border border-proph-grey-light rounded-lg px-4 py-3 text-proph-white placeholder-proph-grey-text focus:outline-none focus:border-proph-yellow focus:ring-1 focus:ring-proph-yellow"
+            />
+          </div>
+
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-proph-white font-semibold text-sm mb-2">
+              School Logo <span className="text-proph-error">*</span>
+            </label>
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                isDragging
+                  ? 'border-proph-yellow bg-proph-yellow/10'
+                  : 'border-proph-grey-light hover:border-proph-yellow/50'
+              }`}
+            >
+              {logoPreview ? (
+                <div className="space-y-3">
+                  <img
+                    src={logoPreview}
+                    alt="Logo preview"
+                    className="w-24 h-24 mx-auto object-contain rounded-lg"
+                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLogoFile(null);
+                        setLogoPreview(null);
+                      }}
+                      className="text-proph-yellow text-sm font-semibold hover:underline"
+                    >
+                      Remove
+                    </button>
+                    <span className="text-proph-grey-text">|</span>
+                    <label className="text-proph-yellow text-sm font-semibold hover:underline cursor-pointer">
+                      Change
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileInputChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-proph-white text-sm mb-2">Drag & drop logo here</p>
+                  <p className="text-proph-grey-text text-xs mb-3">or</p>
+                  <label className="inline-block bg-proph-yellow text-proph-black font-semibold px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E6D436] transition-colors">
+                    Choose File
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
-            <p className="text-proph-grey-text text-xs mt-1">Official school email domain (if applicable)</p>
           </div>
         </div>
 

@@ -18,6 +18,7 @@ import { PlayerOnboarding } from './pages/onboarding/PlayerOnboarding';
 import { CoachOnboarding } from './pages/onboarding/CoachOnboarding';
 import { EmailVerification } from './pages/auth/EmailVerification';
 import { MessagesPage } from './pages/MessagesPage';
+import { CardShowcase } from './pages/admin/CardShowcase';
 import { AuthProvider } from './context/authContext';
 import { NotificationProvider } from './context/notificationContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -165,6 +166,9 @@ function App() {
         
         {/* Public player profile share page */}
         <Route path="/p/:playerId" element={<PlayerProfileSharePage />} />
+        
+        {/* Admin routes */}
+        <Route path="/admin/card-showcase" element={<CardShowcase />} />
       </Routes>
     </Router>
       </NotificationProvider>

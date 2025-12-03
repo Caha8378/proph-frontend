@@ -9,10 +9,15 @@ interface PlayerCardProps {
   flippable?: boolean; // default true
   visitOnClick?: boolean; // default false - open modal instead of flip
   onVisit?: (player: PlayerProfile) => void; // called when visitOnClick
+  controlledFlip?: boolean; // If provided, controls flip state externally
+  spinning?: boolean; // default false - if true, card spins slowly
 }
 
-export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable = true, visitOnClick = false, onVisit }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable = true, visitOnClick = false, onVisit, controlledFlip, spinning = false }) => {
+  const [internalFlipped, setInternalFlipped] = useState(false);
+  
+  // Use controlled flip if provided, otherwise use internal state
+  const isFlipped = controlledFlip !== undefined ? controlledFlip : internalFlipped;
   const { user } = useAuth();
   const percent = (v: number) => `${Math.round(v * 100)}%`;
   
@@ -68,10 +73,14 @@ export const PlayerCardFinal1: React.FC<PlayerCardProps> = ({ player, flippable 
           onVisit(player);
           return;
         }
-        if (flippable) setIsFlipped(!isFlipped);
+        if (flippable && controlledFlip === undefined) {
+          setInternalFlipped(!internalFlipped);
+        }
       }}
     >
-      <div className={`absolute inset-0 transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+      <div 
+        className={`absolute inset-0 transition-all duration-1000 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''} ${spinning ? 'animate-spin-slow' : ''}`}
+      >
         
         {/* FRONT - No Labels Style */}
         <div className="absolute inset-0 [backface-visibility:hidden] rounded-2xl overflow-hidden">

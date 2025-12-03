@@ -155,3 +155,17 @@ body {
 .animate-slide-up {
   animation: slideUp 300ms ease-out;
 }
+
+/* Slow spin animation for card showcase (3x slower than flip) */
+@keyframes spin-slow {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}

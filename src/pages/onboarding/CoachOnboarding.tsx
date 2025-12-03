@@ -13,10 +13,14 @@ import { normalizeBackendUser, logout } from '../../api/auth';
 interface OnboardingSchool extends Omit<School, 'id' | 'logo' | 'division' | 'location'> {
   id?: string;
   name: string;
-  division: string;
+  state?: string;
+  city?: string;
+  division?: string;
   conference?: string;
+  website?: string;
   email_domain?: string;
   logo_url?: string;
+  logoFile?: File;
   isManual?: boolean;
 }
 
@@ -46,7 +50,7 @@ export const CoachOnboarding: React.FC = () => {
     setSelectedSchool(school);
   };
 
-  const handleManualSchool = (school: Omit<School, 'id'> & { isManual: true }) => {
+  const handleManualSchool = (school: Omit<School, 'id'> & { isManual: true; logoFile?: File }) => {
     setSelectedSchool({ ...school, id: undefined });
   };
 
@@ -68,19 +72,33 @@ export const CoachOnboarding: React.FC = () => {
       // Map gender: 'mens' -> 'male', 'womens' -> 'female'
       const genderCoachedValue: 'male' | 'female' = genderCoached === 'mens' ? 'male' : 'female';
 
-      // Get school_id - only if school was selected from dropdown (not manual)
-      const schoolId = selectedSchool.id && !selectedSchool.isManual 
-        ? parseInt(selectedSchool.id) 
-        : null;
-
-      // If manual school entry, we can't register yet (backend needs school_id)
-      // For now, we'll require selecting from dropdown
+      // Handle school creation/selection
+      let schoolId: number;
+      
       if (selectedSchool.isManual) {
-        throw new Error('Please select your school from the dropdown. Manual school entry is not yet supported.');
-      }
+        // Create new school first
+        if (!selectedSchool.name || !selectedSchool.state || !selectedSchool.logoFile) {
+          throw new Error('Please complete all required school fields including logo upload');
+        }
 
-      if (!schoolId) {
-        throw new Error('Please select a school from the dropdown');
+        const schoolData: coachesService.CreateSchoolData = {
+          name: selectedSchool.name,
+          state: selectedSchool.state,
+          city: selectedSchool.city,
+          division: selectedSchool.division,
+          conference: selectedSchool.conference,
+          website: selectedSchool.website,
+          logo: selectedSchool.logoFile,
+        };
+
+        const schoolResult = await coachesService.createSchool(schoolData);
+        schoolId = schoolResult.school_id;
+      } else {
+        // Use existing school from dropdown
+        if (!selectedSchool.id) {
+          throw new Error('Please select a school from the dropdown');
+        }
+        schoolId = parseInt(selectedSchool.id);
       }
 
       // Prepare data for backend
@@ -219,7 +237,7 @@ export const CoachOnboarding: React.FC = () => {
           />
         ) : (
           <GenderRoleStep
-            selectedSchool={selectedSchool}
+            selectedSchool={selectedSchool as any}
             name={name}
             genderCoached={genderCoached}
             role={role}

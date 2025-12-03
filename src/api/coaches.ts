@@ -168,3 +168,51 @@ export const registerCoach = async (data: RegisterCoachData): Promise<RegisterCo
   }
 };
 
+/**
+ * Create a new school (coach only)
+ * Backend endpoint: POST /api/coaches/schools/create
+ * Uses multipart/form-data for file upload
+ */
+export interface CreateSchoolData {
+  name: string;
+  state: string;
+  city?: string;
+  division?: string;
+  conference?: string;
+  website?: string;
+  logo?: File; // File for logo upload
+}
+
+export interface CreateSchoolResponse {
+  success: boolean;
+  school_id: number;
+  message: string;
+  is_new: boolean;
+}
+
+export const createSchool = async (data: CreateSchoolData): Promise<CreateSchoolResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('state', data.state);
+    if (data.city) formData.append('city', data.city);
+    if (data.division) formData.append('division', data.division);
+    if (data.conference) formData.append('conference', data.conference);
+    if (data.website) formData.append('website', data.website);
+    if (data.logo) formData.append('logo', data.logo);
+
+    const response = await apiClient.post<CreateSchoolResponse>(
+      '/coaches/schools/create',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.response?.data?.error || 'Failed to create school');
+  }
+};
+
