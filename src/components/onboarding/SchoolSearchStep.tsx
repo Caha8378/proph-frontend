@@ -16,7 +16,7 @@ interface School {
 interface SchoolSearchStepProps {
   selectedSchool: School | null;
   onSchoolSelect: (school: School | null) => void;
-  onManualSchool: (school: Omit<School, 'id'> & { isManual: true }) => void;
+  onManualSchool: (school: Omit<School, 'id'> & { isManual: true; logoFile?: File }) => void;
   userEmail: string;
   onContinue: () => void;
 }
@@ -425,7 +425,7 @@ const ManualSchoolModal: React.FC<ManualSchoolModalProps> = ({ onClose, onSave }
       name: name.trim(),
       state: state.trim(),
       city: city.trim() || undefined,
-      division: division || undefined,
+      division: division ? division : undefined,
       conference: conference.trim() || undefined,
       website: website.trim() || undefined,
       logo_url: undefined,

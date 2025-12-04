@@ -173,8 +173,7 @@ const QuickEvalQuiz: React.FC = () => {
 const LazyPlayerCard: React.FC<{
   player: PlayerProfile;
   flippable?: boolean;
-  showReviewBadge?: boolean;
-}> = ({ player, flippable = false, showReviewBadge = false }) => {
+}> = ({ player, flippable = false }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -190,7 +189,6 @@ const LazyPlayerCard: React.FC<{
           <PlayerCardFinal1 
             player={player}
             flippable={flippable}
-            showReviewBadge={showReviewBadge}
           />
         </Suspense>
       ) : (
@@ -597,7 +595,6 @@ export const LandingPage2: React.FC = () => {
                 <LazyPlayerCard 
                   player={mockPlayerProfile}
                   flippable={false}
-                  showReviewBadge={false}
                 />
               </div>
 
@@ -707,7 +704,6 @@ export const LandingPage2: React.FC = () => {
                   <LazyPlayerCard 
                     player={mockPlayerProfile}
                     flippable={false}
-                    showReviewBadge={false}
                   />
                   <div className="w-full max-w-[315px] flex gap-2">
                     <button 

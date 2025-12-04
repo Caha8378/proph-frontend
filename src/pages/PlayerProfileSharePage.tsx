@@ -311,7 +311,7 @@ export const PlayerProfileSharePage: React.FC = () => {
 
         {/* Player Card Component */}
         <div className="flex items-center justify-center">
-          <PlayerCardFinal1 player={player} flippable={true} showReviewBadge={false} />
+          <PlayerCardFinal1 player={player} flippable={true} />
         </div>
 
         {/* Call-to-action for non-logged-in users */}

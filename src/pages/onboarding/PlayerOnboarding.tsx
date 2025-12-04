@@ -548,7 +548,6 @@ export const PlayerOnboarding: React.FC = () => {
             <PlayerCardFinal1 
               player={createdProfile} 
               flippable={true}
-              showReviewBadge={false}
             />
           </div>
 

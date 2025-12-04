@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayerCardFinal1 } from '../../components/player/PlayerCardFinal1';
 import { usePlayer } from '../../hooks/usePlayer';
-import * as playersService from '../../api/players';
 import * as searchService from '../../api/search';
-import type { PlayerProfile } from '../../types';
 import { Search, RotateCw, Loader2 } from 'lucide-react';
 
 const BACKGROUND_OPTIONS = [
@@ -20,7 +18,6 @@ export const CardShowcase: React.FC = () => {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [background, setBackground] = useState('bg-proph-black'); // Default to black
   const [isFlipped, setIsFlipped] = useState(false);
-  const [autoFlipCount, setAutoFlipCount] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +29,6 @@ export const CardShowcase: React.FC = () => {
     if (player && !loading) {
       // Reset flip state
       setIsFlipped(false);
-      setAutoFlipCount(0);
       
       // Small delay to ensure card is rendered
       const startDelay = setTimeout(() => {
