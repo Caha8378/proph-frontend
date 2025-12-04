@@ -5,8 +5,11 @@ import * as schoolsService from '../../api/schools';
 interface School {
   id: string;
   name: string;
+  state?: string;
+  city?: string;
   division?: string;
   conference?: string;
+  website?: string;
   email_domain?: string;
   logo_url?: string;
   mens_program?: boolean;
