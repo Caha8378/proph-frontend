@@ -5,7 +5,7 @@ import * as schoolsService from '../../api/schools';
 interface School {
   id: string;
   name: string;
-  division: string;
+  division?: string;
   conference?: string;
   email_domain?: string;
   logo_url?: string;
