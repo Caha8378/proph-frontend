@@ -167,5 +167,70 @@ body {
 }
 
 .animate-spin-slow {
-  animation: spin-slow 3s linear infinite;
+  animation: spin-slow 4.5s linear infinite;
+}
+
+/* Crazy Gradient 3 - Radial + Linear combo with yellow */
+.bg-gradient-crazy-3 {
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255, 236, 60, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 236, 60, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #1C1C1E 0%, #0A0A0A 25%, #1C1C1E 50%, #0A0A0A 75%, #1C1C1E 100%);
+}
+
+/* Crazy Gradient 4 - Multiple radial gradients creating depth */
+.bg-gradient-crazy-4 {
+  background: 
+    radial-gradient(ellipse at top left, rgba(255, 236, 60, 0.4) 0%, transparent 40%),
+    radial-gradient(ellipse at bottom right, rgba(255, 236, 60, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at center, rgba(28, 28, 30, 0.8) 0%, transparent 70%),
+    linear-gradient(45deg, #0A0A0A 0%, #1C1C1E 50%, #0A0A0A 100%);
+}
+
+/* Carbon Fiber Effect */
+.bg-effect-carbon {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #0A0A0A 0px,
+      #0A0A0A 2px,
+      #141414 2px,
+      #141414 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #0A0A0A 0px,
+      #0A0A0A 2px,
+      #141414 2px,
+      #141414 4px
+    ),
+    linear-gradient(135deg, #0A0A0A 0%, #1C1C1E 100%);
+  background-size: 8px 8px, 8px 8px, 100% 100%;
+}
+
+/* Basketball Court Effect */
+.bg-effect-court {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #1a472a 0px,
+      #1a472a 8px,
+      #2d5a3d 8px,
+      #2d5a3d 16px
+    ),
+    radial-gradient(ellipse at center, rgba(255, 236, 60, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, transparent 20%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.05) 21%, transparent 21%),
+    linear-gradient(135deg, #0A0A0A 0%, #1C1C1E 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+}
+
+/* Neon Grid Effect */
+.bg-effect-neon {
+  background: 
+    linear-gradient(rgba(255, 236, 60, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 236, 60, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 30% 30%, rgba(255, 236, 60, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255, 236, 60, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #0A0A0A 0%, #1C1C1E 50%, #0A0A0A 100%);
+  background-size: 50px 50px, 50px 50px, 100% 100%, 100% 100%, 100% 100%;
 }

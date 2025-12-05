@@ -2,14 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlayerCardFinal1 } from '../../components/player/PlayerCardFinal1';
 import { usePlayer } from '../../hooks/usePlayer';
 import * as searchService from '../../api/search';
-import { Search, RotateCw, Loader2 } from 'lucide-react';
+import { Search, RotateCw, Loader2, Pause, Play } from 'lucide-react';
 
-const BACKGROUND_OPTIONS = [
+const GRADIENT_OPTIONS = [
   { name: 'Black', value: 'bg-proph-black' },
   { name: 'Gradient 1', value: 'bg-gradient-to-br from-proph-black via-proph-grey to-proph-black' },
   { name: 'Gradient 2', value: 'bg-gradient-to-br from-proph-black via-proph-yellow/20 to-proph-black' },
-  { name: 'Gradient 3', value: 'bg-gradient-to-tr from-proph-grey via-proph-black to-proph-yellow/10' },
-  { name: 'Gradient 4', value: 'bg-gradient-to-bl from-proph-black via-proph-yellow/5 to-proph-grey' },
+  { name: 'Gradient 3', value: 'bg-gradient-crazy-3' },
+  { name: 'Gradient 4', value: 'bg-gradient-crazy-4' },
+];
+
+const EFFECT_OPTIONS = [
+  { name: 'Carbon Fiber', value: 'bg-effect-carbon' },
+  { name: 'Basketball Court', value: 'bg-effect-court' },
+  { name: 'Neon Grid', value: 'bg-effect-neon' },
 ];
 
 export const CardShowcase: React.FC = () => {
@@ -17,7 +23,9 @@ export const CardShowcase: React.FC = () => {
   const [searchType, setSearchType] = useState<'name' | 'id'>('name');
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [background, setBackground] = useState('bg-proph-black'); // Default to black
+  const [backgroundTab, setBackgroundTab] = useState<'gradients' | 'effects'>('gradients');
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(true); // Default to spinning
   const [isSearching, setIsSearching] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +96,13 @@ export const CardShowcase: React.FC = () => {
   };
 
   const handleFlip = () => {
-    setIsFlipped(prev => !prev);
+    if (!isSpinning) {
+      setIsFlipped(prev => !prev);
+    }
+  };
+
+  const handleToggleSpinning = () => {
+    setIsSpinning(prev => !prev);
   };
 
   return (
@@ -133,29 +147,96 @@ export const CardShowcase: React.FC = () => {
         </div>
 
         {/* Background Selector */}
-        <div className="flex items-center gap-2 bg-proph-grey/90 backdrop-blur-sm rounded-lg p-2 border border-proph-grey-text/20">
-          <span className="text-proph-white text-sm font-semibold">Background:</span>
-          <div className="flex gap-1">
-            {BACKGROUND_OPTIONS.map((option) => (
+        <div className="flex flex-col gap-2 bg-proph-grey/90 backdrop-blur-sm rounded-lg p-2 border border-proph-grey-text/20">
+          <div className="flex items-center gap-2">
+            <span className="text-proph-white text-sm font-semibold">Background:</span>
+            <div className="flex gap-1">
               <button
-                key={option.value}
-                onClick={() => setBackground(option.value)}
+                onClick={() => setBackgroundTab('gradients')}
                 className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
-                  background === option.value
+                  backgroundTab === 'gradients'
                     ? 'bg-proph-yellow text-proph-black'
                     : 'bg-proph-black text-proph-white hover:bg-proph-grey-light'
                 }`}
               >
-                {option.name}
+                Gradients
               </button>
-            ))}
+              <button
+                onClick={() => setBackgroundTab('effects')}
+                className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+                  backgroundTab === 'effects'
+                    ? 'bg-proph-yellow text-proph-black'
+                    : 'bg-proph-black text-proph-white hover:bg-proph-grey-light'
+                }`}
+              >
+                Effects
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            {backgroundTab === 'gradients' ? (
+              GRADIENT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setBackground(option.value)}
+                  className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+                    background === option.value
+                      ? 'bg-proph-yellow text-proph-black'
+                      : 'bg-proph-black text-proph-white hover:bg-proph-grey-light'
+                  }`}
+                >
+                  {option.name}
+                </button>
+              ))
+            ) : (
+              EFFECT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setBackground(option.value)}
+                  className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+                    background === option.value
+                      ? 'bg-proph-yellow text-proph-black'
+                      : 'bg-proph-black text-proph-white hover:bg-proph-grey-light'
+                  }`}
+                >
+                  {option.name}
+                </button>
+              ))
+            )}
           </div>
         </div>
+
+        {/* Spinning Toggle Button */}
+        <button
+          onClick={handleToggleSpinning}
+          className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${
+            isSpinning
+              ? 'bg-proph-yellow text-proph-black hover:bg-[#E6D436]'
+              : 'bg-proph-grey-light text-proph-white hover:bg-proph-grey-text/20'
+          }`}
+        >
+          {isSpinning ? (
+            <>
+              <Pause className="w-4 h-4" />
+              Stop Spinning
+            </>
+          ) : (
+            <>
+              <Play className="w-4 h-4" />
+              Start Spinning
+            </>
+          )}
+        </button>
 
         {/* Flip Button */}
         <button
           onClick={handleFlip}
-          className="bg-proph-yellow text-proph-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#E6D436] transition-colors flex items-center gap-2"
+          disabled={isSpinning}
+          className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${
+            isSpinning
+              ? 'bg-proph-grey-light text-proph-grey-text cursor-not-allowed opacity-50'
+              : 'bg-proph-yellow text-proph-black hover:bg-[#E6D436]'
+          }`}
         >
           <RotateCw className="w-4 h-4" />
           Flip Card
@@ -178,13 +259,13 @@ export const CardShowcase: React.FC = () => {
           <div 
             ref={cardContainerRef}
             onClick={handleFlip}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: isSpinning ? 'default' : 'pointer' }}
           >
             <PlayerCardFinal1 
               player={player} 
-              flippable={true}
+              flippable={!isSpinning}
               controlledFlip={isFlipped}
-              spinning={true}
+              spinning={isSpinning}
             />
           </div>
         ) : (
