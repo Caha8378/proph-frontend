@@ -95,7 +95,7 @@ export const CoachBottomNav: React.FC<CoachBottomNavProps> = ({
           }
         }}
         disabled={disabled}
-        className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+        className={`relative flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
           disabled
             ? 'opacity-50 cursor-not-allowed text-proph-grey-text'
             : active === id 

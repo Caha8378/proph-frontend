@@ -80,7 +80,7 @@ export const MessagesPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-proph-black pb-20">
         <Header />
-        <div className="h-[calc(100vh-3.5rem)]">
+        <div className="h-[calc(100vh-3.5rem-5rem)] md:h-[calc(100vh-3.5rem)]">
           {conversationsLoading ? (
             <div className="h-full flex items-center justify-center">
               <p className="text-proph-grey-text">Loading conversations...</p>

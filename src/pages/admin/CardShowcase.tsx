@@ -244,7 +244,7 @@ export const CardShowcase: React.FC = () => {
       </div>
 
       {/* Card Container */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center mt-32 md:mt-0 pt-4 md:pt-0">
         {loading ? (
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-proph-yellow animate-spin mx-auto mb-4" />

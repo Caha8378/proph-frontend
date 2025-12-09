@@ -53,12 +53,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       className="fixed bottom-0 left-0 right-0 z-50 bg-proph-black border-t border-proph-grey-text/5 shadow-lg"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="h-14 px-2 flex items-center justify-around">
+      <div className="h-12 px-2 flex items-center justify-around py-1">
         
         {/* Home Tab */}
         <button
           onClick={() => handleTabClick('home', '/player/home')}
-          className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
             active === 'home' ? 'text-proph-yellow' : 'text-proph-grey-text'
           }`}
           aria-label="Home"
@@ -70,7 +70,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Postings Tab */}
         <button
           onClick={() => handleTabClick('postings', '/player/postings')}
-          className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
             active === 'postings' ? 'text-proph-yellow' : 'text-proph-grey-text'
           }`}
           aria-label="Postings"
@@ -82,7 +82,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Applications Tab */}
         <button
           onClick={() => handleTabClick('applications', '/player/applications')}
-          className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+          className={`relative flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
             active === 'applications' ? 'text-proph-yellow' : 'text-proph-grey-text'
           }`}
           aria-label={`Applications${hasApplicationUpdate ? ', new activity' : ''}`}
@@ -104,7 +104,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Recruit Tab */}
         <button
           onClick={() => handleTabClick('recruit', '/player/messages')}
-          className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+          className={`relative flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
             active === 'recruit' ? 'text-proph-yellow' : 'text-proph-grey-text'
           }`}
           aria-label={`Recruit${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
@@ -122,7 +122,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Profile Tab */}
         <button
           onClick={() => handleTabClick('profile', '/player/profile')}
-          className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors duration-200 ${
+          className={`relative flex flex-col items-center gap-0.5 px-3 py-0.5 rounded-lg transition-colors duration-200 ${
             active === 'profile' ? 'text-proph-yellow' : 'text-proph-grey-text'
           }`}
           aria-label="Profile"

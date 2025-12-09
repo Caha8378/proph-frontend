@@ -156,7 +156,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-proph-black">
+    <div className="h-full flex flex-col bg-proph-black overflow-hidden">
       {/* Header */}
       <div className="border-b border-proph-grey-text/20 p-4 flex items-center gap-3 flex-shrink-0">
         {/* Back button (mobile only) */}
@@ -238,7 +238,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-proph-grey-text/20 p-4 flex-shrink-0 bg-proph-black">
+      <div className="border-b border-proph-grey-text/20 p-4 flex-shrink-0 bg-proph-black">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
