@@ -200,24 +200,22 @@ const QuickEvalQuiz: React.FC = () => {
         <button
           type="button"
           onClick={openPlayerFlow}
-          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-white hover:bg-proph-black transition-colors group"
+          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-proph-white hover:bg-proph-black transition-colors group flex justify-center items-center"
         >
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-proph-yellow flex-shrink-0" />
+          <span className="inline-flex items-center justify-center gap-2">
             <span className="text-lg font-semibold text-proph-white">I want to play</span>
-            <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" />
-          </div>
+            <ArrowRight className="w-5 h-5 text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" aria-hidden />
+          </span>
         </button>
         <button
           type="button"
           onClick={openCoachFlow}
-          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-white hover:bg-proph-black transition-colors group"
+          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-proph-white hover:bg-proph-black transition-colors group flex justify-center items-center"
         >
-          <div className="flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-proph-yellow flex-shrink-0" />
+          <span className="inline-flex items-center justify-center gap-2">
             <span className="text-lg font-semibold text-proph-white">I want to recruit</span>
-            <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" />
-          </div>
+            <ArrowRight className="w-5 h-5 text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" aria-hidden />
+          </span>
         </button>
       </div>
     );
