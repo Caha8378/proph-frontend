@@ -1,10 +1,11 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Megaphone, Check, LogIn, UserPlus, Eye, MessageCircle, Target, ArrowRight, X as XIcon } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { PlayerProfileModal } from '../components/player/PlayerProfileModal';
 import { useAuth } from '../context/authContext';
 import { getTotalPlayerCards } from '../api/players';
+import { searchSchools, type School as CoachSearchSchool } from '../api/schools';
 import type { PlayerProfile, Posting, Coach, Application } from '../types';
 
 // Lazy load heavy demo components
@@ -18,148 +19,416 @@ const ApplicationCardV1 = lazy(() =>
   import('../components/application/ApplicationCardV1').then(m => ({ default: m.ApplicationCardV1 }))
 );
 
-// Quick Evaluation Quiz Component
+type LandingLeadFlow = 'pick' | 'player' | 'coach';
+
+function emailMailboxHost(email: string): string {
+  const at = email.indexOf('@');
+  if (at < 0) return '';
+  return email.slice(at + 1).trim().toLowerCase();
+}
+
+function domainMatchesMailbox(mailboxHost: string, schoolDomain: string | undefined): boolean {
+  if (!schoolDomain) return false;
+  const h = mailboxHost.toLowerCase();
+  const s = schoolDomain.toLowerCase();
+  return h === s || h.endsWith('.' + s);
+}
+
+function registrableDomain(host: string): string | null {
+  if (!host || !host.includes('.')) return null;
+  const parts = host.split('.');
+  if (parts.length >= 2) return parts.slice(-2).join('.');
+  return host;
+}
+
+async function findSchoolByEmailDomain(email: string): Promise<CoachSearchSchool | null> {
+  const host = emailMailboxHost(email);
+  if (!host || !host.includes('.')) return null;
+  const queries = [host];
+  const root = registrableDomain(host);
+  if (root && root !== host) queries.push(root);
+  const byId = new Map<string, CoachSearchSchool>();
+  for (const q of queries) {
+    const batch = await searchSchools(q);
+    for (const s of batch) {
+      if (!byId.has(s.id)) byId.set(s.id, s);
+    }
+  }
+  for (const s of byId.values()) {
+    if (domainMatchesMailbox(host, s.email_domain)) return s;
+  }
+  return null;
+}
+
+// Player quiz + coach lead capture (hero CTA)
 const QuickEvalQuiz: React.FC = () => {
   const navigate = useNavigate();
-  const [quizExpanded, setQuizExpanded] = useState(false);
+  const [flow, setFlow] = useState<LandingLeadFlow>('pick');
+
   const [quizData, setQuizData] = useState({
     email: '',
     gender: '',
     heightFeet: '',
     heightInches: '',
     weight: '',
-    graduationYear: ''
+    graduationYear: '',
   });
 
-  const handleSubmit = () => {
-    // Store quiz data in localStorage
+  const [coachData, setCoachData] = useState({
+    email: '',
+    genderCoached: '' as '' | 'mens' | 'womens',
+  });
+  const [selectedSchool, setSelectedSchool] = useState<CoachSearchSchool | null>(null);
+  const [schoolQuery, setSchoolQuery] = useState('');
+  const [schoolSuggestions, setSchoolSuggestions] = useState<CoachSearchSchool[]>([]);
+  const [schoolListOpen, setSchoolListOpen] = useState(false);
+  const [domainHint, setDomainHint] = useState<'idle' | 'loading' | 'matched' | 'none'>('idle');
+  const schoolWrapRef = useRef<HTMLDivElement>(null);
+  const domainLookupGen = useRef(0);
+
+  useEffect(() => {
+    if (flow !== 'coach') return;
+    const q = schoolQuery.trim();
+    if (q.length < 2) {
+      setSchoolSuggestions([]);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      void searchSchools(q).then(setSchoolSuggestions);
+    }, 300);
+    return () => window.clearTimeout(t);
+  }, [schoolQuery, flow]);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (!schoolWrapRef.current?.contains(e.target as Node)) setSchoolListOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  const openPlayerFlow = () => {
+    setQuizData({
+      email: '',
+      gender: '',
+      heightFeet: '',
+      heightInches: '',
+      weight: '',
+      graduationYear: '',
+    });
+    setFlow('player');
+  };
+
+  const openCoachFlow = () => {
+    setCoachData({ email: '', genderCoached: '' });
+    setSelectedSchool(null);
+    setSchoolQuery('');
+    setSchoolSuggestions([]);
+    setSchoolListOpen(false);
+    setDomainHint('idle');
+    setFlow('coach');
+  };
+
+  const backToPick = () => {
+    setFlow('pick');
+    setSchoolListOpen(false);
+    setDomainHint('idle');
+  };
+
+  const handlePlayerSubmit = () => {
+    localStorage.removeItem('coachLeadData');
     localStorage.setItem('quizData', JSON.stringify(quizData));
-    
-    // Redirect to signup
     navigate('/signup');
   };
 
-  // Collapsed state
-  if (!quizExpanded) {
+  const handleCoachEmailBlur = () => {
+    const email = coachData.email.trim();
+    if (!email.includes('@')) {
+      setDomainHint('idle');
+      return;
+    }
+    const gen = ++domainLookupGen.current;
+    setDomainHint('loading');
+    void findSchoolByEmailDomain(email).then((found) => {
+      if (gen !== domainLookupGen.current) return;
+      if (found) {
+        setSelectedSchool(found);
+        setSchoolQuery(found.name);
+        setDomainHint('matched');
+      } else {
+        setDomainHint('none');
+      }
+    });
+  };
+
+  const handleCoachSubmit = () => {
+    if (!selectedSchool || !coachData.email.trim() || !coachData.genderCoached) return;
+    localStorage.removeItem('quizData');
+    localStorage.setItem(
+      'coachLeadData',
+      JSON.stringify({
+        email: coachData.email.trim(),
+        schoolId: selectedSchool.id,
+        schoolName: selectedSchool.name,
+        schoolEmailDomain: selectedSchool.email_domain,
+        division: selectedSchool.division,
+        conference: selectedSchool.conference,
+        logo_url: selectedSchool.logo_url,
+        genderCoached: coachData.genderCoached,
+      }),
+    );
+    navigate('/signup');
+  };
+
+  const pickSchool = (s: CoachSearchSchool) => {
+    setSelectedSchool(s);
+    setSchoolQuery(s.name);
+    setSchoolListOpen(false);
+    setDomainHint('idle');
+  };
+
+  if (flow === 'pick') {
     return (
-      <div className="mt-8 max-w-2xl mx-auto">
+      <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row gap-3">
         <button
-          onClick={() => setQuizExpanded(true)}
-          className="w-full bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-grey-text hover:bg-proph-black transition-colors group"
+          type="button"
+          onClick={openPlayerFlow}
+          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-grey-text hover:bg-proph-black transition-colors group"
         >
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-proph-yellow" />
-            <span className="text-lg">I'm a 6'2", 180lb player from...</span>
-            <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform" />
+            <Target className="w-5 h-5 text-proph-yellow flex-shrink-0" />
+            <span className="text-lg font-semibold text-proph-black">I want to play</span>
+            <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={openCoachFlow}
+          className="flex-1 bg-proph-black/90 backdrop-blur rounded-2xl px-4 py-3 text-left text-proph-grey-text hover:bg-proph-black transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-proph-yellow flex-shrink-0" />
+            <span className="text-lg font-semibold text-proph-black">I want to recruit</span>
+            <ArrowRight className="w-5 h-5 ml-auto text-proph-yellow group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </div>
         </button>
       </div>
     );
   }
 
-  // Expanded quiz form
+  if (flow === 'player') {
+    return (
+      <div className="mt-8 max-w-2xl mx-auto">
+        <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
+          <h3 className="text-xl font-bold text-proph-white mb-3">Get Your Free AI Evaluation</h3>
+
+          <div>
+            <label className="block text-sm font-semibold text-proph-grey-text mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="your.email@example.com"
+              value={quizData.email}
+              onChange={(e) => setQuizData({ ...quizData, email: e.target.value })}
+              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-proph-grey-text mb-1">Gender</label>
+            <select
+              value={quizData.gender}
+              onChange={(e) => setQuizData({ ...quizData, gender: e.target.value })}
+              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-proph-grey-text mb-1">Height</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <input
+                  type="number"
+                  placeholder="6"
+                  min={4}
+                  max={8}
+                  value={quizData.heightFeet}
+                  onChange={(e) => setQuizData({ ...quizData, heightFeet: e.target.value })}
+                  className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+                />
+                <p className="text-xs text-proph-grey-text mt-1">Feet</p>
+              </div>
+              <div>
+                <input
+                  type="number"
+                  placeholder="2"
+                  min={0}
+                  max={11}
+                  value={quizData.heightInches}
+                  onChange={(e) => setQuizData({ ...quizData, heightInches: e.target.value })}
+                  className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+                />
+                <p className="text-xs text-proph-grey-text mt-1">Inches</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-proph-grey-text mb-1">Weight (lbs)</label>
+            <input
+              type="number"
+              placeholder="180"
+              value={quizData.weight}
+              onChange={(e) => setQuizData({ ...quizData, weight: e.target.value })}
+              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-proph-grey-text mb-2">Graduation Year</label>
+            <select
+              value={quizData.graduationYear}
+              onChange={(e) => setQuizData({ ...quizData, graduationYear: e.target.value })}
+              className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
+            >
+              <option value="">Select year</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePlayerSubmit}
+            disabled={
+              !quizData.email ||
+              !quizData.gender ||
+              !quizData.heightFeet ||
+              !quizData.heightInches ||
+              !quizData.weight ||
+              !quizData.graduationYear
+            }
+            className="w-full bg-proph-yellow text-proph-black font-bold py-3 rounded-lg hover:bg-proph-yellow/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+          >
+            Complete Your Proph to Find Your Fit
+          </button>
+
+          <button
+            type="button"
+            onClick={backToPick}
+            className="w-full text-sm text-proph-grey-text hover:text-proph-white transition-colors py-2"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const coachFormValid =
+    !!selectedSchool && !!coachData.email.trim() && !!coachData.genderCoached;
+
   return (
     <div className="mt-8 max-w-2xl mx-auto">
       <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
-        <h3 className="text-xl font-bold text-proph-white mb-3">Get Your Free AI Evaluation</h3>
-        
-        {/* Email */}
+        <h3 className="text-xl font-bold text-proph-white mb-3">Start recruiting on Proph</h3>
+        <p className="text-sm text-proph-grey-text -mt-2 mb-2">
+          Tell us a bit about your program—we&apos;ll pre-fill signup and onboarding where we can.
+        </p>
+
         <div>
-          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Email</label>
-          <input 
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Work email</label>
+          <input
             type="email"
-            placeholder="your.email@example.com"
-            value={quizData.email}
-            onChange={(e) => setQuizData({...quizData, email: e.target.value})}
+            placeholder="coach@school.edu"
+            value={coachData.email}
+            onChange={(e) => setCoachData({ ...coachData, email: e.target.value })}
+            onBlur={handleCoachEmailBlur}
             className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
           />
+          {domainHint === 'loading' && (
+            <p className="text-xs text-proph-grey-text mt-1">Looking up your school from email domain…</p>
+          )}
+          {domainHint === 'matched' && selectedSchool && (
+            <p className="text-xs text-proph-yellow mt-1">Matched {selectedSchool.name} from your email domain.</p>
+          )}
+          {domainHint === 'none' && coachData.email.includes('@') && (
+            <p className="text-xs text-proph-grey-text mt-1">No school on file for that domain—search below.</p>
+          )}
         </div>
 
-        {/* Gender */}
+        <div className="relative" ref={schoolWrapRef}>
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">School</label>
+          <input
+            type="text"
+            placeholder="Search your school"
+            value={schoolQuery}
+            onChange={(e) => {
+              const v = e.target.value;
+              setSchoolQuery(v);
+              if (selectedSchool && v !== selectedSchool.name) setSelectedSchool(null);
+              setSchoolListOpen(true);
+              setDomainHint('idle');
+            }}
+            onFocus={() => setSchoolListOpen(true)}
+            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
+          />
+          {schoolListOpen && schoolSuggestions.length > 0 && (
+            <ul className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-proph-grey-text/20 bg-proph-black shadow-xl">
+              {schoolSuggestions.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => pickSchool(s)}
+                    className="w-full text-left px-3 py-2 text-sm text-proph-white hover:bg-proph-grey transition-colors"
+                  >
+                    {s.name}
+                    {s.division ? (
+                      <span className="text-proph-grey-text"> · {s.division}</span>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div>
-          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Gender</label>
-          <select 
-            value={quizData.gender}
-            onChange={(e) => setQuizData({...quizData, gender: e.target.value})}
+          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Gender you coach</label>
+          <select
+            value={coachData.genderCoached}
+            onChange={(e) =>
+              setCoachData({
+                ...coachData,
+                genderCoached: e.target.value as 'mens' | 'womens' | '',
+              })
+            }
             className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
           >
-            <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
+            <option value="">Select</option>
+            <option value="mens">Men&apos;s program</option>
+            <option value="womens">Women&apos;s program</option>
           </select>
         </div>
 
-        {/* Height */}
-        <div>
-          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Height</label>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <input 
-                type="number"
-                placeholder="6"
-                min="4"
-                max="8"
-                value={quizData.heightFeet}
-                onChange={(e) => setQuizData({...quizData, heightFeet: e.target.value})}
-                className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
-              />
-              <p className="text-xs text-proph-grey-text mt-1">Feet</p>
-            </div>
-            <div>
-              <input 
-                type="number"
-                placeholder="2"
-                min="0"
-                max="11"
-                value={quizData.heightInches}
-                onChange={(e) => setQuizData({...quizData, heightInches: e.target.value})}
-                className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
-              />
-              <p className="text-xs text-proph-grey-text mt-1">Inches</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Weight */}
-        <div>
-          <label className="block text-sm font-semibold text-proph-grey-text mb-1">Weight (lbs)</label>
-          <input 
-            type="number"
-            placeholder="180"
-            value={quizData.weight}
-            onChange={(e) => setQuizData({...quizData, weight: e.target.value})}
-            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white placeholder:text-proph-grey-text focus:outline-none focus:border-proph-yellow transition-colors"
-          />
-        </div>
-
-        {/* Graduation Year */}
-        <div>
-          <label className="block text-sm font-semibold text-proph-grey-text mb-2">Graduation Year</label>
-          <select 
-            value={quizData.graduationYear}
-            onChange={(e) => setQuizData({...quizData, graduationYear: e.target.value})}
-            className="w-full bg-proph-grey border border-proph-grey-text/20 rounded-lg px-2 py-3 text-proph-white focus:outline-none focus:border-proph-yellow transition-colors"
-          >
-            <option value="">Select year</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
-            <option value="2028">2028</option>
-            <option value="2029">2029</option>
-          </select>
-        </div>
-
-        {/* Submit Button */}
         <button
-          onClick={handleSubmit}
-          disabled={!quizData.email || !quizData.gender || !quizData.heightFeet || !quizData.heightInches || !quizData.weight || !quizData.graduationYear}
+          type="button"
+          onClick={handleCoachSubmit}
+          disabled={!coachFormValid}
           className="w-full bg-proph-yellow text-proph-black font-bold py-3 rounded-lg hover:bg-proph-yellow/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
         >
-          Complete Your Proph to Find Your Fit
+          Continue to coach signup
         </button>
 
         <button
-          onClick={() => setQuizExpanded(false)}
+          type="button"
+          onClick={backToPick}
           className="w-full text-sm text-proph-grey-text hover:text-proph-white transition-colors py-2"
         >
           Cancel

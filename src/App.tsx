@@ -1,9 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { PlayerHomePage, PostingFeedPage, ApplicationsPage, ProfilePage } from './pages';
 
 import { PostingDetailPage } from './pages/PostingDetailPage';
 import { SchoolPage } from './pages/SchoolPage';
-import { LandingPage } from './pages/LandingPage';
 import { LandingPage2 } from './pages/LandingPage2';
 import { MissionPage } from './pages/MissionPage';
 import { PlayerProfileSharePage } from './pages/PlayerProfileSharePage';
@@ -31,12 +30,13 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage2 />} />
-        <Route path="/landing" element={<LandingPage />} />
+        {/* Temporarily disabled — send legacy links to home */}
+        <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/mission" element={<MissionPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<EmailVerification />} />
-        <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/welcome" element={<Navigate to="/" replace />} />
         
         {/* Comparison/design routes (public for now) */}
         {/* <Route path="/posting-comparison" element={<PostingCardComparison />} />

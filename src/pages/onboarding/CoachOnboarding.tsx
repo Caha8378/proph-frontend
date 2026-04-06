@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SchoolSearchStep } from '../../components/onboarding/SchoolSearchStep';
 import { GenderRoleStep } from '../../components/onboarding/GenderRoleStep';
@@ -45,6 +45,31 @@ export const CoachOnboarding: React.FC = () => {
 
   const userEmail = storedUser?.email || 'coach@example.com';
   const userId = storedUser?.id || null;
+
+  useEffect(() => {
+    const raw = localStorage.getItem('coachLeadData');
+    if (!raw) return;
+    try {
+      const lead = JSON.parse(raw);
+      if (lead.schoolId && lead.schoolName) {
+        setSelectedSchool({
+          id: String(lead.schoolId),
+          name: lead.schoolName,
+          division: lead.division,
+          conference: lead.conference,
+          email_domain: lead.schoolEmailDomain,
+          logo_url: lead.logo_url,
+        } as OnboardingSchool);
+      }
+      if (lead.genderCoached === 'mens' || lead.genderCoached === 'womens') {
+        setGenderCoached(lead.genderCoached);
+      }
+    } catch {
+      // ignore malformed lead
+    } finally {
+      localStorage.removeItem('coachLeadData');
+    }
+  }, []);
 
   const handleSchoolSelect = (school: School | null) => {
     setSelectedSchool(school);

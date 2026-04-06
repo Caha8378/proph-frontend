@@ -40,17 +40,30 @@ export const SignupPage: React.FC = () => {
     loading: false,
   });
 
-  // Pre-fill from quiz data if available
+  // Pre-fill from landing coach lead or player quiz (coach lead takes precedence)
   useEffect(() => {
+    const coachLeadStr = localStorage.getItem('coachLeadData');
+    if (coachLeadStr) {
+      try {
+        const lead = JSON.parse(coachLeadStr);
+        setForm(prev => ({
+          ...prev,
+          email: lead.email || '',
+          role: 'coach' as Role,
+        }));
+        return;
+      } catch (error) {
+        console.error('Error parsing coach lead data:', error);
+      }
+    }
     const quizDataStr = localStorage.getItem('quizData');
     if (quizDataStr) {
       try {
         const quizData = JSON.parse(quizDataStr);
-        // Pre-fill email and auto-select player role
         setForm(prev => ({
           ...prev,
           email: quizData.email || '',
-          role: 'player' as Role
+          role: 'player' as Role,
         }));
       } catch (error) {
         console.error('Error parsing quiz data:', error);
@@ -106,9 +119,9 @@ export const SignupPage: React.FC = () => {
       await signup(form.email, form.password, form.role!);
       
       // Store pending data for onboarding (needed for profile creation)
-      localStorage.setItem('pendingEmail', form.email);
-      localStorage.setItem('pendingPassword', form.password); // Need for auto-login after onboarding
-      localStorage.setItem('pendingRole', form.role!);
+      // localStorage.setItem('pendingEmail', form.email);
+      // localStorage.setItem('pendingPassword', form.password);
+      // localStorage.setItem('pendingRole', form.role!);
       
       // Small delay to ensure auth context is updated
       await new Promise(resolve => setTimeout(resolve, 100));
