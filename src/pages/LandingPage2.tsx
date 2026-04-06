@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Megaphone, Check, LogIn, UserPlus, Eye, MessageCircle, Target, ArrowRight, X as XIcon } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
@@ -84,7 +84,14 @@ const QuickEvalQuiz: React.FC = () => {
   const [schoolListOpen, setSchoolListOpen] = useState(false);
   const [domainHint, setDomainHint] = useState<'idle' | 'loading' | 'matched' | 'none'>('idle');
   const schoolWrapRef = useRef<HTMLDivElement>(null);
+  const expandedPanelRef = useRef<HTMLDivElement>(null);
   const domainLookupGen = useRef(0);
+
+  const backToPick = useCallback(() => {
+    setFlow('pick');
+    setSchoolListOpen(false);
+    setDomainHint('idle');
+  }, []);
 
   useEffect(() => {
     if (flow !== 'coach') return;
@@ -101,11 +108,17 @@ const QuickEvalQuiz: React.FC = () => {
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (!schoolWrapRef.current?.contains(e.target as Node)) setSchoolListOpen(false);
+      const target = e.target as Node;
+      if (!schoolWrapRef.current?.contains(target)) {
+        setSchoolListOpen(false);
+      }
+      if (flow === 'pick') return;
+      if (expandedPanelRef.current?.contains(target)) return;
+      backToPick();
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, []);
+  }, [flow, backToPick]);
 
   const openPlayerFlow = () => {
     setQuizData({
@@ -127,12 +140,6 @@ const QuickEvalQuiz: React.FC = () => {
     setSchoolListOpen(false);
     setDomainHint('idle');
     setFlow('coach');
-  };
-
-  const backToPick = () => {
-    setFlow('pick');
-    setSchoolListOpen(false);
-    setDomainHint('idle');
   };
 
   const handlePlayerSubmit = () => {
@@ -218,9 +225,9 @@ const QuickEvalQuiz: React.FC = () => {
 
   if (flow === 'player') {
     return (
-      <div className="mt-8 max-w-2xl mx-auto">
+      <div ref={expandedPanelRef} className="mt-8 max-w-2xl mx-auto">
         <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
-          <h3 className="text-xl font-bold text-proph-white mb-3">Get Your Free AI Evaluation</h3>
+          <p className="text-base font-semibold text-proph-grey-text mb-1">tell us about yourself</p>
 
           <div>
             <label className="block text-sm font-semibold text-proph-grey-text mb-1">Email</label>
@@ -335,12 +342,9 @@ const QuickEvalQuiz: React.FC = () => {
     !!selectedSchool && !!coachData.email.trim() && !!coachData.genderCoached;
 
   return (
-    <div className="mt-8 max-w-2xl mx-auto">
+    <div ref={expandedPanelRef} className="mt-8 max-w-2xl mx-auto">
       <div className="bg-proph-black/90 backdrop-blur rounded-2xl p-6 space-y-4">
-        <h3 className="text-xl font-bold text-proph-white mb-3">Start recruiting on Proph</h3>
-        <p className="text-sm text-proph-grey-text -mt-2 mb-2">
-          Tell us a bit about your program—we&apos;ll pre-fill signup and onboarding where we can.
-        </p>
+        <p className="text-base font-semibold text-proph-grey-text mb-1">tell us about your program</p>
 
         <div>
           <label className="block text-sm font-semibold text-proph-grey-text mb-1">Work email</label>
