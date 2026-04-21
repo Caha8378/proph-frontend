@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react';
 import { useAuth } from '../../context/authContext';
 import * as postingsService from '../../api/postings';
 import { getOptimizedCloudinaryUrl } from '../../utils/cloudinary';
+import { useLogoBackgroundClass } from '../../hooks/useLogoBackgroundClass';
 
 // Helper function to convert inches to feet'inches" format
 const formatHeight = (heightInches: number | undefined | null): string | null => {
@@ -46,6 +47,8 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
       ? (req.classYear === 1 ? 'Eligible next season' : `Class ${req.classYear}`)
       : null
   ].filter(Boolean).join(' • ');
+  const logoSrc = posting.school.logo ? getOptimizedCloudinaryUrl(posting.school.logo, 48, 48) : '';
+  const logoBackgroundClass = useLogoBackgroundClass(logoSrc);
 
   // Check eligibility for players
   useEffect(() => {
@@ -106,9 +109,9 @@ export const PostingCardHorizontalMini: React.FC<PostingCardMiniProps> = ({ post
       <div className="flex gap-3 md:gap-4 items-center">
         {/* Logo left */}
         {posting.school.logo && (
-          <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden bg-white/5 flex items-center justify-center">
+          <div className={`flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden ${logoBackgroundClass} flex items-center justify-center transition-colors`}>
             <img
-              src={getOptimizedCloudinaryUrl(posting.school.logo, 48, 48)}
+              src={logoSrc}
               alt={posting.school.name}
               width={48}
               height={48}

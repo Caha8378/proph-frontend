@@ -5,6 +5,7 @@ import { useAuth } from '../context/authContext';
 import { ApplyModalMinC } from '../components/application/ApplyModalMinC';
 import * as postingsService from '../api/postings';
 import type { Posting } from '../types';
+import { useLogoBackgroundClass } from '../hooks/useLogoBackgroundClass';
 
 // Helper function to convert inches to feet'inches" format
 const formatHeight = (heightInches: number | undefined | null): string | null => {
@@ -35,6 +36,7 @@ export const PostingDetailPage: React.FC = () => {
   const [canApply, setCanApply] = useState<boolean | null>(null);
   const [eligibilityReasons, setEligibilityReasons] = useState<string[]>([]);
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
+  const logoBackgroundClass = useLogoBackgroundClass(posting?.school.logo);
 
   useEffect(() => {
     const fetchPosting = async () => {
@@ -177,7 +179,7 @@ export const PostingDetailPage: React.FC = () => {
             )}
 
             <div className="flex items-center gap-4 pb-6 border-b border-proph-grey-text/20">
-              <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center">
+              <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden ${logoBackgroundClass} flex items-center justify-center transition-colors`}>
                 <img 
                   src={posting.school.logo || '/defualt.webp'} 
                   alt={posting.school.name} 

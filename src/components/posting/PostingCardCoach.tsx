@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Posting } from '../../types';
 import { Pencil, Trash2, Users, Clock } from 'lucide-react';
 import { PostingStatusBadge } from './PostingStatusBadge';
+import { useLogoBackgroundClass } from '../../hooks/useLogoBackgroundClass';
 
 // Helper function to convert inches to feet'inches" format
 const formatHeight = (heightInches: number | undefined | null): string | null => {
@@ -22,6 +23,7 @@ interface PostingCardCoachProps {
 export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onEdit, onDelete, onViewApplications }) => {
   const due = new Date(posting.deadline).toLocaleString('en-US', { month: 'short', day: 'numeric' });
   const navigate = useNavigate();
+  const logoBackgroundClass = useLogoBackgroundClass(posting.school.logo);
   
   // Get height in display format (check heightInches first, then fall back to height string)
   const heightDisplay = (posting.requirements as any)?.heightInches 
@@ -64,7 +66,7 @@ export const PostingCardCoach: React.FC<PostingCardCoachProps> = ({ posting, onE
 
       {/* Header */}
       <div className="flex items-start gap-3 md:gap-4 mb-2 md:mb-3 cursor-pointer" onClick={() => navigate(`/posting/${posting.id}`)}>
-        <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden bg-proph-black/40 flex items-center justify-center">
+        <div className={`flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden ${logoBackgroundClass} flex items-center justify-center transition-colors`}>
           {posting.school.logo ? (
             <img 
               src={posting.school.logo} 
