@@ -10,7 +10,8 @@ export default {
         // Core Brand Colors
         'proph-yellow': '#FFEC3C',
         'proph-black': '#0A0A0A',
-        'proph-grey': '#1C1C1E',
+        'proph-grey': '#1f1f28',
+        'proph-grey-logo': '#8e99a2',
         'proph-white': '#FFFFFF',
         
         // Accent Colors

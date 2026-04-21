@@ -44,7 +44,8 @@
 @theme {
   --color-proph-yellow: #FFEC3C;
   --color-proph-black: #0A0A0A;
-  --color-proph-grey: #1C1C1E;
+  --color-proph-grey: #1f1f28;
+  --color-proph-grey-logo: #8e99a2;
   --color-proph-white: #FFFFFF;
   --color-proph-purple: #8B5CF6;
   --color-proph-purple-dark: #6D28D9;
@@ -108,7 +109,7 @@ body {
 }
 
 .card {
-  background-color: #1C1C1E;
+  background-color: #1f1f28;
   border-radius: 0.75rem;
   padding: 1rem;
   border: 1px solid rgba(161, 161, 166, 0.2);
@@ -116,7 +117,8 @@ body {
 
 /* Proph utility classes */
 .bg-proph-black { background-color: #0A0A0A; }
-.bg-proph-grey { background-color: #1C1C1E; }
+.bg-proph-grey { background-color: #1f1f28; }
+.bg-proph-grey-logo { background-color: #8e99a2; }
 .bg-proph-grey-light { background-color: #2C2C2E; }
 .text-proph-white { color: #FFFFFF; }
 .text-proph-yellow { color: #FFEC3C; }

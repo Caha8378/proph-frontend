@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-type LogoBackgroundClass = 'bg-proph-grey-text/20' | 'bg-proph-black/40';
+type LogoBackgroundClass = 'bg-proph-grey-logo' | 'bg-proph-black/40';
 
 const DEFAULT_CLASS: LogoBackgroundClass = 'bg-proph-black/40';
 
@@ -61,7 +61,7 @@ export const useLogoBackgroundClass = (logoUrl?: string | null): LogoBackgroundC
         }
 
         const avgLuminance = luminanceSum / visiblePixelCount;
-        setBgClass(avgLuminance < 130 ? 'bg-proph-grey-text/20' : 'bg-proph-black/40');
+        setBgClass(avgLuminance < 130 ? 'bg-proph-grey-logo' : 'bg-proph-black/40');
       } catch {
         // If canvas is blocked by CORS, keep a safe default.
         setBgClass(DEFAULT_CLASS);
