@@ -4,6 +4,7 @@ import { Search, User, Building2, ArrowRight, Briefcase } from 'lucide-react';
 import type { SearchResponse } from '../../api/search';
 import { useAuth } from '../../context/authContext';
 import { useProfile } from '../../hooks';
+import { useLogoBackgroundClass } from '../../hooks/useLogoBackgroundClass';
 
 interface SearchResultsDropdownProps {
   query: string;
@@ -111,6 +112,34 @@ const findStateInQuery = (query: string): string | null => {
   }
   
   return null;
+};
+
+/** School row logo chip — same adaptive background as posting cards (hook must run here, not inside map). */
+const SchoolSearchLogoChip: React.FC<{
+  logoUrl?: string | null;
+  schoolName: string;
+}> = ({ logoUrl, schoolName }) => {
+  const resolved = logoUrl || undefined;
+  const logoBackgroundClass = useLogoBackgroundClass(resolved);
+
+  return (
+    <div
+      className={`flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden ${logoBackgroundClass} flex items-center justify-center transition-colors`}
+    >
+      {resolved ? (
+        <img
+          src={resolved}
+          alt={schoolName}
+          className="w-full h-full object-contain p-1"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/defualt.webp';
+          }}
+        />
+      ) : (
+        <Building2 className="w-5 h-5 text-proph-grey-text" />
+      )}
+    </div>
+  );
 };
 
 export const SearchResultsDropdown: React.FC<SearchResultsDropdownProps> = ({
@@ -311,20 +340,10 @@ export const SearchResultsDropdown: React.FC<SearchResultsDropdownProps> = ({
                     onClick={() => handleCollegeClick(college)}
                     className="w-full px-4 py-3 flex items-center gap-3 hover:bg-proph-grey-light transition-colors text-left group"
                   >
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-proph-black/40 flex items-center justify-center">
-                      {(college.logo || college.logo_url) ? (
-                        <img
-                          src={college.logo || college.logo_url}
-                          alt={college.school}
-                          className="w-full h-full object-contain p-1"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/defualt.webp';
-                          }}
-                        />
-                      ) : (
-                        <Building2 className="w-5 h-5 text-proph-grey-text" />
-                      )}
-                    </div>
+                    <SchoolSearchLogoChip
+                      logoUrl={college.logo || college.logo_url}
+                      schoolName={college.school}
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="text-proph-white font-semibold group-hover:text-proph-yellow transition-colors">
                         {college.school}
