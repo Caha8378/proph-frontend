@@ -752,7 +752,7 @@ export const LandingPage2: React.FC = () => {
           <button onClick={() => navigate('/')} className="active:scale-95 transition-transform flex-shrink-0">
             <h1 
               className="text-xl sm:text-2xl font-extrabold text-proph-yellow" 
-              style={{ textShadow: '0 0 10px rgba(255, 236, 60, 0.5)', letterSpacing: '-2px' }}
+              style={{ textShadow: 'none', letterSpacing: '-0.02em' }}
             >
               Proph
             </h1>

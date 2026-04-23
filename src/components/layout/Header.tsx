@@ -85,8 +85,8 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 
               className="text-xl md:text-3xl font-extrabold text-proph-yellow"
               style={{ 
-                textShadow: '0 0 10px rgba(255, 236, 60, 0.5)',
-                letterSpacing: '-2px'
+                textShadow: 'none',
+                letterSpacing: '-0.02em'
               }}
             >
               Proph
