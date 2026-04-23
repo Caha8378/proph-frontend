@@ -25,7 +25,7 @@ export const LogoPage: React.FC = () => {
     <main className={`min-h-screen ${backgroundClass} flex items-center justify-center px-4`}>
       <h1
         className={`text-[clamp(5rem,22vw,18rem)] leading-none font-extrabold ${textClass} select-all`}
-        style={{ textShadow: shadowStyle, letterSpacing: '-0.055em' }}
+        style={{ textShadow: shadowStyle, letterSpacing: '-0.1em' }}
       >
         Proph
       </h1>
