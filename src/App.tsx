@@ -18,6 +18,7 @@ import { CoachOnboarding } from './pages/onboarding/CoachOnboarding';
 import { EmailVerification } from './pages/auth/EmailVerification';
 import { MessagesPage } from './pages/MessagesPage';
 import { CardShowcase } from './pages/admin/CardShowcase';
+import { LogoPage } from './pages/LogoPage';
 import { AuthProvider } from './context/authContext';
 import { NotificationProvider } from './context/notificationContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="/welcome" element={<Navigate to="/" replace />} />
+        <Route path="/logo" element={<LogoPage />} />
         
         {/* Comparison/design routes (public for now) */}
         {/* <Route path="/posting-comparison" element={<PostingCardComparison />} />
